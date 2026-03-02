@@ -1,0 +1,206 @@
+﻿<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conception LMS - statsLMS</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .dashboard-container {
+            max-width: 1200px;
+            margin: auto;
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #eee;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+        }
+
+        .kpi-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .kpi-card {
+            background: #fff;
+            border: 1px solid #e1e4e8;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            transition: transform 0.2s;
+        }
+
+            .kpi-card:hover {
+                transform: translateY(-5px);
+            }
+
+        .kpi-value {
+            block-size: auto;
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #2c3e50;
+            display: block;
+        }
+
+        .kpi-label {
+            color: #7f8c8d;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .chart-box {
+            background: #fafafa;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #eee;
+            height: 400px;
+        }
+
+        h2 {
+            font-size: 1.1em;
+            color: #34495e;
+            margin-top: 0;
+        }
+
+        .status-tag {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            background: #27ae60;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard-container">
+        <div class="header">
+            <div>
+                <h1>📦 Conception & Catalogue LMS</h1>
+                <p id="lastUpdate" style="color: #7f8c8d; margin: 0;">Analyse des ressources et programmes</p>
+            </div>
+            <div class="status-tag">Mode Édition / Conception</div>
+        </div>
+
+        <div class="kpi-container">
+            <div class="kpi-card">
+                <span class="kpi-value" id="countProgrammes">--</span>
+                <span class="kpi-label">Programmes</span>
+            </div>
+            <div class="kpi-card">
+                <span class="kpi-value" id="countRessources">--</span>
+                <span class="kpi-label">Total Ressources</span>
+            </div>
+            <div class="kpi-card">
+                <span class="kpi-value" id="avgRessources">--</span>
+                <span class="kpi-label">Moy. par Programme</span>
+            </div>
+            <div class="kpi-card">
+                <span class="kpi-value" id="countExcel">--</span>
+                <span class="kpi-label">Fichiers Excel</span>
+            </div>
+        </div>
+
+        <div class="charts-grid">
+            <div class="chart-box">
+                <h2>Top 10 : Programmes les plus denses</h2>
+                <canvas id="chartProgrammes"></canvas>
+            </div>
+            <div class="chart-box">
+                <h2>Répartition des types de contenus</h2>
+                <canvas id="chartFormats"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function loadData() {
+            try {
+                const [resProg, resItems] = await Promise.all([
+                    fetch('liste_des_programmes.json').then(r => r.json()),
+                    fetch('liste_des_ressources.json').then(r => r.json())
+                ]);
+
+                updateDashboard(resProg, resItems);
+            } catch (e) {
+                console.error("Erreur de chargement JSON", e);
+            }
+        }
+
+        function updateDashboard(programmes, ressources) {
+            // KPI - Calculs
+            document.getElementById('countProgrammes').innerText = programmes.length;
+            document.getElementById('countRessources').innerText = ressources.length;
+
+            const totalInProg = programmes.reduce((acc, p) => acc + (parseInt(p["nb de ressources"]) || 0), 0);
+            document.getElementById('avgRessources').innerText = (totalInProg / programmes.length).toFixed(1);
+
+            const excelCount = ressources.filter(r => r.Format === "RESOURCE_TYPE_EXCEL").length;
+            document.getElementById('countExcel').innerText = excelCount;
+
+            // Graphique 1 : Top 10 Programmes
+            const topProg = [...programmes]
+                .sort((a, b) => (parseInt(b["nb de ressources"]) || 0) - (parseInt(a["nb de ressources"]) || 0))
+                .slice(0, 10);
+
+            new Chart(document.getElementById('chartProgrammes'), {
+                type: 'bar',
+                data: {
+                    labels: topProg.map(p => p.Name.substring(0, 30) + "..."),
+                    datasets: [{
+                        label: 'Nb de ressources',
+                        data: topProg.map(p => parseInt(p["nb de ressources"]) || 0),
+                        backgroundColor: '#3498db'
+                    }]
+                },
+                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false }
+            });
+
+            // Graphique 2 : Formats de fichiers
+            const formats = {};
+            ressources.forEach(r => {
+                const f = r.Format ? r.Format.replace('RESOURCE_TYPE_', '') : 'AUTRE';
+                formats[f] = (formats[f] || 0) + 1;
+            });
+
+            new Chart(document.getElementById('chartFormats'), {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(formats),
+                    datasets: [{
+                        data: Object.values(formats),
+                        backgroundColor: ['#27ae60', '#e67e22', '#9b59b6', '#34495e', '#f1c40f']
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+        }
+
+        loadData();
+    </script>
+</body>
+</html>
