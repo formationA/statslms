@@ -183,8 +183,24 @@
                 const data = dataStore.sessions[0] || {};
                 const rawVal = data["Valeurs distinctes de Progresses → User"] || "0";
                 const total = parseInt(rawVal.replace(/,/g, '')) || 0;
+
                 badge.innerText = `Total : ${total.toLocaleString()}`;
+
+                // Affichage au centre du canvas
                 ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+
+                // Dessiner le chiffre
+                ctx.fillStyle = '#2c3e50';
+                ctx.font = 'bold 80px Segoe UI';
+                ctx.fillText(total.toLocaleString(), ctx.canvas.width / 2, ctx.canvas.height / 2 - 20);
+
+                // Dessiner le libellé en dessous
+                ctx.fillStyle = '#7f8c8d';
+                ctx.font = '24px Segoe UI';
+                ctx.fillText("Apprenants uniques au total", ctx.canvas.width / 2, ctx.canvas.height / 2 + 50);
+
                 return;
             }
 
