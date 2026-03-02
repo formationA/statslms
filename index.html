@@ -149,9 +149,9 @@
             if (enCoursData && enCoursData.length > 0) {
                 // On suppose que le JSON est de type [{"count": 42}]
                 const nbEnCours = enCoursData[0].count || 0;
-                document.getElementById('liveBadge').innerText = `En cours : ${nbEnCours}`;
+                document.getElementById('liveBadge').innerText = `Apprenant en cours : ${nbEnCours}`;
             } else {
-                document.getElementById('liveBadge').innerText = `En cours : 0`;
+                document.getElementById('liveBadge').innerText = `Apprenant en cours : 0`;
             }
 
             // --- LOGIQUE DE DATE PERSONNALISÉE ---
