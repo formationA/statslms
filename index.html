@@ -104,85 +104,52 @@
     </div>
 
     <script>
-        // Initialisation de l'objet de stockage unique
-        let dataStore = {
-            sessions: [],
-            actifs: [],
-            ressources: [],
-            location: []
-        };
-
+        let dataStore = { sessions: [], actifs: [], ressources: [], location: [] };
         let myChart = null;
         const ctx = document.getElementById('mainChart').getContext('2d');
 
-        // Réglage auto sur J-1
-        const hier = new Date();
-        hier.setDate(hier.getDate() - 1);
-        document.getElementById('endDate').value = hier.toISOString().split('T')[0];
+        // Dates par défaut pour 2026
+        document.getElementById('startDate').value = "2026-01-01";
+        document.getElementById('endDate').value = "2026-12-31";
 
         async function fetchData(url) {
             try {
                 const response = await fetch(url + '?v=' + Date.now());
-                if (!response.ok) return [];
-                const data = await response.json();
+                if (!response.ok) {
+                    console.warn("Fichier non trouvé ou erreur : " + url);
+                    return [];
+                }
+                const rawData = await response.json();
 
-                // Normalisation : on transforme "apprenants_actifs" (ou autre) en "val"
-                return data.map(item => {
-                    let value = 0;
-                    // On cherche la clé qui contient la valeur numérique
+                return rawData.map(item => {
+                    let foundValue = 0;
+                    // On cherche dynamiquement la clé numérique (apprenants_actifs, etc.)
                     for (let key in item) {
                         if (key !== "date" && key !== "location" && key !== "Location") {
-                            value = item[key];
+                            foundValue = item[key];
                         }
                     }
                     return {
-                        date: item.date || null,
-                        location: item.location || item.Location || null,
-                        val: value
+                        date: item.date,
+                        location: item.location || item.Location || "Inconnu",
+                        val: parseInt(foundValue) || 0
                     };
                 });
             } catch (e) {
-                console.error("Erreur sur : " + url, e);
+                console.error("Erreur de lecture sur : " + url, e);
                 return [];
             }
         }
 
         async function init() {
-            // Correction des noms de fichiers pour correspondre exactement à l'image
-            const [sessions, actifs, ressources, villes] = await Promise.all([
-                fetchData('apprenants_dans_des_sessions.json'), // Un seul underscore ici
-                fetchData('apprenants_actifs_sur_le_lms.json'),
-                fetchData('connexion_aux_ressources.json'),
-                fetchData('blocks_per_location.json')
-            ]);
+            // Chargement sécurisé : si un fichier échoue, le tableau de bord continue
+            dataStore.sessions = await fetchData('apprenants_dans_des_sessions.json');
+            dataStore.actifs = await fetchData('apprenants_actifs_sur_le_lms.json');
+            dataStore.ressources = await fetchData('connexion_aux_ressources.json');
+            dataStore.location = await fetchData('blocks_per_location.json');
 
-            dataStore.sessions = sessions;
-            dataStore.actifs = actifs;
-            dataStore.ressources = ressources;
-            dataStore.location = villes;
-
-            console.log("Données chargées :", dataStore); // Pour vérifier dans la console (F12)
+            console.log("Données chargées :", dataStore);
             updateDashboard();
-        }
-
-        function calculateWeekly(data) {
-            if (!data.length) return [];
-            const weeks = {};
-            data.forEach(item => {
-                const val = parseInt(item.val) || 0;
-                const d = new Date(item.date);
-                if (isNaN(d.getTime())) return;
-                const year = d.getFullYear();
-                const tempDate = new Date(d.valueOf());
-                tempDate.setDate(tempDate.getDate() + 4 - (tempDate.getDay() || 7));
-                const week = Math.ceil((((tempDate - new Date(year, 0, 1)) / 86400000) + 1) / 7);
-                const label = `S${week}-${year}`;
-                if (!weeks[label]) weeks[label] = { sum: 0, count: 0, sortKey: d.getTime() };
-                weeks[label].sum += val;
-                weeks[label].count += 1;
-            });
-            return Object.keys(weeks).sort((a, b) => weeks[a].sortKey - weeks[b].sortKey)
-                .map(k => ({ label: k, val: (weeks[k].sum / weeks[k].count).toFixed(1) }));
         }
 
         function updateDashboard() {
@@ -195,33 +162,46 @@
 
             document.getElementById('dateFilters').style.visibility = (view === 'location') ? 'hidden' : 'visible';
 
-            // 1. Déterminer la bonne clé JSON selon le fichier
-            let keyName = "val"; // Par défaut
-            if (view === "actifs" || view === "moyenne_hebdo") keyName = "apprenants_actifs";
-            if (view === "sessions") keyName = "apprenants_sessions"; // Vérifiez si c'est le cas dans l'autre fichier
-            if (view === "ressources") keyName = "connexions"; // Vérifiez également ici
+            let sourceData = (view === 'moyenne_hebdo') ? dataStore.actifs : dataStore[view];
 
-            // 2. Récupérer les données
-            let sourceData = dataStore[view] || [];
-            if (view === 'moyenne_hebdo') sourceData = dataStore.actifs;
+            if (!sourceData || sourceData.length === 0) {
+                badge.innerText = "Aucune donnée";
+                return;
+            }
 
-            // 3. Filtrer et calculer (on utilise [keyName] au lieu de .val)
+            // Cas spécial Villes
+            if (view === 'location') {
+                const topVilles = sourceData.slice(0, 20);
+                myChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: topVilles.map(d => d.location),
+                        datasets: [{ label: 'Sessions', data: topVilles.map(d => d.val), backgroundColor: '#e67e22' }]
+                    },
+                    options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false }
+                });
+                badge.innerText = "Top 20 Villes";
+                return;
+            }
+
+            // Filtrage et Tri pour les graphiques temporels
             let filtered = sourceData
-                .filter(d => d.date >= start && d.date <= end)
-                .map(d => ({
-                    date: d.date,
-                    val: parseInt(d[keyName]) || 0  // On convertit dynamiquement
-                }));
-
-            // Trier par date (pour éviter les graphiques en zigzag)
-            filtered.sort((a, b) => new Date(a.date) - new Date(b.date));
+                .filter(d => d.date && d.date >= start && d.date <= end)
+                .sort((a, b) => new Date(a.date) - new Date(b.date));
 
             let total = filtered.reduce((a, b) => a + b.val, 0);
             badge.innerText = `Total : ${total.toLocaleString()}`;
 
-            // 4. Rendu du graphique
             if (view === 'moyenne_hebdo') {
-                // ... (votre code calculateWeekly existant fonctionnera car il utilise .val après le map ci-dessus)
+                const weekly = calculateWeekly(filtered);
+                myChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: weekly.map(d => d.label),
+                        datasets: [{ label: 'Moyenne quotidienne', data: weekly.map(d => d.val), backgroundColor: '#9b59b6' }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false }
+                });
             } else {
                 let color = view === 'actifs' ? '#2980b9' : (view === 'sessions' ? '#8e44ad' : '#27ae60');
                 myChart = new Chart(ctx, {
@@ -233,8 +213,7 @@
                             data: filtered.map(d => d.val),
                             borderColor: color,
                             backgroundColor: color + '1A',
-                            fill: true,
-                            tension: 0.3
+                            fill: true, tension: 0.3
                         }]
                     },
                     options: { responsive: true, maintainAspectRatio: false }
@@ -242,8 +221,25 @@
             }
         }
 
-        document.querySelectorAll('select, input').forEach(el => el.addEventListener('change', updateDashboard));
+        function calculateWeekly(data) {
+            const weeks = {};
+            data.forEach(item => {
+                const d = new Date(item.date);
+                if (isNaN(d)) return;
+                const year = d.getFullYear();
+                const tempDate = new Date(d.valueOf());
+                tempDate.setDate(tempDate.getDate() + 4 - (tempDate.getDay() || 7));
+                const week = Math.ceil((((tempDate - new Date(year, 0, 1)) / 86400000) + 1) / 7);
+                const label = `S${week}-${year}`;
+                if (!weeks[label]) weeks[label] = { sum: 0, count: 0, sortKey: d.getTime() };
+                weeks[label].sum += item.val;
+                weeks[label].count += 1;
+            });
+            return Object.keys(weeks).sort((a, b) => weeks[a].sortKey - weeks[b].sortKey)
+                .map(k => ({ label: k, val: (weeks[k].sum / weeks[k].count).toFixed(1) }));
+        }
 
+        document.querySelectorAll('select, input').forEach(el => el.addEventListener('change', updateDashboard));
         init();
     </script>
 </body>
