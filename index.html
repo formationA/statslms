@@ -138,11 +138,25 @@
             ]);
 
             if (ouvertes && ouvertes.length > 0) {
-                // On récupère la dernière ligne du fichier
                 const lastEntry = ouvertes[ouvertes.length - 1];
-                const lastDateStr = lastEntry["Start Date: Heure"];
-                if (lastDateStr) {
-                    document.getElementById('lastUpdate').innerText = `Dernière actualisation : ${lastDateStr}`;
+                let dateStr = lastEntry["Start Date: Heure"];
+
+                if (dateStr) {
+                    // Conversion simple AM/PM en 24h pour le français
+                    if (dateStr.toLowerCase().includes('pm')) {
+                        let parts = dateStr.split(',');
+                        let timePart = parts[2].trim().toLowerCase().replace('pm', '');
+                        let hour = parseInt(timePart);
+                        if (hour < 12) dateStr = dateStr.replace(hour + ' PM', (hour + 12) + 'h');
+                        else dateStr = dateStr.replace('12 PM', '12h');
+                    } else {
+                        dateStr = dateStr.replace(' AM', 'h').replace(' am', 'h');
+                    }
+
+                    // Nettoyage des virgules superflues
+                    dateStr = dateStr.replace(/, /g, ' ');
+
+                    document.getElementById('lastUpdate').innerText = `Dernière actualisation : ${dateStr}`;
                 }
             }
 
