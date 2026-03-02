@@ -84,11 +84,11 @@
             <div>
                 <label for="viewType">Vue :</label>
                 <select id="viewType">
-                    <option value="sessions">👥 Apprenants (Sessions)</option>
+                    <option value="sessions">👥 Apprenants (Total Unique)</option>
                     <option value="actifs" selected>📈 Apprenants Actifs (Quotidien)</option>
-                    <option value="ressources">🔗 Connexions Ressources (Quotidien)</option>
-                    <option value="moyenne_hebdo">📊 Moyenne Hebdo (Période)</option>
                     <option value="ouvertes">🔑 Sessions Ouvertes (Historique)</option>
+                    <option value="ressources">🔗 Connexions Ressources (Quotidien)</option>
+                    <option value="moyenne_hebdo">📊 Moyenne Hebdo (Apprenants)</option>
                     <option value="location">📍 Répartition par centre (Top 20)</option>
                 </select>
             </div>
@@ -106,11 +106,10 @@
 
 
     <script>
-        let dataStore = { sessions: [], actifs: [], ressources: [], location: [] };
+        let dataStore = { sessions: [], actifs: [], ressources: [], location: [], ouvertes: [] };
         let myChart = null;
         const ctx = document.getElementById('mainChart').getContext('2d');
 
-        // Dates par défaut (février à mars 2026 selon vos fichiers)
         document.getElementById('startDate').value = "2026-01-01";
         document.getElementById('endDate').value = "2026-12-31";
 
@@ -126,7 +125,6 @@
         }
 
         async function init() {
-            // 1. On déclare bien 'ouvertes' dans la liste des résultats du Promise.all
             const [sessions, actifs, ressources, villes, ouvertes] = await Promise.all([
                 fetchData('apprenants_dans_des_sessions.json'),
                 fetchData('apprenants_actifs_sur_le_lms.json'),
@@ -140,13 +138,11 @@
             dataStore.ressources = ressources;
             dataStore.location = villes;
 
-            // 2. Traitement du nouveau JSON (new_blocks_over_time)
             const monthMap = {
                 "janvier": 0, "février": 1, "mars": 2, "avril": 3, "mai": 4, "juin": 5,
                 "juillet": 6, "août": 7, "septembre": 8, "octobre": 9, "novembre": 10, "décembre": 11
             };
 
-            // On vérifie que 'ouvertes' contient bien des données avant de mapper
             if (ouvertes && ouvertes.length > 0) {
                 dataStore.ouvertes = ouvertes
                     .filter(d => d["Start Date: Heure"] && d["Start Date: Heure"] !== "")
@@ -158,24 +154,19 @@
 
                         let isoDate = null;
                         if (month !== undefined && !isNaN(day) && !isNaN(year)) {
-                            // On crée la date locale
                             const dateObj = new Date(year, month, day);
                             isoDate = dateObj.toISOString().split('T')[0];
                         }
-
                         return {
                             date: isoDate,
                             val: parseInt(d["Nombre de lignes"].replace(/,/g, '')) || 0
                         };
                     })
                     .filter(d => d.date !== null);
-            } else {
-                dataStore.ouvertes = [];
             }
 
             updateDashboard();
         }
-
 
         function updateDashboard() {
             const view = document.getElementById('viewType').value;
@@ -185,7 +176,6 @@
 
             if (myChart) myChart.destroy();
 
-            // 1. CAS SESSIONS (Total unique)
             if (view === 'sessions') {
                 document.getElementById('dateFilters').style.visibility = 'hidden';
                 const data = dataStore.sessions[0] || {};
@@ -198,11 +188,11 @@
 
             document.getElementById('dateFilters').style.visibility = (view === 'location') ? 'hidden' : 'visible';
 
-            // 2. CAS VILLES (Location / Nombre de sessions)
             if (view === 'location') {
                 const topVilles = [...dataStore.location]
                     .sort((a, b) => (parseInt(b["Nombre de lignes"]) || 0) - (parseInt(a["Nombre de lignes"]) || 0))
                     .slice(0, 20);
+
                 myChart = new Chart(ctx, {
                     type: 'bar',
                     data: {
@@ -219,20 +209,17 @@
                 return;
             }
 
-            // 3. CAS RESSOURCES, ACTIFS & SESSIONS OUVERTES
             let filtered = [];
             let color = '#2980b9';
             let chartLabel = "";
 
             if (view === 'ouvertes') {
-                // Filtrage direct de dataStore.ouvertes (déjà mappé dans init)
                 filtered = dataStore.ouvertes
                     .filter(d => d.date >= start && d.date <= end)
                     .sort((a, b) => new Date(a.date) - new Date(b.date));
-                color = '#8e44ad'; // Couleur violette pour différencier
+                color = '#8e44ad';
                 chartLabel = "Nombre de sessions ouvertes";
             } else {
-                // Logique standard pour les autres vues
                 let keyName = (view === 'ressources') ? "resource_connections" : "apprenants_actifs";
                 let sourceData = (view === 'moyenne_hebdo') ? dataStore.actifs : dataStore[view];
 
@@ -265,9 +252,7 @@
         }
 
         function renderChart(type, labels, data, label, color) {
-            // On crée une version très claire pour l'intérieur (ex: 20% d'opacité avec '33')
             const lightColor = color + '33';
-
             myChart = new Chart(ctx, {
                 type: type,
                 data: {
@@ -275,13 +260,9 @@
                     datasets: [{
                         label: label,
                         data: data,
-                        // La bordure utilise la couleur pleine (#512da8)
                         borderColor: color,
-                        // L'intérieur utilise la couleur claire
                         backgroundColor: lightColor,
-                        // Épaisseur de la bordure (2px pour qu'elle soit bien visible)
                         borderWidth: 2,
-                        // On active le remplissage pour les lignes et les barres
                         fill: true,
                         tension: 0.3
                     }]
@@ -289,8 +270,6 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    // Garder l'axe Y pour les villes et X pour le reste
-                    indexAxis: (label === 'Nombre de sessions') ? 'y' : 'x',
                     plugins: {
                         legend: {
                             display: true,
