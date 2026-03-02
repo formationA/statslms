@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Analyse des données LMS - Complet</title>
+    <title>Analyse LMS - statsLMS</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
@@ -74,18 +74,18 @@
 
     <div class="dashboard-container">
         <div class="header">
-            <h1>Tableau de Bord LMS - Complet & Auto</h1>
-            <div class="stat-badge" id="totalBadge">Chargement...</div>
+            <h1>Tableau de Bord LMS</h1>
+            <div class="stat-badge" id="totalBadge">Chargement des données...</div>
         </div>
 
         <div class="filter-bar">
             <div>
-                <label for="viewType">Type de vue :</label>
+                <label for="viewType">Vue :</label>
                 <select id="viewType">
-                    <option value="actifs">📈 Apprenants Actifs (Quotidien)</option>
-                    <option value="ressources" selected>🔗 Connexions Ressources (Quotidien)</option>
-                    <option value="moyenne_hebdo">📊 Moyenne Hebdomadaire (Période)</option>
-                    <option value="location">📍 Répartition par Ville (Top 20)</option>
+                    <option value="actifs">📈 Apprenants Actifs</option>
+                    <option value="ressources" selected>🔗 Connexions Ressources</option>
+                    <option value="moyenne_hebdo">📊 Moyenne Hebdo (Actifs)</option>
+                    <option value="location">📍 Par Ville</option>
                 </select>
             </div>
             <div id="dateFilters">
@@ -101,54 +101,57 @@
     </div>
 
     <script>
-        // On initialise les données vides
         let dataTime = { actifs: [], ressources: [] };
         let dataLocation = [];
         let myChart = null;
         const ctx = document.getElementById('mainChart').getContext('2d');
 
-        // Réglage de la date de fin à Hier (J-1)
+        // Réglage auto sur J-1 (Hier)
         const hier = new Date();
         hier.setDate(hier.getDate() - 1);
         document.getElementById('endDate').value = hier.toISOString().split('T')[0];
 
-        // --- CHARGEMENT DES FICHIERS JSON ---
-        async function loadAllData() {
+        async function fetchData(url) {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error(`Erreur sur ${url}`);
+            return await response.json();
+        }
+
+        async function init() {
             try {
-                // On charge les 3 fichiers en même temps
-                const [resActifs, resRessources, resLoc] = await Promise.all([
-                    fetch('apprenants_actifs_sur_le_lms.json'),
-                    fetch('connexion_aux_ressources.json'),
-                    fetch('repartition_par_ville.json') // Assurez-vous que ce fichier existe
+                // Chargement des fichiers selon vos noms exacts en images
+                const [actifs, ressources, villes] = await Promise.all([
+                    fetchData('apprenants_actifs_sur_le_lms.json'),
+                    fetchData('connexion_aux_ressources.json'),
+                    fetchData('blocks_per_location.json') // Nom corrigé selon votre capture
                 ]);
 
-                dataTime.actifs = await resActifs.json();
-                dataTime.ressources = await resRessources.json();
-                dataLocation = await resLoc.json();
+                dataTime.actifs = actifs;
+                dataTime.ressources = ressources;
+                dataLocation = villes;
 
                 updateDashboard();
-            } catch (err) {
-                document.getElementById('totalBadge').innerText = "Erreur de fichiers JSON";
-                console.error(err);
+            } catch (error) {
+                console.error(error);
+                document.getElementById('totalBadge').innerText = "Erreur de chargement";
             }
         }
 
-        function calculateWeeklyFromFiltered(filteredData) {
+        function calculateWeekly(data) {
             const weeks = {};
-            filteredData.forEach(item => {
+            data.forEach(item => {
                 const d = new Date(item.date);
                 const year = d.getFullYear();
                 const tempDate = new Date(d.valueOf());
                 tempDate.setDate(tempDate.getDate() + 4 - (tempDate.getDay() || 7));
-                const yearStart = new Date(tempDate.getFullYear(), 0, 1);
-                const weekNum = Math.ceil((((tempDate - yearStart) / 86400000) + 1) / 7);
-                const label = `S${weekNum}-${year}`;
+                const week = Math.ceil((((tempDate - new Date(year, 0, 1)) / 86400000) + 1) / 7);
+                const label = `S${week}-${year}`;
                 if (!weeks[label]) weeks[label] = { sum: 0, count: 0, sortKey: d.getTime() };
                 weeks[label].sum += parseInt(item.val);
                 weeks[label].count += 1;
             });
             return Object.keys(weeks).sort((a, b) => weeks[a].sortKey - weeks[b].sortKey)
-                .map(key => ({ label: key, val: (weeks[key].sum / weeks[key].count).toFixed(1) }));
+                .map(k => ({ label: k, val: (weeks[k].sum / weeks[k].count).toFixed(1) }));
         }
 
         function updateDashboard() {
@@ -156,34 +159,36 @@
             const start = document.getElementById('startDate').value;
             const end = document.getElementById('endDate').value;
             const badge = document.getElementById('totalBadge');
-            const dateFilters = document.getElementById('dateFilters');
 
-            dateFilters.style.visibility = (view === 'location') ? 'hidden' : 'visible';
-            if (myChart !== null) { myChart.destroy(); }
+            if (myChart) myChart.destroy();
 
-            // Logique de calcul pour le badge
-            let currentKey = (view === 'ressources') ? 'ressources' : 'actifs';
-            let filtered = dataTime[currentKey].filter(d => d.date >= start && d.date <= end);
-            let total = filtered.reduce((acc, curr) => acc + parseInt(curr.val), 0);
-            badge.innerText = `Total : ${total.toLocaleString()}`;
+            document.getElementById('dateFilters').style.visibility = (view === 'location') ? 'hidden' : 'visible';
 
             if (view === 'location') {
-                badge.innerText = "Top 20 Villes (Total)";
                 myChart = new Chart(ctx, {
                     type: 'bar',
                     data: {
-                        labels: dataLocation.slice(0, 20).map(d => d.Location),
+                        labels: dataLocation.slice(0, 20).map(d => d.Location || d.location),
                         datasets: [{ label: 'Sessions', data: dataLocation.slice(0, 20).map(d => d.val), backgroundColor: '#e67e22' }]
                     },
                     options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false }
                 });
-            } else if (view === 'moyenne_hebdo') {
-                const weeklyData = calculateWeeklyFromFiltered(filtered);
+                badge.innerText = "Top 20 Villes";
+                return;
+            }
+
+            let sourceData = (view === 'ressources') ? dataTime.ressources : dataTime.actifs;
+            let filtered = sourceData.filter(d => d.date >= start && d.date <= end);
+            let total = filtered.reduce((a, b) => a + parseInt(b.val), 0);
+            badge.innerText = `Total : ${total.toLocaleString()}`;
+
+            if (view === 'moyenne_hebdo') {
+                const weekly = calculateWeekly(filtered);
                 myChart = new Chart(ctx, {
                     type: 'bar',
                     data: {
-                        labels: weeklyData.map(d => d.label),
-                        datasets: [{ label: 'Moyenne quot.', data: weeklyData.map(d => d.val), backgroundColor: '#9b59b6' }]
+                        labels: weekly.map(d => d.label),
+                        datasets: [{ label: 'Moyenne quotidienne', data: weekly.map(d => d.val), backgroundColor: '#9b59b6' }]
                     },
                     options: { responsive: true, maintainAspectRatio: false }
                 });
@@ -204,11 +209,9 @@
             }
         }
 
-        document.getElementById('viewType').addEventListener('change', updateDashboard);
-        document.getElementById('startDate').addEventListener('change', updateDashboard);
-        document.getElementById('endDate').addEventListener('change', updateDashboard);
+        document.querySelectorAll('select, input').forEach(el => el.addEventListener('change', updateDashboard));
 
-        loadAllData();
+        init();
     </script>
 </body>
 </html>
