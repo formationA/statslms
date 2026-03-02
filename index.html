@@ -198,8 +198,8 @@
 
             if (view === 'moyenne_hebdo') {
                 const weekly = calculateWeekly(filtered);
-                // On remplace '#8e44ad' par '#4b0082' (Violet Indigo soutenu)
-                renderChart('bar', weekly.map(d => d.label), weekly.map(d => d.val), 'Moyenne quotidienne', '#4b0082');
+                // Utilisation du Deep Purple #512da8 pour une moyenne hebdomadaire plus soutenue
+                renderChart('bar', weekly.map(d => d.label), weekly.map(d => d.val), 'Moyenne quotidienne', '#512da8');
             } else {
                 let color = (view === 'actifs') ? '#2980b9' : '#27ae60';
                 renderChart('line', filtered.map(d => d.date), filtered.map(d => d.val), view, color);
