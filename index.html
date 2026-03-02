@@ -232,8 +232,15 @@
                     .sort((a, b) => new Date(a.date) - new Date(b.date));
 
                 if (view === 'actifs' || view === 'moyenne_hebdo') {
-                    color = '#2980b9';
-                    chartLabel = "Nombre d'apprenants connectés";
+                    // Si c'est la moyenne, on met le violet et le texte spécifique
+                    if (view === 'moyenne_hebdo') {
+                        color = '#512da8';
+                        chartLabel = "Moyenne quotidienne des apprenants actifs";
+                    } else {
+                        // Si ce sont les actifs simples, on garde le bleu
+                        color = '#2980b9';
+                        chartLabel = "Nombre d'apprenants connectés";
+                    }
                 } else if (view === 'ressources') {
                     color = '#27ae60';
                     chartLabel = "Nombre de ressources lancées";
