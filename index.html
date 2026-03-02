@@ -108,47 +108,36 @@
         let myChart = null;
         const ctx = document.getElementById('mainChart').getContext('2d');
 
-        // Dates par défaut pour 2026
+        // Dates par défaut (vos données sont en 2026)
         document.getElementById('startDate').value = "2026-01-01";
         document.getElementById('endDate').value = "2026-12-31";
 
+        // Fonction de chargement simple
         async function fetchData(url) {
             try {
                 const response = await fetch(url + '?v=' + Date.now());
-                if (!response.ok) {
-                    console.warn("Fichier non trouvé ou erreur : " + url);
-                    return [];
-                }
-                const rawData = await response.json();
-
-                return rawData.map(item => {
-                    let foundValue = 0;
-                    // On cherche dynamiquement la clé numérique (apprenants_actifs, etc.)
-                    for (let key in item) {
-                        if (key !== "date" && key !== "location" && key !== "Location") {
-                            foundValue = item[key];
-                        }
-                    }
-                    return {
-                        date: item.date,
-                        location: item.location || item.Location || "Inconnu",
-                        val: parseInt(foundValue) || 0
-                    };
-                });
+                if (!response.ok) return [];
+                return await response.json();
             } catch (e) {
-                console.error("Erreur de lecture sur : " + url, e);
+                console.error("Erreur sur : " + url);
                 return [];
             }
         }
 
         async function init() {
-            // Chargement sécurisé : si un fichier échoue, le tableau de bord continue
-            dataStore.sessions = await fetchData('apprenants_dans_des_sessions.json');
-            dataStore.actifs = await fetchData('apprenants_actifs_sur_le_lms.json');
-            dataStore.ressources = await fetchData('connexion_aux_ressources.json');
-            dataStore.location = await fetchData('blocks_per_location.json');
+            // Chargement des fichiers avec les noms exacts de votre image
+            const [sessions, actifs, ressources, villes] = await Promise.all([
+                fetchData('apprenants_dans_des_sessions.json'),
+                fetchData('apprenants_actifs_sur_le_lms.json'),
+                fetchData('connexion_aux_ressources.json'),
+                fetchData('blocks_per_location.json')
+            ]);
 
-            console.log("Données chargées :", dataStore);
+            dataStore.sessions = sessions;
+            dataStore.actifs = actifs;
+            dataStore.ressources = ressources;
+            dataStore.location = villes;
+
             updateDashboard();
         }
 
@@ -162,70 +151,76 @@
 
             document.getElementById('dateFilters').style.visibility = (view === 'location') ? 'hidden' : 'visible';
 
-            let sourceData = (view === 'moyenne_hebdo') ? dataStore.actifs : dataStore[view];
+            // --- ÉTAPE CRUCIALE : On définit quelle colonne lire selon la vue ---
+            let keyName = "val"; // Nom par défaut
+            let sourceData = dataStore[view] || [];
 
-            if (!sourceData || sourceData.length === 0) {
-                badge.innerText = "Aucune donnée";
-                return;
+            if (view === 'actifs' || view === 'moyenne_hebdo') {
+                keyName = "apprenants_actifs";
+                sourceData = dataStore.actifs;
+            } else if (view === 'sessions') {
+                // Vérifiez si c'est bien ce nom dans votre JSON sessions
+                keyName = "apprenants_sessions";
+            } else if (view === 'ressources') {
+                // Vérifiez si c'est bien ce nom dans votre JSON ressources
+                keyName = "connexions";
             }
 
-            // Cas spécial Villes
-            if (view === 'location') {
-                const topVilles = sourceData.slice(0, 20);
-                myChart = new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: topVilles.map(d => d.location),
-                        datasets: [{ label: 'Sessions', data: topVilles.map(d => d.val), backgroundColor: '#e67e22' }]
-                    },
-                    options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false }
-                });
-                badge.innerText = "Top 20 Villes";
-                return;
-            }
-
-            // Filtrage et Tri pour les graphiques temporels
+            // --- Filtrage, Conversion et Tri ---
             let filtered = sourceData
                 .filter(d => d.date && d.date >= start && d.date <= end)
+                .map(d => ({
+                    date: d.date,
+                    val: parseInt(d[keyName]) || 0 // On transforme le nom spécifique en "val"
+                }))
                 .sort((a, b) => new Date(a.date) - new Date(b.date));
 
             let total = filtered.reduce((a, b) => a + b.val, 0);
             badge.innerText = `Total : ${total.toLocaleString()}`;
 
-            if (view === 'moyenne_hebdo') {
-                const weekly = calculateWeekly(filtered);
+            // Affichage du graphique
+            if (view === 'location') {
+                // Logique simplifiée pour les villes
+                const villesData = dataStore.location.slice(0, 20);
                 myChart = new Chart(ctx, {
                     type: 'bar',
                     data: {
-                        labels: weekly.map(d => d.label),
-                        datasets: [{ label: 'Moyenne quotidienne', data: weekly.map(d => d.val), backgroundColor: '#9b59b6' }]
+                        labels: villesData.map(d => d.location || d.Location || "Inconnu"),
+                        datasets: [{ label: 'Sessions', data: villesData.map(d => parseInt(d.val) || 0), backgroundColor: '#e67e22' }]
                     },
-                    options: { responsive: true, maintainAspectRatio: false }
+                    options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false }
                 });
+            } else if (view === 'moyenne_hebdo') {
+                const weekly = calculateWeekly(filtered);
+                renderChart('bar', weekly.map(d => d.label), weekly.map(d => d.val), 'Moyenne Hebdo', '#9b59b6');
             } else {
                 let color = view === 'actifs' ? '#2980b9' : (view === 'sessions' ? '#8e44ad' : '#27ae60');
-                myChart = new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: filtered.map(d => d.date),
-                        datasets: [{
-                            label: view,
-                            data: filtered.map(d => d.val),
-                            borderColor: color,
-                            backgroundColor: color + '1A',
-                            fill: true, tension: 0.3
-                        }]
-                    },
-                    options: { responsive: true, maintainAspectRatio: false }
-                });
+                renderChart('line', filtered.map(d => d.date), filtered.map(d => d.val), view, color);
             }
+        }
+
+        function renderChart(type, labels, data, label, color) {
+            myChart = new Chart(ctx, {
+                type: type,
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: label,
+                        data: data,
+                        borderColor: color,
+                        backgroundColor: color + '1A',
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
         }
 
         function calculateWeekly(data) {
             const weeks = {};
             data.forEach(item => {
                 const d = new Date(item.date);
-                if (isNaN(d)) return;
                 const year = d.getFullYear();
                 const tempDate = new Date(d.valueOf());
                 tempDate.setDate(tempDate.getDate() + 4 - (tempDate.getDay() || 7));
