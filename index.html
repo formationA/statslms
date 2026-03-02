@@ -103,12 +103,13 @@
         </div>
     </div>
 
+
     <script>
         let dataStore = { sessions: [], actifs: [], ressources: [], location: [] };
         let myChart = null;
         const ctx = document.getElementById('mainChart').getContext('2d');
 
-        // Dates par défaut calées sur vos données de février/mars 2026
+        // Dates par défaut (février à mars 2026 selon vos fichiers)
         document.getElementById('startDate').value = "2026-02-01";
         document.getElementById('endDate').value = "2026-03-05";
 
@@ -124,6 +125,7 @@
         }
 
         async function init() {
+            // Chargement des 4 fichiers avec les noms de votre dossier
             const [sessions, actifs, ressources, villes] = await Promise.all([
                 fetchData('apprenants_dans_des_sessions.json'),
                 fetchData('apprenants_actifs_sur_le_lms.json'),
@@ -147,7 +149,7 @@
 
             if (myChart) myChart.destroy();
 
-            // 1. CAS PARTICULIER : SESSIONS (Valeur unique)
+            // 1. CAS SESSIONS (Total unique)
             if (view === 'sessions') {
                 document.getElementById('dateFilters').style.visibility = 'hidden';
                 const data = dataStore.sessions[0] || {};
@@ -160,7 +162,7 @@
 
             document.getElementById('dateFilters').style.visibility = (view === 'location') ? 'hidden' : 'visible';
 
-            // 2. CAS PARTICULIER : PAR VILLE (Location / Nombre de lignes)
+            // 2. CAS VILLES (Location / Nombre de lignes)
             if (view === 'location') {
                 const topVilles = dataStore.location.slice(0, 20);
                 myChart = new Chart(ctx, {
@@ -179,19 +181,10 @@
                 return;
             }
 
-            // 3. GRAPHIQUES TEMPORELS (Actifs / Ressources)
-            let keyName = "";
-            let sourceData = [];
+            // 3. CAS RESSOURCES & ACTIFS
+            let keyName = (view === 'ressources') ? "resource_connections" : "apprenants_actifs";
+            let sourceData = (view === 'moyenne_hebdo') ? dataStore.actifs : dataStore[view];
 
-            if (view === 'actifs' || view === 'moyenne_hebdo') {
-                keyName = "apprenants_actifs";
-                sourceData = dataStore.actifs;
-            } else {
-                keyName = "resource_connections";
-                sourceData = dataStore.ressources;
-            }
-
-            // Filtrage, Conversion et Tri (pour éviter les zigzags)
             let filtered = sourceData
                 .filter(d => d.date && d.date >= start && d.date <= end)
                 .map(d => ({
@@ -250,5 +243,6 @@
         document.querySelectorAll('select, input').forEach(el => el.addEventListener('change', updateDashboard));
         init();
     </script>
+
 </body>
 </html>
