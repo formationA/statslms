@@ -108,11 +108,10 @@
         let myChart = null;
         const ctx = document.getElementById('mainChart').getContext('2d');
 
-        // Dates par défaut (vos données sont en 2026)
-        document.getElementById('startDate').value = "2026-01-01";
-        document.getElementById('endDate').value = "2026-12-31";
+        // Dates par défaut calées sur vos données de février/mars 2026
+        document.getElementById('startDate').value = "2026-02-01";
+        document.getElementById('endDate').value = "2026-03-05";
 
-        // Fonction de chargement simple
         async function fetchData(url) {
             try {
                 const response = await fetch(url + '?v=' + Date.now());
@@ -125,7 +124,6 @@
         }
 
         async function init() {
-            // Chargement des fichiers avec les noms exacts de votre image
             const [sessions, actifs, ressources, villes] = await Promise.all([
                 fetchData('apprenants_dans_des_sessions.json'),
                 fetchData('apprenants_actifs_sur_le_lms.json'),
@@ -149,52 +147,67 @@
 
             if (myChart) myChart.destroy();
 
+            // 1. CAS PARTICULIER : SESSIONS (Valeur unique)
+            if (view === 'sessions') {
+                document.getElementById('dateFilters').style.visibility = 'hidden';
+                const data = dataStore.sessions[0] || {};
+                const rawVal = data["Valeurs distinctes de Progresses → User"] || "0";
+                const total = parseInt(rawVal.replace(/,/g, '')) || 0;
+                badge.innerText = `Total : ${total.toLocaleString()}`;
+                ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+                return;
+            }
+
             document.getElementById('dateFilters').style.visibility = (view === 'location') ? 'hidden' : 'visible';
 
-            // --- ÉTAPE CRUCIALE : On définit quelle colonne lire selon la vue ---
-            let keyName = "val"; // Nom par défaut
-            let sourceData = dataStore[view] || [];
+            // 2. CAS PARTICULIER : PAR VILLE (Location / Nombre de lignes)
+            if (view === 'location') {
+                const topVilles = dataStore.location.slice(0, 20);
+                myChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: topVilles.map(d => d.Location || "Inconnu"),
+                        datasets: [{
+                            label: 'Nombre de lignes',
+                            data: topVilles.map(d => parseInt(d["Nombre de lignes"]) || 0),
+                            backgroundColor: '#e67e22'
+                        }]
+                    },
+                    options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false }
+                });
+                badge.innerText = "Top 20 Villes";
+                return;
+            }
+
+            // 3. GRAPHIQUES TEMPORELS (Actifs / Ressources)
+            let keyName = "";
+            let sourceData = [];
 
             if (view === 'actifs' || view === 'moyenne_hebdo') {
                 keyName = "apprenants_actifs";
                 sourceData = dataStore.actifs;
-            } else if (view === 'sessions') {
-                // Vérifiez si c'est bien ce nom dans votre JSON sessions
-                keyName = "apprenants_sessions";
-            } else if (view === 'ressources') {
-                // Vérifiez si c'est bien ce nom dans votre JSON ressources
-                keyName = "connexions";
+            } else {
+                keyName = "resource_connections";
+                sourceData = dataStore.ressources;
             }
 
-            // --- Filtrage, Conversion et Tri ---
+            // Filtrage, Conversion et Tri (pour éviter les zigzags)
             let filtered = sourceData
                 .filter(d => d.date && d.date >= start && d.date <= end)
                 .map(d => ({
                     date: d.date,
-                    val: parseInt(d[keyName]) || 0 // On transforme le nom spécifique en "val"
+                    val: parseInt(d[keyName]) || 0
                 }))
                 .sort((a, b) => new Date(a.date) - new Date(b.date));
 
             let total = filtered.reduce((a, b) => a + b.val, 0);
             badge.innerText = `Total : ${total.toLocaleString()}`;
 
-            // Affichage du graphique
-            if (view === 'location') {
-                // Logique simplifiée pour les villes
-                const villesData = dataStore.location.slice(0, 20);
-                myChart = new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: villesData.map(d => d.location || d.Location || "Inconnu"),
-                        datasets: [{ label: 'Sessions', data: villesData.map(d => parseInt(d.val) || 0), backgroundColor: '#e67e22' }]
-                    },
-                    options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false }
-                });
-            } else if (view === 'moyenne_hebdo') {
+            if (view === 'moyenne_hebdo') {
                 const weekly = calculateWeekly(filtered);
-                renderChart('bar', weekly.map(d => d.label), weekly.map(d => d.val), 'Moyenne Hebdo', '#9b59b6');
+                renderChart('bar', weekly.map(d => d.label), weekly.map(d => d.val), 'Moyenne quotidienne', '#9b59b6');
             } else {
-                let color = view === 'actifs' ? '#2980b9' : (view === 'sessions' ? '#8e44ad' : '#27ae60');
+                let color = (view === 'actifs') ? '#2980b9' : '#27ae60';
                 renderChart('line', filtered.map(d => d.date), filtered.map(d => d.val), view, color);
             }
         }
