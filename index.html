@@ -205,7 +205,9 @@
                 renderChart('bar', weekly.map(d => d.label), weekly.map(d => d.val), 'Moyenne apprenants connectés', '#512da8');
             } else {
                 let color = (view === 'actifs') ? '#2980b9' : '#27ae60';
-                renderChart('line', filtered.map(d => d.date), filtered.map(d => d.val), view, color);
+                let chartLabel = (view === 'actifs') ? "Nombre d'apprenants connectés" : view;
+               
+                renderChart('line', filtered.map(d => d.date), filtered.map(d => d.val), chartLabel, color);
             }
         }
 
