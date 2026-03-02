@@ -88,6 +88,7 @@
                     <option value="actifs" selected>📈 Apprenants Actifs (Quotidien)</option>
                     <option value="ressources">🔗 Connexions Ressources (Quotidien)</option>
                     <option value="moyenne_hebdo">📊 Moyenne Hebdo (Période)</option>
+                    <option value="ouvertes">🔑 Sessions Ouvertes (Historique)</option>
                     <option value="location">📍 Répartition par centre (Top 20)</option>
                 </select>
             </div>
@@ -130,7 +131,8 @@
                 fetchData('apprenants_dans_des_sessions.json'),
                 fetchData('apprenants_actifs_sur_le_lms.json'),
                 fetchData('connexion_aux_ressources.json'),
-                fetchData('blocks_per_location.json')
+                fetchData('blocks_per_location.json'),
+                fetchData('new_blocks_over_time.json')
             ]);
 
             dataStore.sessions = sessions;
@@ -138,8 +140,24 @@
             dataStore.ressources = ressources;
             dataStore.location = villes;
 
+            // 2. Traitement spécifique pour parser les dates textuelles du nouveau JSON
+            const monthMap = { "janvier": 0, "février": 1, "mars": 2, "avril": 3, "mai": 4, "juin": 5, "juillet": 6, "août": 7, "septembre": 8, "octobre": 9, "novembre": 10, "décembre": 11 };
+
+            dataStore.ouvertes = ouvertes.filter(d => d["Start Date: Heure"] !== "").map(d => {
+                const parts = d["Start Date: Heure"].toLowerCase().replace(',', '').split(' ');
+                const month = monthMap[parts[0]];
+                const day = parseInt(parts[1]);
+                const year = parseInt(parts[2]);
+                let isoDate = null;
+                if (month !== undefined && day && year) {
+                    isoDate = new Date(year, month, day).toISOString().split('T')[0];
+                }
+                return { date: isoDate, val: parseInt(d["Nombre de lignes"].replace(/,/g, '')) || 0 };
+            }).filter(d => d.date !== null);
+
             updateDashboard();
         }
+
 
         function updateDashboard() {
             const view = document.getElementById('viewType').value;
@@ -164,7 +182,6 @@
 
             // 2. CAS VILLES (Location / Nombre de sessions)
             if (view === 'location') {
-              
                 const topVilles = [...dataStore.location]
                     .sort((a, b) => (parseInt(b["Nombre de lignes"]) || 0) - (parseInt(a["Nombre de lignes"]) || 0))
                     .slice(0, 20);
@@ -184,35 +201,47 @@
                 return;
             }
 
-            // 3. CAS RESSOURCES & ACTIFS
-            let keyName = (view === 'ressources') ? "resource_connections" : "apprenants_actifs";
-            let sourceData = (view === 'moyenne_hebdo') ? dataStore.actifs : dataStore[view];
+            // 3. CAS RESSOURCES, ACTIFS & SESSIONS OUVERTES
+            let filtered = [];
+            let color = '#2980b9';
+            let chartLabel = "";
 
-            let filtered = sourceData
-                .filter(d => d.date && d.date >= start && d.date <= end)
-                .map(d => ({
-                    date: d.date,
-                    val: parseInt(d[keyName]) || 0
-                }))
-                .sort((a, b) => new Date(a.date) - new Date(b.date));
+            if (view === 'ouvertes') {
+                // Filtrage direct de dataStore.ouvertes (déjà mappé dans init)
+                filtered = dataStore.ouvertes
+                    .filter(d => d.date >= start && d.date <= end)
+                    .sort((a, b) => new Date(a.date) - new Date(b.date));
+                color = '#8e44ad'; // Couleur violette pour différencier
+                chartLabel = "Nombre de sessions ouvertes";
+            } else {
+                // Logique standard pour les autres vues
+                let keyName = (view === 'ressources') ? "resource_connections" : "apprenants_actifs";
+                let sourceData = (view === 'moyenne_hebdo') ? dataStore.actifs : dataStore[view];
+
+                filtered = sourceData
+                    .filter(d => d.date && d.date >= start && d.date <= end)
+                    .map(d => ({
+                        date: d.date,
+                        val: parseInt(d[keyName]) || 0
+                    }))
+                    .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+                if (view === 'actifs' || view === 'moyenne_hebdo') {
+                    color = '#2980b9';
+                    chartLabel = "Nombre d'apprenants connectés";
+                } else if (view === 'ressources') {
+                    color = '#27ae60';
+                    chartLabel = "Nombre de ressources lancées";
+                }
+            }
 
             let total = filtered.reduce((a, b) => a + b.val, 0);
             badge.innerText = `Total : ${total.toLocaleString()}`;
 
             if (view === 'moyenne_hebdo') {
                 const weekly = calculateWeekly(filtered);
-                // Utilisation du Deep Purple #512da8 pour une moyenne hebdomadaire plus soutenue
-                renderChart('bar', weekly.map(d => d.label), weekly.map(d => d.val), "Moyenne d'apprenants connectés", '#512da8');
+                renderChart('bar', weekly.map(d => d.label), weekly.map(d => d.val), chartLabel, '#512da8');
             } else {
-                let color = (view === 'actifs') ? '#2980b9' : '#27ae60';
-                let chartLabel = view;
-
-                if (view === 'actifs') {
-                    chartLabel = "Nombre d'apprenants connectés";
-                } else if (view === 'ressources') {
-                    chartLabel = "Nombre de ressources lancées";
-                }
-               
                 renderChart('line', filtered.map(d => d.date), filtered.map(d => d.val), chartLabel, color);
             }
         }
