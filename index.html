@@ -173,7 +173,7 @@
                     data: {
                         labels: topVilles.map(d => d.Location || "Inconnu"),
                         datasets: [{
-                            label: 'Nombre de lignes',
+                            label: 'Nombre de sessions',
                             data: topVilles.map(d => parseInt(d["Nombre de lignes"]) || 0),
                             backgroundColor: '#e67e22'
                         }]
@@ -235,7 +235,7 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     // Garder l'axe Y pour les villes et X pour le reste
-                    indexAxis: (label === 'Nombre de lignes') ? 'y' : 'x',
+                    indexAxis: (label === 'Nombre de sessions') ? 'y' : 'x',
                     plugins: {
                         legend: {
                             display: true,
