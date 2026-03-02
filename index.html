@@ -164,7 +164,10 @@
 
             // 2. CAS VILLES (Location / Nombre de lignes)
             if (view === 'location') {
-                const topVilles = dataStore.location.slice(0, 20);
+              
+                const topVilles = [...dataStore.location]
+                    .sort((a, b) => (parseInt(b["Nombre de lignes"]) || 0) - (parseInt(a["Nombre de lignes"]) || 0))
+                    .slice(0, 20);
                 myChart = new Chart(ctx, {
                     type: 'bar',
                     data: {
