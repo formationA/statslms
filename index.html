@@ -80,7 +80,10 @@
                 <h1>Tableau de Bord LMS</h1>
                 <small id="lastUpdate" style="color: #7f8c8d; font-style: italic;">Chargement de la date...</small>
             </div>
-            <div class="stat-badge" id="totalBadge">Initialisation...</div>
+            <div style="display: flex; gap: 10px;">
+                <div class="stat-badge" id="liveBadge" style="background: #e74c3c;">En direct : --</div>
+                <div class="stat-badge" id="totalBadge">Initialisation...</div>
+            </div>
         </div>
 
         <div class="filter-bar">
@@ -110,7 +113,8 @@
 
 
     <script>
-        let dataStore = { sessions: [], actifs: [], ressources: [], location: [], ouvertes: [] };
+        let dataStore = { sessions: [], actifs: [], ressources: [], location: [], ouvertes: [], enCours: 0 };
+       
         let myChart = null;
         const ctx = document.getElementById('mainChart').getContext('2d');
 
@@ -134,8 +138,15 @@
                 fetchData('apprenants_actifs_sur_le_lms.json'),
                 fetchData('connexion_aux_ressources.json'),
                 fetchData('blocks_per_location.json'),
-                fetchData('new_blocks_over_time.json')
+                fetchData('new_blocks_over_time.json'),
+                fetchData('nombre_d_apprenants_en_cours.json')
             ]);
+
+            // --- LOGIQUE D'AFFICHAGE DU NOMBRE EN COURS ---
+            if (enCoursData && enCoursData.length > 0) {
+                const nbEnCours = enCoursData[0].count;
+                document.getElementById('liveBadge').innerText = `En cours : ${nbEnCours}`;
+            }
 
             // --- LOGIQUE DE DATE PERSONNALISÉE (Format FR & -1h) ---
             if (ouvertes && ouvertes.length > 0) {
