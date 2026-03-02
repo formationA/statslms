@@ -126,8 +126,8 @@
         }
 
         async function init() {
-            // Chargement des 4 fichiers avec les noms de votre dossier
-            const [sessions, actifs, ressources, villes] = await Promise.all([
+            // 1. On déclare bien 'ouvertes' dans la liste des résultats du Promise.all
+            const [sessions, actifs, ressources, villes, ouvertes] = await Promise.all([
                 fetchData('apprenants_dans_des_sessions.json'),
                 fetchData('apprenants_actifs_sur_le_lms.json'),
                 fetchData('connexion_aux_ressources.json'),
@@ -140,20 +140,38 @@
             dataStore.ressources = ressources;
             dataStore.location = villes;
 
-            // 2. Traitement spécifique pour parser les dates textuelles du nouveau JSON
-            const monthMap = { "janvier": 0, "février": 1, "mars": 2, "avril": 3, "mai": 4, "juin": 5, "juillet": 6, "août": 7, "septembre": 8, "octobre": 9, "novembre": 10, "décembre": 11 };
+            // 2. Traitement du nouveau JSON (new_blocks_over_time)
+            const monthMap = {
+                "janvier": 0, "février": 1, "mars": 2, "avril": 3, "mai": 4, "juin": 5,
+                "juillet": 6, "août": 7, "septembre": 8, "octobre": 9, "novembre": 10, "décembre": 11
+            };
 
-            dataStore.ouvertes = ouvertes.filter(d => d["Start Date: Heure"] !== "").map(d => {
-                const parts = d["Start Date: Heure"].toLowerCase().replace(',', '').split(' ');
-                const month = monthMap[parts[0]];
-                const day = parseInt(parts[1]);
-                const year = parseInt(parts[2]);
-                let isoDate = null;
-                if (month !== undefined && day && year) {
-                    isoDate = new Date(year, month, day).toISOString().split('T')[0];
-                }
-                return { date: isoDate, val: parseInt(d["Nombre de lignes"].replace(/,/g, '')) || 0 };
-            }).filter(d => d.date !== null);
+            // On vérifie que 'ouvertes' contient bien des données avant de mapper
+            if (ouvertes && ouvertes.length > 0) {
+                dataStore.ouvertes = ouvertes
+                    .filter(d => d["Start Date: Heure"] && d["Start Date: Heure"] !== "")
+                    .map(d => {
+                        const parts = d["Start Date: Heure"].toLowerCase().replace(',', '').split(' ');
+                        const month = monthMap[parts[0]];
+                        const day = parseInt(parts[1]);
+                        const year = parseInt(parts[2]);
+
+                        let isoDate = null;
+                        if (month !== undefined && !isNaN(day) && !isNaN(year)) {
+                            // On crée la date locale
+                            const dateObj = new Date(year, month, day);
+                            isoDate = dateObj.toISOString().split('T')[0];
+                        }
+
+                        return {
+                            date: isoDate,
+                            val: parseInt(d["Nombre de lignes"].replace(/,/g, '')) || 0
+                        };
+                    })
+                    .filter(d => d.date !== null);
+            } else {
+                dataStore.ouvertes = [];
+            }
 
             updateDashboard();
         }
@@ -228,7 +246,7 @@
 
                 if (view === 'actifs' || view === 'moyenne_hebdo') {
                     color = '#2980b9';
-                    chartLabel = "Nombre d'apprenants connectés";
+                    chartLabel = "Moyenne d'apprenants connectés";
                 } else if (view === 'ressources') {
                     color = '#27ae60';
                     chartLabel = "Nombre de ressources lancées";
