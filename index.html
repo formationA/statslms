@@ -207,6 +207,10 @@
         }
 
         function renderChart(type, labels, data, label, color) {
+            // Si c'est un graphique en barres (Moyenne ou Villes), on veut 100% d'opacité
+            // Si c'est une ligne (Actifs ou Ressources), on peut garder un peu de douceur au remplissage
+            const isBar = (type === 'bar');
+
             myChart = new Chart(ctx, {
                 type: type,
                 data: {
@@ -215,12 +219,23 @@
                         label: label,
                         data: data,
                         borderColor: color,
-                        backgroundColor: color + '1A',
+                        // MODIFICATION ICI : On enlève le '+ 1A' pour les barres
+                        backgroundColor: isBar ? color : color + '33',
                         fill: true,
-                        tension: 0.3
+                        tension: 0.3,
+                        borderWidth: isBar ? 0 : 2 // Pas de bordure sur les barres pour un look plus moderne
                     }]
                 },
-                options: { responsive: true, maintainAspectRatio: false }
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            labels: { color: '#333', font: { weight: 'bold' } }
+                        }
+                    }
+                }
             });
         }
 
