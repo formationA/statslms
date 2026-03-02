@@ -10,38 +10,12 @@
             font-family: 'Segoe UI', sans-serif;
             background-color: #f4f7f9;
             margin: 0;
-            padding: 0;
+            padding: 20px;
         }
-
-        /* Navigation */
-        nav {
-            background: #2c3e50;
-            padding: 10px 20px;
-            display: flex;
-            gap: 10px;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-
-        .nav-btn {
-            background: none;
-            border: 1px solid rgba(255,255,255,0.3);
-            color: white;
-            padding: 8px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-            .nav-btn.active {
-                background: #3498db;
-                border-color: #3498db;
-            }
 
         .dashboard-container {
             max-width: 1100px;
-            margin: 20px auto;
+            margin: auto;
             background: white;
             padding: 25px;
             border-radius: 15px;
@@ -79,56 +53,6 @@
             flex-wrap: wrap;
         }
 
-        /* Tab Management */
-        .tab-content {
-            display: none;
-        }
-
-            .tab-content.active {
-                display: block;
-            }
-
-        /* Conception Styles */
-        .kpi-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .kpi-card {
-            background: #ebf2f7;
-            padding: 15px;
-            border-radius: 10px;
-            text-align: center;
-            border: 1px solid #d1d9e0;
-        }
-
-            .kpi-card b {
-                display: block;
-                font-size: 1.5em;
-                color: #2c3e50;
-            }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-            font-size: 0.9em;
-        }
-
-            table th {
-                background: #f2f2f2;
-                text-align: left;
-                padding: 10px;
-                border-bottom: 2px solid #ddd;
-            }
-
-            table td {
-                padding: 10px;
-                border-bottom: 1px solid #eee;
-            }
-
         select, input {
             padding: 8px;
             border: 1px solid #ddd;
@@ -140,212 +64,193 @@
             height: 500px;
             width: 100%;
         }
+
+        label {
+            font-weight: bold;
+            color: #555;
+            margin-right: 5px;
+        }
     </style>
 </head>
 <body>
 
-    <nav>
-        <button class="nav-btn active" onclick="switchTab('activite', this)">📈 Activité Live</button>
-        <button class="nav-btn" onclick="switchTab('conception', this)">📦 Conception LMS</button>
-    </nav>
+    <div style="padding: 10px 20px; background: #2c3e50; display: flex; justify-content: flex-end;">
+        <a href="conception.html" style="color: white; text-decoration: none; font-weight: bold; border: 1px solid white; padding: 5px 15px; border-radius: 5px; font-size: 0.8em;">
+            📦 Voir le Catalogue (Conception) →
+        </a>
+    </div>
 
     <div class="dashboard-container">
-
-        <div id="tab-activite" class="tab-content active">
-            <div class="header">
-                <div>
-                    <h1>Tableau de Bord LMS</h1>
-                    <small id="lastUpdate" style="color: #7f8c8d; font-style: italic;">Chargement...</small>
-                </div>
-                <div style="display: flex; gap: 10px;">
-                    <div class="stat-badge" id="liveBadge" style="background: #e74c3c;">En direct : --</div>
-                    <div class="stat-badge" id="totalBadge">Initialisation...</div>
-                </div>
+        <div class="header">
+            <div>
+                <h1>Tableau de Bord LMS</h1>
+                <small id="lastUpdate" style="color: #7f8c8d; font-style: italic;">Chargement de la date...</small>
             </div>
+            <div style="display: flex; gap: 10px;">
+                <div class="stat-badge" id="liveBadge" style="background: #e74c3c;">En direct : --</div>
+                <div class="stat-badge" id="totalBadge">Initialisation...</div>
+            </div>
+        </div>
 
-            <div class="filter-bar">
+        <div class="filter-bar">
+            <div>
                 <label for="viewType">Vue :</label>
                 <select id="viewType">
+
                     <option value="actifs" selected>📈 Apprenants Actifs (Quotidien)</option>
                     <option value="moyenne_hebdo">📊 Moyenne Hebdo (Apprenants)</option>
                     <option value="ressources">🔗 Connexions Ressources (Quotidien)</option>
                     <option value="ouvertes">🔑 Sessions Ouvertes (Historique)</option>
                     <option value="location">📍 Répartition par centre (Top 20)</option>
+
                 </select>
-                <div id="dateFilters">
-                    <label>Période :</label>
-                    <input type="date" id="startDate" value="2026-01-01">
-                    <input type="date" id="endDate" value="2026-12-31">
-                </div>
             </div>
-
-            <div class="chart-wrapper">
-                <canvas id="mainChart"></canvas>
+            <div id="dateFilters">
+                <label>Période :</label>
+                <input type="date" id="startDate" value="2026-01-01">
+                <input type="date" id="endDate">
             </div>
         </div>
 
-        <div id="tab-conception" class="tab-content">
-            <div class="header">
-                <h1>📦 Catalogue & Ressources</h1>
-            </div>
-
-            <div class="kpi-grid">
-                <div class="kpi-card"><small>Programmes</small><b id="kpiProg">--</b></div>
-                <div class="kpi-card"><small>Ressources</small><b id="kpiRes">--</b></div>
-                <div class="kpi-card"><small>Format Excel</small><b id="kpiExcel">--</b></div>
-            </div>
-
-            <div class="filter-bar">
-                <input type="text" id="resSearch" placeholder="🔍 Rechercher une ressource (nom ou code)..." style="flex: 1;">
-            </div>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                <div>
-                    <h3>Top 10 Programmes (Densité)</h3>
-                    <div style="height: 300px;"><canvas id="chartProgDensity"></canvas></div>
-                </div>
-                <div style="max-height: 400px; overflow-y: auto;">
-                    <h3>Liste des Ressources</h3>
-                    <table>
-                        <thead>
-                            <tr><th>Code</th><th>Nom</th><th>Action</th></tr>
-                        </thead>
-                        <tbody id="resTableBody"></tbody>
-                    </table>
-                </div>
-            </div>
+        <div class="chart-wrapper">
+            <canvas id="mainChart"></canvas>
         </div>
-
     </div>
 
+
     <script>
-        let dataStore = { sessions: [], actifs: [], ressources: [], location: [], ouvertes: [], prog: [], resAll: [] };
+        let dataStore = { sessions: [], actifs: [], ressources: [], location: [], ouvertes: [], enCours: 0 };
+
         let myChart = null;
-        let chartProg = null;
         const ctx = document.getElementById('mainChart').getContext('2d');
 
-        // NAVIGATION
-        function switchTab(tabId, btn) {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('tab-' + tabId).classList.add('active');
-            btn.classList.add('active');
-        }
+        document.getElementById('startDate').value = "2026-01-01";
+        document.getElementById('endDate').value = "2026-12-31";
 
         async function fetchData(url) {
             try {
                 const response = await fetch(url + '?v=' + Date.now());
-                return response.ok ? await response.json() : [];
-            } catch (e) { return []; }
+                if (!response.ok) return [];
+                return await response.json();
+            } catch (e) {
+                console.error("Erreur sur : " + url);
+                return [];
+            }
         }
 
+
         async function init() {
-            const [sessions, actifs, ressources, villes, ouvertes, enCoursData, progData, resData] = await Promise.all([
+            // 1. On récupère les 6 fichiers (ajout de 'enCours' à la fin)
+            const [sessions, actifs, ressources, villes, ouvertes, enCoursData] = await Promise.all([
                 fetchData('apprenants_dans_des_sessions.json'),
                 fetchData('apprenants_actifs_sur_le_lms.json'),
                 fetchData('connexion_aux_ressources.json'),
                 fetchData('blocks_per_location.json'),
                 fetchData('new_blocks_over_time.json'),
-                fetchData('nombre_d_apprenants_en_cours.json'),
-                fetchData('liste_des_programmes.json'),
-                fetchData('liste_des_ressources.json')
+                fetchData('nombre_d_apprenants_en_cours.json') // Assurez-vous que l'ordre correspond
             ]);
 
-            // ACTIVITÉ LOGIQUE
-            if (enCoursData?.[0]) {
-                document.getElementById('liveBadge').innerText = `Apprenant en cours : ${enCoursData[0].count || 0}`;
+            // --- LOGIQUE D'AFFICHAGE DU NOMBRE EN COURS ---
+            // Utilisation de la variable récupérée juste au-dessus
+            if (enCoursData && enCoursData.length > 0) {
+                // On suppose que le JSON est de type [{"count": 42}]
+                const nbEnCours = enCoursData[0].count || 0;
+                document.getElementById('liveBadge').innerText = `Apprenant en cours : ${nbEnCours}`;
+            } else {
+                document.getElementById('liveBadge').innerText = `Apprenant en cours : 0`;
             }
 
-            // DATE UPDATE
-            if (ouvertes?.length > 0) {
-                const lastEntry = ouvertes[ouvertes.length - 1]["Start Date: Heure"];
-                if (lastEntry) {
-                    // Simplification pour l'affichage de la date
-                    document.getElementById('lastUpdate').innerText = `Dernière actualisation : ${lastEntry}`;
+            // --- LOGIQUE DE DATE PERSONNALISÉE ---
+            if (ouvertes && ouvertes.length > 0) {
+                const lastEntry = ouvertes[ouvertes.length - 1];
+                const rawDateStr = lastEntry["Start Date: Heure"];
+
+                if (rawDateStr) {
+                    const monthMap = { "janvier": 0, "février": 1, "mars": 2, "avril": 3, "mai": 4, "juin": 5, "juillet": 6, "août": 7, "septembre": 8, "octobre": 9, "novembre": 10, "décembre": 11 };
+                    const parts = rawDateStr.toLowerCase().replace(/,/g, '').split(' ');
+
+                    const month = monthMap[parts[0]];
+                    const day = parseInt(parts[1]);
+                    const year = parseInt(parts[2]);
+                    let hour = parseInt(parts[3]);
+
+                    if (month !== undefined && !isNaN(day)) {
+                        const dateObj = new Date(year, month, day, hour, 0);
+                        dateObj.setHours(dateObj.getHours() - 1);
+
+                        const finalDay = dateObj.getDate();
+                        const finalMonth = parts[0];
+                        const finalYear = dateObj.getFullYear();
+                        const finalHour = dateObj.getHours().toString().padStart(2, '0');
+
+                        document.getElementById('lastUpdate').innerText = `Dernière actualisation : ${finalDay} ${finalMonth} ${finalYear} - ${finalHour}h00`;
+                    }
                 }
             }
 
+            // Stockage dans le dataStore global
+            dataStore.sessions = sessions;
             dataStore.actifs = actifs;
             dataStore.ressources = ressources;
             dataStore.location = villes;
-            dataStore.ouvertes = processOuvertes(ouvertes);
 
-            // CONCEPTION LOGIQUE
-            dataStore.prog = progData;
-            dataStore.resAll = resData;
-            renderConception();
+            // Traitement des sessions ouvertes pour le graphique
+            if (ouvertes && ouvertes.length > 0) {
+                const monthMap = { "janvier": 0, "février": 1, "mars": 2, "avril": 3, "mai": 4, "juin": 5, "juillet": 6, "août": 7, "septembre": 8, "octobre": 9, "novembre": 10, "décembre": 11 };
+
+                dataStore.ouvertes = ouvertes
+                    .filter(d => d["Start Date: Heure"])
+                    .map(d => {
+                        const parts = d["Start Date: Heure"].toLowerCase().replace(',', '').split(' ');
+                        const m = monthMap[parts[0]];
+                        const dy = parseInt(parts[1]);
+                        const yr = parseInt(parts[2]);
+
+                        let isoDate = null;
+                        if (m !== undefined && !isNaN(dy) && !isNaN(yr)) {
+                            isoDate = new Date(yr, m, dy).toISOString().split('T')[0];
+                        }
+                        return {
+                            date: isoDate,
+                            val: parseInt(d["Nombre de lignes"]?.replace(/,/g, '')) || 0
+                        };
+                    })
+                    .filter(d => d.date !== null);
+            }
 
             updateDashboard();
         }
 
-        function processOuvertes(data) {
-            if (!data) return [];
-            const monthMap = { "janvier": 0, "février": 1, "mars": 2, "avril": 3, "mai": 4, "juin": 5, "juillet": 6, "août": 7, "septembre": 8, "octobre": 9, "novembre": 10, "décembre": 11 };
-            return data.map(d => {
-                const p = d["Start Date: Heure"]?.toLowerCase().replace(',', '').split(' ');
-                if (!p || p.length < 3) return null;
-                const dt = new Date(parseInt(p[2]), monthMap[p[0]], parseInt(p[1]));
-                return { date: dt.toISOString().split('T')[0], val: parseInt(d["Nombre de lignes"]?.replace(/,/g, '')) || 0 };
-            }).filter(d => d && d.date);
-        }
 
-        function renderConception() {
-            document.getElementById('kpiProg').innerText = dataStore.prog.length;
-            document.getElementById('kpiRes').innerText = dataStore.resAll.length;
-            document.getElementById('kpiExcel').innerText = dataStore.resAll.filter(r => r.Format?.includes('EXCEL')).length;
-
-            // Chart Prog Density
-            const top10 = [...dataStore.prog].sort((a,b) => (parseInt(b["nb de ressources"])||0) - (parseInt(a["nb de ressources"])||0)).slice(0,10);
-            if(chartProg) chartProg.destroy();
-            chartProg = new Chart(document.getElementById('chartProgDensity'), {
-                type: 'bar',
-                data: {
-                    labels: top10.map(p => p.Name.substring(0,20) + '...'),
-                    datasets: [{ label: 'Ressources', data: top10.map(p => parseInt(p["nb de ressources"])||0), backgroundColor: '#3498db' }]
-                },
-                options: { indexAxis: 'y', maintainAspectRatio: false }
-            });
-
-            displayResList(dataStore.resAll);
-        }
-
-        function displayResList(list) {
-            const body = document.getElementById('resTableBody');
-            body.innerHTML = list.slice(0, 50).map(r => `
-                <tr>
-                    <td><small>${r.Code || '-'}</small></td>
-                    <td>${r.Name}</td>
-                    <td><a href="${r.URL}" target="_blank">🔗</a></td>
-                </tr>
-            `).join('');
-        }
-
-        // Recherche ressources
-        document.getElementById('resSearch').addEventListener('input', (e) => {
-            const val = e.target.value.toLowerCase();
-            const filtered = dataStore.resAll.filter(r => r.Name.toLowerCase().includes(val) || r.Code?.toLowerCase().includes(val));
-            displayResList(filtered);
-        });
-
-        // RE-UTILISATION DE VOTRE LOGIQUE DE GRAPHIQUE ACTIVITÉ
         function updateDashboard() {
             const view = document.getElementById('viewType').value;
             const start = document.getElementById('startDate').value;
             const end = document.getElementById('endDate').value;
+            const badge = document.getElementById('totalBadge');
+
             if (myChart) myChart.destroy();
+
 
             document.getElementById('dateFilters').style.visibility = (view === 'location') ? 'hidden' : 'visible';
 
             if (view === 'location') {
-                const topVilles = [...dataStore.location].sort((a, b) => (parseInt(b["Nombre de lignes"]) || 0) - (parseInt(a["Nombre de lignes"]) || 0)).slice(0, 20);
+                const topVilles = [...dataStore.location]
+                    .sort((a, b) => (parseInt(b["Nombre de lignes"]) || 0) - (parseInt(a["Nombre de lignes"]) || 0))
+                    .slice(0, 20);
+
                 myChart = new Chart(ctx, {
                     type: 'bar',
                     data: {
                         labels: topVilles.map(d => d.Location || "Inconnu"),
-                        datasets: [{ label: 'Sessions', data: topVilles.map(d => parseInt(d["Nombre de lignes"]) || 0), backgroundColor: '#e67e22' }]
+                        datasets: [{
+                            label: 'Nombre de sessions',
+                            data: topVilles.map(d => parseInt(d["Nombre de lignes"]) || 0),
+                            backgroundColor: '#e67e22'
+                        }]
                     },
                     options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false }
                 });
+                badge.innerText = "Top 20 centres de formation";
                 return;
             }
 
@@ -354,33 +259,99 @@
             let chartLabel = "";
 
             if (view === 'ouvertes') {
-                filtered = dataStore.ouvertes.filter(d => d.date >= start && d.date <= end).sort((a, b) => new Date(a.date) - new Date(b.date));
-                color = '#8e44ad'; chartLabel = "Sessions ouvertes";
+                filtered = dataStore.ouvertes
+                    .filter(d => d.date >= start && d.date <= end)
+                    .sort((a, b) => new Date(a.date) - new Date(b.date));
+                color = '#8e44ad';
+                chartLabel = "Nombre de sessions ouvertes";
             } else {
                 let keyName = (view === 'ressources') ? "resource_connections" : "apprenants_actifs";
-                let sourceData = (view === 'moyenne_hebdo') ? dataStore.actifs : dataStore[view] || dataStore.actifs;
-                filtered = sourceData.filter(d => d.date && d.date >= start && d.date <= end).map(d => ({ date: d.date, val: parseInt(d[keyName]) || 0 })).sort((a, b) => new Date(a.date) - new Date(b.date));
-                color = (view === 'ressources') ? '#27ae60' : (view === 'moyenne_hebdo' ? '#512da8' : '#2980b9');
-                chartLabel = view;
+                let sourceData = (view === 'moyenne_hebdo') ? dataStore.actifs : dataStore[view];
+
+                filtered = sourceData
+                    .filter(d => d.date && d.date >= start && d.date <= end)
+                    .map(d => ({
+                        date: d.date,
+                        val: parseInt(d[keyName]) || 0
+                    }))
+                    .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+                if (view === 'actifs' || view === 'moyenne_hebdo') {
+                    // Si c'est la moyenne, on met le violet et le texte spécifique
+                    if (view === 'moyenne_hebdo') {
+                        color = '#512da8';
+                        chartLabel = "Moyenne des apprenants connectés";
+                    } else {
+                        // Si ce sont les actifs simples, on garde le bleu
+                        color = '#2980b9';
+                        chartLabel = "Nombre d'apprenants connectés";
+                    }
+                } else if (view === 'ressources') {
+                    color = '#27ae60';
+                    chartLabel = "Nombre de ressources lancées";
+                }
             }
 
-            document.getElementById('totalBadge').innerText = `Total : ${filtered.reduce((a, b) => a + b.val, 0).toLocaleString()}`;
-            renderChart(view === 'moyenne_hebdo' ? 'bar' : 'line', filtered.map(d => d.date), filtered.map(d => d.val), chartLabel, color);
+            let total = filtered.reduce((a, b) => a + b.val, 0);
+            badge.innerText = `Total : ${total.toLocaleString()}`;
+
+            if (view === 'moyenne_hebdo') {
+                const weekly = calculateWeekly(filtered);
+                renderChart('bar', weekly.map(d => d.label), weekly.map(d => d.val), chartLabel, '#512da8');
+            } else {
+                renderChart('line', filtered.map(d => d.date), filtered.map(d => d.val), chartLabel, color);
+            }
         }
 
         function renderChart(type, labels, data, label, color) {
+            const lightColor = color + '33';
             myChart = new Chart(ctx, {
                 type: type,
                 data: {
                     labels: labels,
-                    datasets: [{ label: label, data: data, borderColor: color, backgroundColor: color + '33', fill: true, tension: 0.3 }]
+                    datasets: [{
+                        label: label,
+                        data: data,
+                        borderColor: color,
+                        backgroundColor: lightColor,
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.3
+                    }]
                 },
-                options: { responsive: true, maintainAspectRatio: false }
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            labels: { color: '#333', font: { weight: 'bold' } }
+                        }
+                    }
+                }
             });
         }
 
-        document.querySelectorAll('#viewType, #startDate, #endDate').forEach(el => el.addEventListener('change', updateDashboard));
+        function calculateWeekly(data) {
+            const weeks = {};
+            data.forEach(item => {
+                const d = new Date(item.date);
+                const year = d.getFullYear();
+                const tempDate = new Date(d.valueOf());
+                tempDate.setDate(tempDate.getDate() + 4 - (tempDate.getDay() || 7));
+                const week = Math.ceil((((tempDate - new Date(year, 0, 1)) / 86400000) + 1) / 7);
+                const label = `S${week}-${year}`;
+                if (!weeks[label]) weeks[label] = { sum: 0, count: 0, sortKey: d.getTime() };
+                weeks[label].sum += item.val;
+                weeks[label].count += 1;
+            });
+            return Object.keys(weeks).sort((a, b) => weeks[a].sortKey - weeks[b].sortKey)
+                .map(k => ({ label: k, val: (weeks[k].sum / weeks[k].count).toFixed(1) }));
+        }
+
+        document.querySelectorAll('select, input').forEach(el => el.addEventListener('change', updateDashboard));
         init();
     </script>
+
 </body>
 </html>
