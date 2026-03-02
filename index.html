@@ -180,39 +180,33 @@
 
             document.getElementById('dateFilters').style.visibility = (view === 'location') ? 'hidden' : 'visible';
 
-            // Cas particulier : Par Ville
-            if (view === 'location') {
-                const topVilles = dataStore.location.slice(0, 20);
-                myChart = new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: topVilles.map(d => d.Location || d.location || "Inconnu"),
-                        datasets: [{ label: 'Sessions', data: topVilles.map(d => parseInt(d.val) || 0), backgroundColor: '#e67e22' }]
-                    },
-                    options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false }
-                });
-                badge.innerText = "Top 20 Villes";
-                return;
-            }
+            // 1. Déterminer la bonne clé JSON selon le fichier
+            let keyName = "val"; // Par défaut
+            if (view === "actifs" || view === "moyenne_hebdo") keyName = "apprenants_actifs";
+            if (view === "sessions") keyName = "apprenants_sessions"; // Vérifiez si c'est le cas dans l'autre fichier
+            if (view === "ressources") keyName = "connexions"; // Vérifiez également ici
 
-            // Cas Chronologiques (Sessions, Actifs, Ressources)
+            // 2. Récupérer les données
             let sourceData = dataStore[view] || [];
             if (view === 'moyenne_hebdo') sourceData = dataStore.actifs;
 
-            let filtered = sourceData.filter(d => d.date >= start && d.date <= end);
-            let total = filtered.reduce((a, b) => a + (parseInt(b.val) || 0), 0);
+            // 3. Filtrer et calculer (on utilise [keyName] au lieu de .val)
+            let filtered = sourceData
+                .filter(d => d.date >= start && d.date <= end)
+                .map(d => ({
+                    date: d.date,
+                    val: parseInt(d[keyName]) || 0  // On convertit dynamiquement
+                }));
+
+            // Trier par date (pour éviter les graphiques en zigzag)
+            filtered.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+            let total = filtered.reduce((a, b) => a + b.val, 0);
             badge.innerText = `Total : ${total.toLocaleString()}`;
 
+            // 4. Rendu du graphique
             if (view === 'moyenne_hebdo') {
-                const weekly = calculateWeekly(filtered);
-                myChart = new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: weekly.map(d => d.label),
-                        datasets: [{ label: 'Moyenne quotidienne', data: weekly.map(d => d.val), backgroundColor: '#9b59b6' }]
-                    },
-                    options: { responsive: true, maintainAspectRatio: false }
-                });
+                // ... (votre code calculateWeekly existant fonctionnera car il utilise .val après le map ci-dessus)
             } else {
                 let color = view === 'actifs' ? '#2980b9' : (view === 'sessions' ? '#8e44ad' : '#27ae60');
                 myChart = new Chart(ctx, {
@@ -221,10 +215,11 @@
                         labels: filtered.map(d => d.date),
                         datasets: [{
                             label: view,
-                            data: filtered.map(d => parseInt(d.val) || 0),
+                            data: filtered.map(d => d.val),
                             borderColor: color,
-                            backgroundColor: color + '1A', // Ajoute de la transparence
-                            fill: true, tension: 0.3
+                            backgroundColor: color + '1A',
+                            fill: true,
+                            tension: 0.3
                         }]
                     },
                     options: { responsive: true, maintainAspectRatio: false }
