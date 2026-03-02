@@ -84,6 +84,7 @@
             <div>
                 <label for="viewType">Vue :</label>
                 <select id="viewType">
+                    <option value="sessions">👥 Apprenants (Sessions)</option>
                     <option value="actifs">📈 Apprenants Actifs</option>
                     <option value="ressources" selected>🔗 Connexions Ressources</option>
                     <option value="moyenne_hebdo">📊 Moyenne Hebdo (Actifs)</option>
@@ -103,20 +104,27 @@
     </div>
 
     <script>
-        let dataTime = { actifs: [], ressources: [] };
-        let dataLocation = [];
+        // Initialisation de l'objet de stockage unique
+        let dataStore = {
+            sessions: [],
+            actifs: [],
+            ressources: [],
+            location: []
+        };
+
         let myChart = null;
         const ctx = document.getElementById('mainChart').getContext('2d');
 
-        // Réglage auto sur J-1 (Hier)
+        // Réglage auto sur J-1
         const hier = new Date();
         hier.setDate(hier.getDate() - 1);
         document.getElementById('endDate').value = hier.toISOString().split('T')[0];
 
         async function fetchData(url) {
             try {
-                const response = await fetch(url);
-                if (!response.ok) return []; // Retourne tableau vide si fichier absent
+                // Ajout d'un timestamp pour éviter le cache navigateur
+                const response = await fetch(url + '?v=' + Date.now());
+                if (!response.ok) return [];
                 return await response.json();
             } catch (e) {
                 console.error("Erreur sur : " + url);
@@ -125,16 +133,17 @@
         }
 
         async function init() {
-            // Noms des fichiers vérifiés sur vos captures d'écran
-            const [actifs, ressources, villes] = await Promise.all([
+            const [sessions, actifs, ressources, villes] = await Promise.all([
+                fetchData('apprenants__dans_des_sessions.json'),
                 fetchData('apprenants_actifs_sur_le_lms.json'),
                 fetchData('connexion_aux_ressources.json'),
                 fetchData('blocks_per_location.json')
             ]);
 
-            dataTime.actifs = actifs || [];
-            dataTime.ressources = ressources || [];
-            dataLocation = villes || [];
+            dataStore.sessions = sessions;
+            dataStore.actifs = actifs;
+            dataStore.ressources = ressources;
+            dataStore.location = villes;
 
             updateDashboard();
         }
@@ -146,13 +155,11 @@
                 const val = parseInt(item.val) || 0;
                 const d = new Date(item.date);
                 if (isNaN(d.getTime())) return;
-
                 const year = d.getFullYear();
                 const tempDate = new Date(d.valueOf());
                 tempDate.setDate(tempDate.getDate() + 4 - (tempDate.getDay() || 7));
                 const week = Math.ceil((((tempDate - new Date(year, 0, 1)) / 86400000) + 1) / 7);
                 const label = `S${week}-${year}`;
-
                 if (!weeks[label]) weeks[label] = { sum: 0, count: 0, sortKey: d.getTime() };
                 weeks[label].sum += val;
                 weeks[label].count += 1;
@@ -171,8 +178,9 @@
 
             document.getElementById('dateFilters').style.visibility = (view === 'location') ? 'hidden' : 'visible';
 
+            // Cas particulier : Par Ville
             if (view === 'location') {
-                const topVilles = dataLocation.slice(0, 20);
+                const topVilles = dataStore.location.slice(0, 20);
                 myChart = new Chart(ctx, {
                     type: 'bar',
                     data: {
@@ -185,10 +193,11 @@
                 return;
             }
 
-            let sourceData = (view === 'ressources') ? dataTime.ressources : dataTime.actifs;
-            let filtered = sourceData.filter(d => d.date >= start && d.date <= end);
+            // Cas Chronologiques (Sessions, Actifs, Ressources)
+            let sourceData = dataStore[view] || [];
+            if (view === 'moyenne_hebdo') sourceData = dataStore.actifs;
 
-            // Correction du NaN : on force le 0 si la valeur est corrompue
+            let filtered = sourceData.filter(d => d.date >= start && d.date <= end);
             let total = filtered.reduce((a, b) => a + (parseInt(b.val) || 0), 0);
             badge.innerText = `Total : ${total.toLocaleString()}`;
 
@@ -203,15 +212,16 @@
                     options: { responsive: true, maintainAspectRatio: false }
                 });
             } else {
+                let color = view === 'actifs' ? '#2980b9' : (view === 'sessions' ? '#8e44ad' : '#27ae60');
                 myChart = new Chart(ctx, {
                     type: 'line',
                     data: {
                         labels: filtered.map(d => d.date),
                         datasets: [{
-                            label: view === 'actifs' ? 'Apprenants' : 'Connexions',
+                            label: view,
                             data: filtered.map(d => parseInt(d.val) || 0),
-                            borderColor: view === 'actifs' ? '#2980b9' : '#27ae60',
-                            backgroundColor: view === 'actifs' ? 'rgba(41, 128, 185, 0.1)' : 'rgba(39, 174, 96, 0.1)',
+                            borderColor: color,
+                            backgroundColor: color + '1A', // Ajoute de la transparence
                             fill: true, tension: 0.3
                         }]
                     },
