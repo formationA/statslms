@@ -155,8 +155,8 @@
                     const ampm = parts[4];
 
                     // 3. Conversion en format 24h
-                    if (ampm === 'pm' && hour < 12) hour += 12;
-                    if (ampm === 'am' && hour === 12) hour = 0;
+                   // if (ampm === 'pm' && hour < 12) hour += 12;
+                   // if (ampm === 'am' && hour === 12) hour = 0;
 
                     // 4. Création de l'objet Date et retrait d'une heure (-1h)
                     const dateObj = new Date(year, month, day, hour, 0);
