@@ -166,15 +166,15 @@
             if (view === 'location') {
               
                 const topVilles = [...dataStore.location]
-                    .sort((a, b) => (parseInt(b["Nombre de sessions"]) || 0) - (parseInt(a["Nombre de sessions"]) || 0))
+                    .sort((a, b) => (parseInt(b["Nombre de lignes"]) || 0) - (parseInt(a["Nombre de lignes"]) || 0))
                     .slice(0, 20);
                 myChart = new Chart(ctx, {
                     type: 'bar',
                     data: {
                         labels: topVilles.map(d => d.Location || "Inconnu"),
                         datasets: [{
-                            label: 'Nombre de sessions',
-                            data: topVilles.map(d => parseInt(d["Nombre de sessions"]) || 0),
+                            label: 'Nombre de lignes',
+                            data: topVilles.map(d => parseInt(d["Nombre de lignes"]) || 0),
                             backgroundColor: '#e67e22'
                         }]
                     },
@@ -235,7 +235,7 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     // Garder l'axe Y pour les villes et X pour le reste
-                    indexAxis: (label === 'Nombre de sessions') ? 'y' : 'x',
+                    indexAxis: (label === 'Nombre de lignes') ? 'y' : 'x',
                     plugins: {
                         legend: {
                             display: true,
