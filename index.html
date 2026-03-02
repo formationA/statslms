@@ -198,7 +198,7 @@
 
             if (view === 'moyenne_hebdo') {
                 const weekly = calculateWeekly(filtered);
-                renderChart('bar', weekly.map(d => d.label), weekly.map(d => d.val), 'Moyenne quotidienne', '#9b59b6');
+                renderChart('bar', weekly.map(d => d.label), weekly.map(d => d.val), 'Moyenne quotidienne', '#8e44ad');
             } else {
                 let color = (view === 'actifs') ? '#2980b9' : '#27ae60';
                 renderChart('line', filtered.map(d => d.date), filtered.map(d => d.val), view, color);
