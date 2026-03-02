@@ -85,10 +85,10 @@
                 <label for="viewType">Vue :</label>
                 <select id="viewType">
                     <option value="sessions">👥 Apprenants (Sessions)</option>
-                    <option value="actifs" selected>📈 Apprenants Actifs</option>
-                    <option value="ressources">🔗 Connexions Ressources</option>
-                    <option value="moyenne_hebdo">📊 Moyenne Hebdo (Actifs)</option>
-                    <option value="location">📍 Rrépartition par centre (Top 20)</option>
+                    <option value="actifs" selected>📈 Apprenants Actifs (Quotidien)</option>
+                    <option value="ressources">🔗 Connexions Ressources (Quotidien)</option>
+                    <option value="moyenne_hebdo">📊 Moyenne Hebdo (Période)</option>
+                    <option value="location">📍 Répartition par centre (Top 20)</option>
                 </select>
             </div>
             <div id="dateFilters">
@@ -166,15 +166,15 @@
             if (view === 'location') {
               
                 const topVilles = [...dataStore.location]
-                    .sort((a, b) => (parseInt(b["Nombre de lignes"]) || 0) - (parseInt(a["Nombre de lignes"]) || 0))
+                    .sort((a, b) => (parseInt(b["Nombre de sessions"]) || 0) - (parseInt(a["Nombre de sessions"]) || 0))
                     .slice(0, 20);
                 myChart = new Chart(ctx, {
                     type: 'bar',
                     data: {
                         labels: topVilles.map(d => d.Location || "Inconnu"),
                         datasets: [{
-                            label: 'Nombre de lignes',
-                            data: topVilles.map(d => parseInt(d["Nombre de lignes"]) || 0),
+                            label: 'Nombre de sessions',
+                            data: topVilles.map(d => parseInt(d["Nombre de sessions"]) || 0),
                             backgroundColor: '#e67e22'
                         }]
                     },
@@ -235,7 +235,7 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     // Garder l'axe Y pour les villes et X pour le reste
-                    indexAxis: (label === 'Nombre de lignes') ? 'y' : 'x',
+                    indexAxis: (label === 'Nombre de sessions') ? 'y' : 'x',
                     plugins: {
                         legend: {
                             display: true,
