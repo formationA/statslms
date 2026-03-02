@@ -210,9 +210,8 @@
         }
 
         function renderChart(type, labels, data, label, color) {
-            // Si c'est un graphique en barres (Moyenne ou Villes), on veut 100% d'opacité
-            // Si c'est une ligne (Actifs ou Ressources), on peut garder un peu de douceur au remplissage
-            const isBar = (type === 'bar');
+            // On crée une version très claire pour l'intérieur (ex: 20% d'opacité avec '33')
+            const lightColor = color + '33';
 
             myChart = new Chart(ctx, {
                 type: type,
@@ -221,17 +220,22 @@
                     datasets: [{
                         label: label,
                         data: data,
+                        // La bordure utilise la couleur pleine (#512da8)
                         borderColor: color,
-                        // MODIFICATION ICI : On enlève le '+ 1A' pour les barres
-                        backgroundColor: color,
+                        // L'intérieur utilise la couleur claire
+                        backgroundColor: lightColor,
+                        // Épaisseur de la bordure (2px pour qu'elle soit bien visible)
+                        borderWidth: 2,
+                        // On active le remplissage pour les lignes et les barres
                         fill: true,
-                        tension: 0.3,
-                        borderWidth: isBar ? 0 : 2 // Pas de bordure sur les barres pour un look plus moderne
+                        tension: 0.3
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    // Garder l'axe Y pour les villes et X pour le reste
+                    indexAxis: (label === 'Nombre de lignes') ? 'y' : 'x',
                     plugins: {
                         legend: {
                             display: true,
