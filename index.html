@@ -122,12 +122,27 @@
 
         async function fetchData(url) {
             try {
-                // Ajout d'un timestamp pour éviter le cache navigateur
                 const response = await fetch(url + '?v=' + Date.now());
                 if (!response.ok) return [];
-                return await response.json();
+                const data = await response.json();
+
+                // Normalisation : on transforme "apprenants_actifs" (ou autre) en "val"
+                return data.map(item => {
+                    let value = 0;
+                    // On cherche la clé qui contient la valeur numérique
+                    for (let key in item) {
+                        if (key !== "date" && key !== "location" && key !== "Location") {
+                            value = item[key];
+                        }
+                    }
+                    return {
+                        date: item.date || null,
+                        location: item.location || item.Location || null,
+                        val: value
+                    };
+                });
             } catch (e) {
-                console.error("Erreur sur : " + url);
+                console.error("Erreur sur : " + url, e);
                 return [];
             }
         }
