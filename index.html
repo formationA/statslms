@@ -134,7 +134,7 @@
 
         async function init() {
             const [sessions, actifs, ressources, villes] = await Promise.all([
-                fetchData('apprenants__dans_des_sessions.json'),
+                fetchData('apprenants_dans_des_sessions.json'),
                 fetchData('apprenants_actifs_sur_le_lms.json'),
                 fetchData('connexion_aux_ressources.json'),
                 fetchData('blocks_per_location.json')
