@@ -137,26 +137,40 @@
                 fetchData('new_blocks_over_time.json')
             ]);
 
+            // --- LOGIQUE DE DATE PERSONNALISÉE (Format FR & -1h) ---
             if (ouvertes && ouvertes.length > 0) {
                 const lastEntry = ouvertes[ouvertes.length - 1];
-                let dateStr = lastEntry["Start Date: Heure"];
+                const rawDateStr = lastEntry["Start Date: Heure"]; // "mars 2, 2026, 11 PM"
 
-                if (dateStr) {
-                    // Conversion simple AM/PM en 24h pour le français
-                    if (dateStr.toLowerCase().includes('pm')) {
-                        let parts = dateStr.split(',');
-                        let timePart = parts[2].trim().toLowerCase().replace('pm', '');
-                        let hour = parseInt(timePart);
-                        if (hour < 12) dateStr = dateStr.replace(hour + ' PM', (hour + 12) + 'h');
-                        else dateStr = dateStr.replace('12 PM', '12h');
-                    } else {
-                        dateStr = dateStr.replace(' AM', 'h').replace(' am', 'h');
-                    }
+                if (rawDateStr) {
+                    // 1. On mappe les mois pour la conversion
+                    const monthMap = { "janvier": 0, "février": 1, "mars": 2, "avril": 3, "mai": 4, "juin": 5, "juillet": 6, "août": 7, "septembre": 8, "octobre": 9, "novembre": 10, "décembre": 11 };
 
-                    // Nettoyage des virgules superflues
-                    dateStr = dateStr.replace(/, /g, ' ');
+                    // 2. Découpage de la chaîne source
+                    const parts = rawDateStr.toLowerCase().replace(/,/g, '').split(' ');
+                    const month = monthMap[parts[0]];
+                    const day = parseInt(parts[1]);
+                    const year = parseInt(parts[2]);
+                    let hour = parseInt(parts[3]);
+                    const ampm = parts[4];
 
-                    document.getElementById('lastUpdate').innerText = `Dernière actualisation : ${dateStr}`;
+                    // 3. Conversion en format 24h
+                    if (ampm === 'pm' && hour < 12) hour += 12;
+                    if (ampm === 'am' && hour === 12) hour = 0;
+
+                    // 4. Création de l'objet Date et retrait d'une heure (-1h)
+                    const dateObj = new Date(year, month, day, hour, 0);
+                    dateObj.setHours(dateObj.getHours() - 1);
+
+                    // 5. Formatage final : "2 mars 2026 - 10h00"
+                    const finalDay = dateObj.getDate();
+                    const finalMonth = parts[0]; // On garde le nom du mois en texte
+                    const finalYear = dateObj.getFullYear();
+                    const finalHour = dateObj.getHours().toString().padStart(2, '0');
+
+                    const formattedDate = `${finalDay} ${finalMonth} ${finalYear} - ${finalHour}h00`;
+
+                    document.getElementById('lastUpdate').innerText = `Dernière actualisation : ${formattedDate}`;
                 }
             }
 
