@@ -382,6 +382,12 @@
     </style>
 </head>
 <body>
+    <div style="padding: 10px 20px; background: #2c3e50; display: flex; justify-content: flex-end; gap: 10px;">
+        <a href="index.html" style="color: white; text-decoration: none; font-weight: bold; border: 1px solid white; padding: 5px 15px; border-radius: 5px; font-size: 0.8em;">
+            ⬅️ Retour au Tableau de bord
+        </a>
+    </div>
+
 
     <div class="container">
         <header>
@@ -472,7 +478,7 @@
                     <input type="checkbox" id="show-corrections" checked>
                     <label for="show-corrections">Afficher les bonnes réponses à la fin</label>
                 </div>
-                
+
                 <div class="checkbox-group" style="display: flex; flex-direction: column; align-items: flex-start; gap: 5px; margin-top: 10px;">
                     <div style="display: flex; align-items: center; gap: 10px;">
                         <label for="pass-score" style="font-size: 1rem; color: inherit;">🎯 Seuil de réussite :</label>
@@ -485,7 +491,7 @@
                         (Aucun seuil de réussite)
                     </span>
                 </div>
-                
+
                 <div>
                     <label>📦 Nom du module</label>
                     <input type="text" id="export-name" placeholder="nom_du_module">
@@ -518,7 +524,7 @@
                     <tr><td>Le texte...</td><td>Choix 1 ; Choix 2 ; Choix 3</td><td>Choix 2</td></tr>
                 </table>
             </div>
-            
+
             <div class="help-section">
                 <strong>Procédure :</strong>
                 <p>
@@ -1004,15 +1010,15 @@ Le tableau doit avoir 3 colonnes exactes. il peut parfois y avoir plusieurs rép
             const div = document.createElement('div');
             div.className = 'card';
             div.innerHTML = `
-            <button class="remove-btn" onclick="this.parentElement.remove(); reIndex();">Supprimer</button>
-            <span class="q-number"></span>
-            <label>Question</label>
-            <input type="text" class="inp-q" value="${data.q}" placeholder="Texte de la question...">
-            <label>Choix (séparés par ; )</label>
-            <input type="text" class="inp-o" value="${data.opt}" placeholder="Choix 1 ; Choix 2 ; Choix 3">
-            <label>Réponse(s) Correcte(s)</label>
-            <input type="text" class="inp-a" value="${data.ans}" placeholder="La réponse exacte">
-        `;
+                    <button class="remove-btn" onclick="this.parentElement.remove(); reIndex();">Supprimer</button>
+                    <span class="q-number"></span>
+                    <label>Question</label>
+                    <input type="text" class="inp-q" value="${data.q}" placeholder="Texte de la question...">
+                    <label>Choix (séparés par ; )</label>
+                    <input type="text" class="inp-o" value="${data.opt}" placeholder="Choix 1 ; Choix 2 ; Choix 3">
+                    <label>Réponse(s) Correcte(s)</label>
+                    <input type="text" class="inp-a" value="${data.ans}" placeholder="La réponse exacte">
+                `;
             list.appendChild(div);
             reIndex();
         }
