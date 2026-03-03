@@ -10,12 +10,31 @@
             font-family: 'Segoe UI', sans-serif;
             background-color: #f4f7f9;
             margin: 0;
-            padding: 20px;
+            padding: 0; /* Modifié pour coller la barre en haut */
         }
+
+        /* Style de la barre de navigation */
+        .nav-top {
+            padding: 10px 20px;
+            background: #2c3e50;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+            .nav-top a {
+                color: white;
+                text-decoration: none;
+                font-weight: bold;
+                border: 1px solid white;
+                padding: 5px 15px;
+                border-radius: 5px;
+                font-size: 0.8em;
+            }
 
         .dashboard-container {
             max-width: 1100px;
-            margin: auto;
+            margin: 20px auto;
             background: white;
             padding: 25px;
             border-radius: 15px;
@@ -99,15 +118,13 @@
             border: 1px solid #eee;
             border-radius: 10px;
         }
-
-        a {
-            text-decoration: none;
-            color: #3498db;
-            font-weight: bold;
-        }
     </style>
 </head>
 <body>
+
+    <div class="nav-top">
+        <a href="index.html">⬅️ Retour au Tableau de bord</a>
+    </div>
 
     <div class="dashboard-container">
         <div class="header">
@@ -116,9 +133,6 @@
                 <small style="color: #7f8c8d;">Analyse des programmes et ressources</small>
             </div>
             <div style="display: flex; gap: 10px; align-items: center;">
-                <a href="index.html" style="color: #34495e; text-decoration: none; font-weight: bold; border: 1px solid #34495e; padding: 5px 15px; border-radius: 5px; font-size: 0.8em; margin-right: 10px;">
-                    ← Retour aux Statistiques
-                </a>
                 <div class="stat-badge" id="countProg" style="background: #2980b9;">-- Programmes</div>
                 <div class="stat-badge" id="countRes" style="background: #27ae60;">-- Ressources</div>
             </div>
@@ -141,7 +155,6 @@
                         <tr>
                             <th>Code / Type</th>
                             <th>Nom de la ressource</th>
-                           
                         </tr>
                     </thead>
                     <tbody id="resTableBody">
@@ -204,12 +217,11 @@
         function renderTable(data) {
             const tbody = document.getElementById('resTableBody');
             tbody.innerHTML = data.map(r => `
-                <tr>
-                    <td><small>${r.Code || ''}</small><br><b>${r.Format ? r.Format.replace('RESOURCE_TYPE_', '') : ''}</b></td>
-                    <td>${r.Name}</td>
-                    
-                </tr>
-            `).join('');
+                    <tr>
+                        <td><small>${r.Code || ''}</small><br><b>${r.Format ? r.Format.replace('RESOURCE_TYPE_', '') : ''}</b></td>
+                        <td>${r.Name}</td>
+                    </tr>
+                `).join('');
         }
 
         document.getElementById('searchInput').addEventListener('input', (e) => {

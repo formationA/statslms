@@ -1,0 +1,219 @@
+﻿<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matrice des Fonctions Plateforme</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+
+    <div style="padding: 10px 20px; background: #2c3e50; display: flex; justify-content: flex-end; gap: 10px;">
+        <a href="index.html" style="color: white; text-decoration: none; font-weight: bold; border: 1px solid white; padding: 5px 15px; border-radius: 5px; font-size: 0.8em;">
+            ⬅️ Retour au Tableau de bord
+        </a>
+     </div>
+
+    <div class="max-w-7xl mx-auto bg-white shadow-2xl rounded-lg overflow-hidden mt-10 mb-10">
+        <div class="bg-indigo-700 p-6 text-white">
+            <h1 class="text-3xl font-bold italic">Tableau de Bord des Permissions</h1>
+            <p class="opacity-80">Configuration détaillée des accès par profil utilisateur</p>
+        </div>
+
+        <div class="p-4 bg-indigo-50 border-b flex flex-wrap gap-4 items-center">
+            <div>
+                <label class="block text-xs font-semibold text-indigo-900 uppercase">Filtrer par Profil</label>
+                <select id="profileFilter" onchange="renderTable()" class="mt-1 block w-48 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2">
+                    <option value="Tous">Tous les profils</option>
+                </select>
+            </div>
+            <div class="flex-1">
+                <label class="block text-xs font-semibold text-indigo-900 uppercase">Rechercher une fonction</label>
+                <input type="text" id="searchFunc" onkeyup="renderTable()" placeholder="Ex: certificat, forum, justificatif..." class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2">
+            </div>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-800 text-white">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Fonctionnalité</th>
+                        <th id="dynamic-header" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Droits</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody" class="bg-white divide-y divide-gray-200">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const matrix = {
+            "Apprenant": {
+                "visio consultation": "X",
+                "Exercices": "X",
+                "Certificats : A date de fin": "100% mail",
+                "Visualiser les tutos": "X"
+            },
+            "Formateur": {
+                "groupe : ajouter / supprimer": "X",
+                "groupe : consulter": "X",
+                "bloquer / debloquer": "X",
+                "forcer achèvement": "X",
+                "visio création": "X",
+                "visio consultation": "X",
+                "compléments ressources": "X",
+                "Exercices": "X",
+                "Paramètres session": "X",
+                "Réinitialiser le mdp d'un apprenant": "X",
+                "Supprimer post ds forum": "X",
+                "Justificatif : en cours": "X",
+                "Programme : consultation": "X",
+                "Visualiser les actualités": "X",
+                "Visualiser les tutos": "X"
+            },
+            "Gestionnaire": {
+                "Justificatif : en cours": "X",
+                "Justificatif : A date de fin": "X",
+                "Certificats : en cours": "100%",
+                "Certificats : A date de fin": "100%",
+                "Programme : consultation": "X",
+                "Visualiser les actualités": "X",
+                "Visualiser les tutos": "X"
+            },
+            "Helpdesk": {
+                "bloquer / debloquer": "X",
+                "forcer achèvement": "X",
+                "Réinitialiser le mdp d'un apprenant": "X",
+                "Programme : consultation": "X",
+                "Visualiser les actualités": "X",
+                "Visualiser les Tutos": "X"
+            },
+            "Concepteur": {
+                "bloquer / debloquer": "X",
+                "forcer achèvement": "X",
+                "Justificatif : en cours": "X",
+                "Justificatif : A date de fin": "X",
+                "Certificats : en cours": "100%",
+                "Certificats : A date de fin": "100%",
+                "Programme : consultation": "X",
+                "Programme : modification": "X",
+                "Visualiser les actualités": "X",
+                "Visualiser les tutos": "X"
+            },
+            "Superviseur": {
+                "groupe : consulter": "X",
+                "bloquer / debloquer": "X",
+                "forcer achèvement": "X",
+                "visio consultation": "X",
+                "compléments ressources": "consultation",
+                "Exercices": "consultation",
+                "Justificatif : en cours": "X",
+                "Justificatif : A date de fin": "X",
+                "Certificats : en cours": "100%",
+                "Certificats : A date de fin": "100%",
+                "Programme : consultation": "X",
+                "Visualiser les actualités": "X",
+                "Visualiser les tutos": "X"
+            },
+            "Admin": {
+                "groupe : ajouter / supprimer": "X",
+                "groupe : consulter": "X",
+                "bloquer / debloquer": "X",
+                "forcer achèvement": "X",
+                "visio consultation": "X",
+                "compléments ressources": "X",
+                "Exercices": "X",
+                "Paramètres session": "X",
+                "Réinitialiser le mdp d'un apprenant": "X",
+                "Supprimer post ds forum": "X",
+                "Justificatif : en cours": "X",
+                "Justificatif : A date de fin": "X",
+                "Certificats : en cours": "100%",
+                "Certificats : A date de fin": "100%",
+                "Programme : consultation": "X",
+                "Poster Forum Aftral": "X",
+                "Supprimer compte users": "X",
+                "Supprimer poste sur forum Aftral": "X",
+                "Visualiser les actualités": "X",
+                "Visualiser les tutos": "X"
+            },
+            "Profil avec permissions": {
+                "visio création": "X",
+                "Réinitialiser le mdp d'un apprenant": "X",
+                "Poster Forum Aftral": "X",
+                "Supprimer poste sur forum Aftral": "X",
+                "Visualiser les actualités": "X",
+                "Visualiser les tutos": "X"
+            }
+        };
+
+        const allFunctions = [
+            "groupe : ajouter / supprimer", "groupe : consulter", "bloquer / debloquer",
+            "forcer achèvement", "visio création", "visio consultation",
+            "compléments ressources", "Exercices", "Paramètres session",
+            "Réinitialiser le mdp d'un apprenant", "Supprimer post ds forum",
+            "Justificatif : en cours", "Justificatif : A date de fin",
+            "Certificats : en cours", "Certificats : A date de fin",
+            "Programme : consultation", "Programme : modification",
+            "Poster Forum Aftral", "Supprimer compte users", "Supprimer poste sur forum Aftral",
+            "Visualiser les actualités", "Visualiser les tutos"
+        ];
+
+        const select = document.getElementById('profileFilter');
+        Object.keys(matrix).forEach(p => {
+            let opt = document.createElement('option');
+            opt.value = p;
+            opt.innerHTML = p;
+            select.appendChild(opt);
+        });
+
+        function renderTable() {
+            const profile = document.getElementById('profileFilter').value;
+            const search = document.getElementById('searchFunc').value.toLowerCase();
+            const tbody = document.getElementById('tableBody');
+            const header = document.getElementById('dynamic-header');
+
+            tbody.innerHTML = '';
+
+            if (profile === "Tous") {
+                header.innerText = "Profils ayant accès";
+                allFunctions.forEach(func => {
+                    if (func.toLowerCase().includes(search)) {
+                        let authorizedProfiles = [];
+                        Object.keys(matrix).forEach(p => {
+                            if (matrix[p][func]) authorizedProfiles.push(`<span class="bg-indigo-100 text-indigo-800 px-2 py-1 rounded text-xs mr-1 border border-indigo-200 mb-1 inline-block">${p} (${matrix[p][func]})</span>`);
+                        });
+
+                        tbody.innerHTML += `
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-6 py-4 text-sm font-medium text-gray-900">${func}</td>
+                                        <td class="px-6 py-4 text-sm text-gray-500">${authorizedProfiles.join(' ')}</td>
+                                    </tr>`;
+                    }
+                });
+            } else {
+                header.innerText = "Statut du Droit";
+                allFunctions.forEach(func => {
+                    if (func.toLowerCase().includes(search)) {
+                        const val = matrix[profile][func] || "-";
+                        const isAuthorized = val !== "-";
+
+                        tbody.innerHTML += `
+                                    <tr class="hover:bg-gray-50 ${isAuthorized ? 'bg-green-50' : ''}">
+                                        <td class="px-6 py-4 text-sm font-medium text-gray-900">${func}</td>
+                                        <td class="px-6 py-4 text-sm">
+                                            <span class="${isAuthorized ? 'text-green-700 font-bold' : 'text-gray-300'}">
+                                                ${val === "X" ? "✅ Autorisé" : (val === "-" ? "❌ Refusé" : "👁️ " + val)}
+                                            </span>
+                                        </td>
+                                    </tr>`;
+                    }
+                });
+            }
+        }
+
+        renderTable();
+    </script>
+</body>
+</html>
