@@ -1,0 +1,1096 @@
+﻿<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SCORM Studio v1.2 - AFTRAL</title>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+    <style>
+        :root {
+            --primary: #6366f1;
+            --success: #10b981;
+            --danger: #ef4444;
+            --bg: #f1f5f9;
+            --panel: #ffffff;
+            --import-accent: #64748b;
+            --config-accent: #10b981;
+            --ia-accent: #a855f7;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg);
+            margin: 0;
+            padding: 20px;
+            color: #1e293b;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .creator-mention {
+            font-size: 0.8rem;
+            color: #64748b;
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+
+        .panel {
+            background: var(--panel);
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+            border: 1px solid #e2e8f0;
+            position: relative;
+        }
+
+        .panel-ia {
+            border-top: 6px solid var(--ia-accent);
+            background: #faf5ff;
+        }
+
+        .panel-import {
+            border-top: 6px solid var(--import-accent);
+            background: #f8fafc;
+        }
+
+        .panel-questions {
+            border: 2px dashed #cbd5e1;
+            background: transparent;
+            box-shadow: none;
+        }
+
+        .panel-config {
+            border-top: 6px solid var(--success);
+            background: #f0fdf4;
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            color: #475569;
+            margin-bottom: 20px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 6px solid var(--primary);
+            margin-bottom: 15px;
+            position: relative;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0 16px 0;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            font-weight: 700;
+            color: #475569;
+            font-size: 0.9rem;
+        }
+
+            .checkbox-group input {
+                width: auto;
+                margin: 0;
+                cursor: pointer;
+                transform: scale(1.2);
+            }
+
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-main {
+            background: var(--primary);
+            color: white;
+            margin-bottom: 20px;
+        }
+
+        .btn-ia {
+            background: var(--ia-accent);
+            color: white;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn-outline {
+            background: #ffffff;
+            color: #475569;
+            border: 1px solid #cbd5e1;
+        }
+
+        .btn-help {
+            background: none;
+            color: var(--primary);
+            text-decoration: underline;
+            font-size: 0.8rem;
+            padding: 5px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .action-zone {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .btn-preview {
+            background: #475569;
+            color: white;
+            flex: 1;
+            font-size: 1.1rem;
+        }
+
+        .btn-generate {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            flex: 2;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+        }
+
+        #alert-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.6);
+            z-index: 3000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(4px);
+        }
+
+        .alert-content {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2);
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes popIn {
+            from {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .alert-icon {
+            font-size: 3rem;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+
+        .alert-message {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: #1e293b;
+            margin-bottom: 20px;
+        }
+
+        #help-modal, #preview-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.7);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .help-content {
+            background: white;
+            width: 90%;
+            max-width: 650px;
+            border-radius: 24px;
+            padding: 30px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+        }
+
+        .help-header {
+            color: var(--primary);
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+        }
+
+        .help-section {
+            background: #f8fafc;
+            border-radius: 12px;
+            border-left: 4px solid var(--primary);
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+
+        .help-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+            .help-table th, .help-table td {
+                padding: 10px;
+                border: 1px solid #e2e8f0;
+                font-size: 0.8rem;
+                text-align: center;
+            }
+
+        .kbd {
+            background: #e2e8f0;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-weight: bold;
+        }
+
+        .modal-content-full {
+            width: 95%;
+            max-width: 900px;
+            height: 85vh;
+            background: white;
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-size: 30px;
+            cursor: pointer;
+            z-index: 1001;
+            background: white;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #preview-frame {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .remove-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            color: #ef4444;
+            background: none;
+            font-size: 0.8rem;
+            text-decoration: underline;
+            border: none;
+            cursor: pointer;
+        }
+
+        label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+        }
+
+        .q-number {
+            font-weight: 900;
+            color: var(--primary);
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .btn-export-csv {
+            background-color: #8b5cf6; /* Violet moderne */
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <span class="creator-mention">IT PEDAGOGIE - AFTRAL</span>
+            <h1>🚀 SCORM Studio v1.2</h1>
+            <p class="subtitle">Créer des QUIZ SCORM compatibles LMS</p>
+        </header>
+
+        <div id="alert-modal">
+            <div class="alert-content">
+                <div class="alert-icon"><i class="fas fa-circle-exclamation"></i></div>
+                <div class="alert-message" id="alert-text">Message</div>
+                <button class="btn-main" style="width:100%; margin:0;" onclick="closeAlert()">D'accord</button>
+            </div>
+        </div>
+
+        <div class="panel panel-ia">
+            <div class="section-title"><i class="fas fa-robot"></i> 1. Générateur IA (via ChatGPT)</div>
+            <div class="grid">
+                <div>
+                    <label>Sujet du questionnaire</label>
+                    <input type="text" id="ai-subject" placeholder="Ex: Les risques du cariste, Incendie...">
+                </div>
+                <div>
+                    <label>Nombre de questions</label>
+                    <input type="number" id="ai-count" value="3" min="1" max="15">
+                </div>
+            </div>
+            <button class="btn-ia" onclick="prepareChatGPT()">
+                <i class="fas fa-external-link-alt"></i> Ouvrir ChatGPT
+            </button>
+            <p style="font-size: 0.75rem; color: #6b7280; margin-top: 10px; text-align: center;">
+                <em>L'IA va s'ouvrir dans un onglet. Collez le texte, copiez le tableau généré, et utilisez "Importer les lignes" ci-dessous.</em>
+            </p>
+        </div>
+
+        <div class="panel panel-import">
+            <div class="section-title"><i class="fas fa-file-import"></i> 2. Importation des données</div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;">
+                <label>📋 Zone de saisie & Glisser-Déposer</label>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn-outline" style="padding: 4px 12px; font-size: 0.8rem;" onclick="downloadExampleCSV()">📝 Modèle CSV</button>
+                    <button class="btn-help" onclick="toggleHelp(true)">💡 Besoin d'aide ?</button>
+                </div>
+            </div>
+
+            <textarea id="raw-input" rows="5"
+                      placeholder="• COLLEZ vos lignes ici (ChatGPT ou Excel) et cliquer sur Importer les données&#10;• OU GLISSEZ un fichier .json ou .csv"
+                      style="width:100%; border: 2px dashed #cbd5e1; transition: all 0.3s ease;"></textarea>
+
+            <button class="btn-outline" style="width:100%; margin-top: 10px; background: #f8fafc;" onclick="handlePaste()">
+                ⚡ Importer les données de la zone
+            </button>
+
+            <input type="file" id="file-input" accept=".csv,.json" style="display:none">
+        </div>
+
+        <div class="section-title"><i class="fas fa-list-check"></i> 3. Questions du Quiz</div>
+        <div id="questions-list" class="panel panel-questions"></div>
+        <button class="btn-main" onclick="addQuestion()">+ Ajouter une question</button>
+
+        <div class="panel panel-config" style="margin-top:30px;">
+            <div class="section-title"><i class="fas fa-gears"></i> 4. Paramètres & Exportation</div>
+            <div class="grid">
+                <div>
+                    <label>🎨 Thème Graphique</label>
+                    <select id="quiz-theme">
+                        <option value="azur">💎 Azur</option>
+                        <option value="emerald">🌿 Émeraude</option>
+                        <option value="amber">🔸 Ambre</option>
+                    </select>
+                </div>
+                <div>
+                    <label>🖼️ Image de fond</label>
+                    <select id="bg-choice">
+                        <option value="none" selected>❌ Aucun (Couleur unie)</option>
+                        <option value="abstrait">✨ Abstrait (Neutre)</option>
+                        <option value="transport">🚛 Transport (Camion)</option>
+                        <option value="logistique">📦 Logistique (Entrepôt)</option>
+                        <option value="formation">🎓 Formation (École/Bureau)</option>
+                    </select>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="shuffle-mode">
+                    <label for="shuffle-mode"> Mode aléatoire</label>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="show-corrections" checked>
+                    <label for="show-corrections">Afficher les bonnes réponses à la fin</label>
+                </div>
+                
+                <div class="checkbox-group" style="display: flex; flex-direction: column; align-items: flex-start; gap: 5px; margin-top: 10px;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <label for="pass-score" style="font-size: 1rem; color: inherit;">🎯 Seuil de réussite :</label>
+                        <input type="number" id="pass-score" value="0" min="0" max="100"
+                               oninput="updateThresholdLabel(this.value)"
+                               style="width: 60px; padding: 6px; border: 1px solid #e2e8f0; border-radius: 8px; font-weight: bold; text-align: center;">
+                        <span style="font-size: 0.9rem; color: inherit;">%</span>
+                    </div>
+                    <span id="threshold-info" style="font-size: 0.85rem; color: #64748b; font-style: italic; margin-left: 2px;">
+                        (Aucun seuil de réussite)
+                    </span>
+                </div>
+                
+                <div>
+                    <label>📦 Nom du module</label>
+                    <input type="text" id="export-name" placeholder="nom_du_module">
+                </div>
+            </div>
+            <div class="action-zone">
+                <button class="btn-preview" onclick="openPreview()">
+                    <i class="fas fa-eye"></i> Aperçu
+                </button>
+                <button onclick="exportToCSV()" class="btn-export-csv">
+                    <i class="fas fa-file-csv"></i> Exporter en CSV
+                </button>
+                <button onclick="exportToJSON()" class="btn-export-json" style="background-color: #6366f1;">
+                    <i class="fas fa-file-code"></i> Exporter en JSON
+                </button>
+                <button class="btn-generate" onclick="generateScorm()">
+                    <i class="fas fa-download"></i> Générer le scorm (.zip)
+                </button>
+
+            </div>
+        </div>
+    </div>
+
+    <div id="help-modal">
+        <div class="help-content">
+            <div class="help-header">📖 Guide Import</div>
+            <div class="help-section">
+                <table class="help-table">
+                    <tr><th>A (Question)</th><th>B (Options)</th><th>C (Réponse)</th></tr>
+                    <tr><td>Le texte...</td><td>Choix 1 ; Choix 2 ; Choix 3</td><td>Choix 2</td></tr>
+                </table>
+            </div>
+            
+            <div class="help-section">
+                <strong>Procédure :</strong>
+                <p>
+                    1. Sélectionnez vos lignes.<br>
+                    2. Copiez ( <span class="kbd">CTRL + C</span> ).<br>
+                    3. Collez ci-dessus.<br>
+                    4. Si vous utilisez un générateur d'IA autre que ChatGpt, veillez à bien ajouter des <strong>pipes (`|`)</strong> entre les colonnes, comme ceci :
+                </p>
+                <pre>Question | Option 1 ; Option 2 ; Option 3 | Réponse correcte</pre>
+                <p>5. Appuyez sur ⚡ <strong>Importer les lignes</strong>.</p>
+            </div>
+
+
+            <button class="btn-main" style="width:100%" onclick="toggleHelp(false)">J'ai compris</button>
+        </div>
+    </div>
+
+    <div id="preview-modal">
+        <div class="modal-content-full">
+            <span class="close-modal" onclick="closePreview()">&times;</span>
+            <iframe id="preview-frame"></iframe>
+        </div>
+    </div>
+
+    <script>
+        function showAlert(msg) {
+            document.getElementById('alert-text').innerText = msg;
+            document.getElementById('alert-modal').style.display = 'flex';
+        }
+        function closeAlert() { document.getElementById('alert-modal').style.display = 'none'; }
+        function toggleHelp(show) { document.getElementById('help-modal').style.display = show ? 'flex' : 'none'; }
+
+        function reIndex() {
+            document.querySelectorAll('.card').forEach((card, i) => {
+                card.querySelector('.q-number').innerText = "QUESTION N°" + (i + 1);
+            });
+        }
+
+        function addQuestion(data = { q: '', opt: '', ans: '' }) {
+            const list = document.getElementById('questions-list');
+            const div = document.createElement('div');
+            div.className = 'card';
+            div.innerHTML = '<button class="remove-btn" onclick="this.parentElement.remove(); reIndex();">Supprimer</button>' +
+                '<span class="q-number"></span>' +
+                '<label>Question</label>' +
+                '<input type="text" class="inp-q" value="' + data.q + '" placeholder="Ex: Quelle est la capitale de la France ?">' +
+                '<label>Choix (séparés par ; )</label>' +
+                '<input type="text" class="inp-o" value="' + data.opt + '" placeholder="Ex: Paris ; Lyon ; Marseille">' +
+                '<label>Réponse(s) Correcte(s)</label>' +
+                '<input type="text" class="inp-a" value="' + data.ans + '" placeholder="Ex: Paris">';
+            list.appendChild(div);
+            reIndex();
+        }
+
+        function handlePaste() {
+            const raw = document.getElementById('raw-input').value;
+            if (!raw.trim()) return showAlert("Veuillez coller des données avant d'importer !");
+
+            const lines = raw.split(/\r?\n/);
+            lines.forEach(line => {
+                // On sépare par tabulation ou par pipe |, puis on nettoie les espaces
+                let parts = line.split(/[|\t]/).map(s => s.trim()).filter(s => s !== "");
+
+                if (parts.length >= 3) {
+                    const firstCell = parts[0].toLowerCase();
+                    // IGNORE les lignes de titres ou de séparation Markdown
+                    if (firstCell.includes("question") || firstCell.startsWith("---") || firstCell.startsWith("===")) {
+                        return;
+                    }
+                    addQuestion({ q: parts[0], opt: parts[1], ans: parts[2] });
+                }
+            });
+            document.getElementById('raw-input').value = '';
+        }
+
+        function handleCSV(input) {
+            Papa.parse(input.files[0], {
+                header: true, skipEmptyLines: true, complete: res => {
+                    res.data.forEach(row => {
+                        let q = row.Question || row.question || "";
+                        let o = row.Options || row.options || "";
+                        let a = row.Reponse || row.reponse || "";
+                        if (q) addQuestion({ q, opt: o, ans: a });
+                    });
+                }
+            });
+        }
+
+        function getQuestions() {
+            const qs = [];
+            document.querySelectorAll('.card').forEach(card => {
+                const q = card.querySelector('.inp-q').value.trim();
+                const o = card.querySelector('.inp-o').value.trim();
+                const a = card.querySelector('.inp-a').value.trim();
+                if (q && o && a) {
+                    qs.push({
+                        question: q,
+                        options: o.split(';').map(s => s.trim()).filter(s => s),
+                        bonne_reponse: a.split(';').map(s => s.trim()).filter(s => s)
+                    });
+                }
+            });
+            return qs;
+        }
+
+
+        function buildPlayerHtml(questions, themeChoice, shuffle, bgChoice, showCorr, passScore) {
+            const themes = {
+                azur: { bg: 'rgba(240, 247, 255, 0.95)', card: '#ffffff', primary: '#3b82f6', accent: '#1d4ed8', fallback: '#f0f9ff' },
+                emerald: { bg: 'rgba(240, 253, 244, 0.95)', card: '#ffffff', primary: '#10b981', accent: '#047857', fallback: '#f0fdf4' },
+                amber: { bg: 'rgba(255, 251, 235, 0.95)', card: '#ffffff', primary: '#f59e0b', accent: '#d97706', fallback: '#fffbeb' }
+            };
+            const bgImages = {
+                transport: "https://images.pexels.com/photos/2199293/pexels-photo-2199293.jpeg?auto=compress&cs=tinysrgb&w=1600",
+                logistique: "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&q=80&w=1600",
+                formation: "https://images.pexels.com/photos/267507/pexels-photo-267507.jpeg?auto=compress&cs=tinysrgb&w=1600",
+                abstrait: "https://images.pexels.com/photos/2310713/pexels-photo-2310713.jpeg?auto=compress&cs=tinysrgb&w=1600"
+            };
+            const selTheme = themes[themeChoice];
+            const selectedImg = bgImages[bgChoice];
+            let bodyStyle = bgChoice !== "none" && selectedImg ? `background: linear-gradient(rgba(15, 23, 42, 0.7), rgba(15, 23, 42, 0.7)), url('${selectedImg}') no-repeat center center fixed; background-size: cover;` : `background-color: ${selTheme.fallback};`;
+
+            const safePassScore = (passScore !== undefined && passScore !== "" && !isNaN(passScore)) ? parseInt(passScore) : 50;
+
+            return '<html><head><meta charset="UTF-8"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">' +
+                '<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"><\/script>' +
+                '<script src="SCORM_API_wrapper.js"><\/script>' +
+                '<style>' +
+                'body { font-family: sans-serif; margin: 0; padding: 20px; min-height: 100vh; display: flex; align-items: center; justify-content: center; ' + bodyStyle + ' box-sizing: border-box; }' +
+                '.quiz-card { background: ' + selTheme.card + '; padding: 35px; border-radius: 24px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); width: 100%; max-width: 650px; text-align: center; max-height: 90vh; overflow-y: auto; position: relative; }' +
+                '.type-badge { display: inline-block; padding: 6px 16px; border-radius: 30px; font-size: 0.85rem; font-weight: bold; background: ' + selTheme.bg + '; color: ' + selTheme.primary + '; margin-bottom: 25px; border: 1px solid ' + selTheme.primary + '; }' +
+                '.progress { height: 8px; background: #e2e8f0; border-radius: 10px; margin-bottom: 25px; overflow: hidden; }' +
+                '.progress-bar { height: 100%; background: ' + selTheme.primary + '; width: 0%; transition: 0.4s; }' +
+                'h2 { margin-bottom: 10px; color: #1e293b; font-size: 1.5rem; }' +
+                '.opt { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 16px; margin: 10px 0; border: 2px solid #f1f5f9; border-radius: 14px; background: white; cursor: pointer; font-size: 1.05rem; text-align: left; transition: 0.2s; color: #334155; font-weight: 500; }' +
+                '.opt:hover { border-color: ' + selTheme.primary + '; background: #f8fafc; }' +
+                '.selected { border-color: ' + selTheme.primary + '; background: ' + selTheme.bg + '; }' +
+                '.correct-ui { border-color: #10b981 !important; background-color: #f0fdf4 !important; color: #10b981 !important; }' +
+                '.wrong-ui { border-color: #ef4444 !important; background-color: #fef2f2 !important; color: #ef4444 !important; }' +
+                '.btn-val { background: ' + selTheme.accent + '; color: white; border: none; padding: 18px; border-radius: 14px; width: 100%; cursor: pointer; font-weight: bold; margin-top: 20px; font-size: 1.1rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }' +
+                '.status-icon { display:none; margin-left:10px; font-size: 1.3rem; }' +
+                '.final-perc { font-size: 5.5rem; font-weight: 900; margin: 10px 0; }' +
+                '.final-raw { font-size: 1.4rem; font-weight: 700; color: #64748b; margin-bottom: 5px; }' +
+                '.threshold-text { font-size: 0.9rem; color: #94a3b8; margin-bottom: 20px; font-style: italic; }' +
+                '.status-msg { font-size: 1.8rem; font-weight: bold; display: inline-block; margin-top: 10px; }' +
+                '.corr-box { text-align: left; margin-top: 20px; padding-top: 20px; border-top: 2px solid #f1f5f9; }' +
+                '.corr-item { margin-bottom: 10px; padding: 12px; border-radius: 10px; background: #f8fafc; font-size: 0.95rem; border-left: 4px solid #e2e8f0; }' +
+                '</style></head><body>' +
+                '<div class="quiz-card" id="box"><div class="progress"><div class="progress-bar" id="pb"></div></div><h2 id="q"></h2><div id="type-box" class="type-badge"></div><div id="choices"></div><button id="v-btn" class="btn-val" style="display:none" onclick="validateMulti()">Valider la réponse</button></div>' +
+                '<script>' +
+
+                //'let data = ' + JSON.stringify(questions) + ';' +
+                'let rawData = ' + JSON.stringify(questions) + ';' +
+                'let data = Array.isArray(rawData) ? rawData : (rawData.quiz ? rawData.quiz : []);' +
+
+                // Normalisation : on s'assure que bonne_reponse est toujours un tableau pour la logique interne
+                //'data.forEach(q => { if(!Array.isArray(q.bonne_reponse)) q.bonne_reponse = [q.bonne_reponse]; });' +
+                //'if(' + shuffle + ') { data = data.sort(() => Math.random() - 0.5); data.forEach(q => q.options = q.options.sort(() => Math.random() - 0.5)); }' +
+
+                'data.forEach(q => { if(!Array.isArray(q.bonne_reponse)) q.bonne_reponse = [q.bonne_reponse]; });' +
+                'if(' + shuffle + ') { data = data.sort(() => Math.random() - 0.5); data.forEach(q => q.options = q.options.sort(() => Math.random() - 0.5)); }' +
+                'let cur = 0, score = 0, userSel = [];' +
+                'window.onload = function() { pipwerks.SCORM.init(); };' +
+                'window.onunload = function() { pipwerks.SCORM.quit(); };' +
+
+                'function render() {' +
+                '  if(cur >= data.length) {' +
+                '    let f = Math.round((score/data.length)*100);' +
+                '    let threshold = ' + safePassScore + ';' +
+                '    let isPassed = f >= threshold;' +
+                '    if(typeof pipwerks !== "undefined" && pipwerks.SCORM.connection.isOpen) {' +
+                '      pipwerks.SCORM.set("cmi.core.score.raw", f);' +
+                '      pipwerks.SCORM.set("cmi.core.lesson_status", isPassed ? "passed" : "failed");' +
+                '      pipwerks.SCORM.quit();' +
+                '    }' +
+                '    if(isPassed && threshold > 0) { confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } }); }' +
+                '    let color = (threshold === 0) ? "' + selTheme.primary + '" : (isPassed ? "#10b981" : "#f59e0b");' +
+                '    let msg = threshold === 0 ? "✨ Activité Terminée" : (isPassed ? "✅ Score Validé" : "⌛ Objectif non atteint");' +
+                '    let subMsg = threshold === 0 ? "Merci d\'avoir complété ce questionnaire !" : (isPassed ? "Excellent travail !" : "Encore un effort pour atteindre le seuil de validation.");' +
+                '    let thresholdHTML = threshold > 0 ? "<div class=\'threshold-text\'>Seuil requis pour validation : " + threshold + "%</div>" : "";' +
+                '    let resHTML = "<div class=\'final-perc\' style=\'color:" + color + "\'>" + f + "%</div>" + ' +
+                '      "<div class=\'final-raw\'>Bonnes réponses : " + score + " / " + data.length + "</div>" + thresholdHTML + ' +
+                '      "<div class=\'status-msg\' style=\'color:" + color + "\'>" + msg + "</div><p style=\'color:#64748b\'>" + subMsg + "</p>";' +
+                '    if(' + showCorr + ') {' +
+                '      resHTML += "<div class=\'corr-box\'><h3>Correction :</h3>";' +
+                '      data.forEach((q, i) => {' +
+                '         resHTML += "<div class=\'corr-item\'><strong>" + (i+1) + ". " + q.question + "</strong><br><span style=\'color:#10b981\'>Réponse : " + q.bonne_reponse.join(", ") + "</span></div>";' +
+                '      });' +
+                '      resHTML += "</div>";' +
+                '    }' +
+                '    document.getElementById("box").innerHTML = resHTML;' +
+                '    return;' +
+                '  }' +
+                '  const q = data[cur]; if(!q) return; userSel = []; ' +
+                '  document.getElementById("pb").style.width = (cur/data.length)*100 + "%";' +
+                '  document.getElementById("type-box").innerText = q.bonne_reponse.length > 1 ? "Plusieurs réponses possibles" : "Une seule réponse possible";' +
+                '  document.getElementById("q").innerText = q.question; ' +
+                '  document.getElementById("v-btn").style.display = q.bonne_reponse.length > 1 ? "block" : "none";' +
+                '  const container = document.getElementById("choices"); container.innerHTML = "";' +
+                '  q.options.forEach(o => {' +
+                '    const b = document.createElement("button"); b.className = "opt"; b.innerHTML = "<span>" + o + "</span><i class=\'fas status-icon\'></i>";' +
+                '    b.onclick = () => {' +
+                '      if(q.bonne_reponse.length === 1) { userSel = [o]; submitAnswer(); }' +
+                '      else { b.classList.toggle("selected"); if(userSel.includes(o)) userSel = userSel.filter(x=>x!==o); else userSel.push(o); }' +
+                '    };' +
+                '    container.appendChild(b);' +
+                '  });' +
+                '}' +
+                'window.validateMulti = function() { if(userSel.length > 0) submitAnswer(); };' +
+                'function submitAnswer() {' +
+                '  const q = data[cur];' +
+                '  const isPerfect = (q.bonne_reponse.length === userSel.length && userSel.every(v => q.bonne_reponse.includes(v)));' +
+                '  if(isPerfect) score++;' +
+                '  document.querySelectorAll(".opt").forEach(btn => {' +
+                '    btn.style.pointerEvents = "none";' +
+                '    const txt = btn.querySelector("span").innerText;' +
+                '    const icon = btn.querySelector(".status-icon");' +
+                '    if(userSel.includes(txt)) {' +
+                '      icon.style.display = "inline";' +
+                '      if(q.bonne_reponse.includes(txt)) {' +
+                '        btn.classList.add("correct-ui"); icon.className = "fas fa-check-circle status-icon";' +
+                '      } else {' +
+                '        btn.classList.add("wrong-ui"); icon.className = "fas fa-times-circle status-icon";' +
+                '      }' +
+                '    }' +
+                '  });' +
+                '  document.getElementById("v-btn").style.display = "none";' +
+                '  setTimeout(() => { cur++; render(); }, 1800);' +
+                '}' +
+                'render(); <\/script></body></html>';
+        }
+
+
+
+
+
+
+        function openPreview() {
+            const qs = getQuestions();
+            if (qs.length === 0) return showAlert("Veuillez ajouter au moins une question !");
+
+            // On récupère la valeur du seuil ici
+            const scoreVal = document.getElementById('pass-score').value;
+
+            document.getElementById('preview-frame').srcdoc = buildPlayerHtml(
+                qs,
+                document.getElementById('quiz-theme').value,
+                document.getElementById('shuffle-mode').checked,
+                document.getElementById('bg-choice').value,
+                document.getElementById('show-corrections').checked,
+                scoreVal // <--- PASSAGE DU SEUIL ICI
+            );
+            document.getElementById('preview-modal').style.display = 'flex';
+        }
+
+
+        function closePreview() {
+            document.getElementById('preview-modal').style.display = 'none';
+            document.getElementById('preview-frame').srcdoc = "";
+        }
+
+        async function generateScorm() {
+            const qs = getQuestions();
+            if (qs.length === 0) return showAlert("Impossible de générer un quiz vide !");
+            const zip = new JSZip();
+
+            const baseName = document.getElementById('export-name').value || "quiz_aftral";
+            const timestamp = getTimestamp();
+            const finalName = `${baseName}_${timestamp}`;
+            zip.file("imsmanifest.xml", '<?xml version="1.0" encoding="UTF-8"?><manifest identifier="MANIFEST-1" version="1.2" xmlns="http://www.imsproject.org/xsd/imscp_rootv1p1p2"><organizations default="ORG-1"><organization identifier="ORG-1"><title>' + finalName + '</title><item identifierRef="RES-1" identifier="ITEM-1"><title>Quiz</title></item></organization></organizations><resources><resource identifier="RES-1" type="webcontent" href="index.html"><file href="index.html"/><file href="SCORM_API_wrapper.js"/></resource></resources></manifest>');
+
+            zip.file("index.html", buildPlayerHtml(
+                qs,
+                document.getElementById('quiz-theme').value,
+                document.getElementById('shuffle-mode').checked,
+                document.getElementById('bg-choice').value,
+                document.getElementById('show-corrections').checked,
+                document.getElementById('pass-score').value
+            ));
+            zip.file("SCORM_API_wrapper.js", 'var pipwerks={SCORM:{version:"1.2",handleCompletionStatus:!0,handleExitMode:!0,API:{handle:null,isFound:!1},connection:{isOpen:!1},init:function(){return this.connection.isOpen=this.API.getHandle()?this.connection.isOpen||"true"===this.API.getHandle().LMSInitialize(""):!1,this.connection.isOpen},get:function(a){return this.connection.isOpen?String(this.API.getHandle().LMSGetValue(a)):null},set:function(a,b){return this.connection.isOpen?"true"===String(this.API.getHandle().LMSSetValue(a,b)):!1},save:function(){return this.connection.isOpen?"true"===String(this.API.getHandle().LMSCommit("")):!1},quit:function(){return this.connection.isOpen?this.API.getHandle().LMSFinish(""):!1},API:{getHandle:function(){var a=window;if(a.API)return a.API;if(a.parent&&a.parent!==a)return this.find(a.parent);return null},find:function(a){var b=0;while(!a.API&&a.parent&&a.parent!==a&&b<10){b++;a=a.parent}return a.API}}}};');
+            const blob = await zip.generateAsync({ type: "blob" });
+            saveAs(blob, finalName + ".zip");
+
+            showAlert("Votre package SCORM est prêt pour le LMS ! 🚀");
+        }
+
+        function downloadExampleCSV() {
+            const rows = [["Question", "Options", "Reponse"], ["Quelle est la capitale de la France ?", "Paris ; Lyon ; Marseille", "Paris"], ["Quels sont les fruits rouges ? (Multi)", "Fraise ; Cerise ; Banane ; Kiwi", "Fraise ; Cerise"]];
+            const csvContent = "\uFEFF" + rows.map(e => e.map(cell => `"${cell}"`).join(";")).join("\n");
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "exemple_quiz.csv";
+            link.click();
+        }
+
+        function prepareChatGPT() {
+            const subject = document.getElementById('ai-subject').value.trim();
+            const count = document.getElementById('ai-count').value;
+            if (!subject) return showAlert("Veuillez saisir un sujet !");
+
+            const prompt = `Génère ${count} questions de quiz sur le sujet suivant : "${subject}".
+Donne-moi le résultat uniquement sous forme de tableau SANS texte avant ni après ni titre.
+Le tableau doit avoir 3 colonnes exactes. il peut parfois y avoir plusieurs réponses :
+1. Question
+2. Options (toutes les options séparées par un point-virgule ;)
+3. Réponse correcte (le texte exact de la bonne réponse)`;
+
+            navigator.clipboard.writeText(prompt).then(() => {
+                showAlert("Prompt copié ! ChatGPT va s'ouvrir automatiquement.");
+                const newWindow = window.open("https://chat.openai.com/chat", "_blank");
+                newWindow.focus();
+                // On ne peut PAS coller automatiquement dans le champ ChatGPT
+                // Mais le texte est déjà copié, l'utilisateur peut juste faire CTRL+V
+            }).catch(err => {
+                showAlert("Erreur lors de la copie. Essayez de copier manuellement.");
+            });
+        }
+
+        function getTimestamp() {
+            const now = new Date();
+
+            const pad = n => n.toString().padStart(2, "0");
+
+            const year = now.getFullYear() % 100;
+            const month = pad(now.getMonth() + 1);
+            const day = pad(now.getDate());
+            const hours = pad(now.getHours());
+            const minutes = pad(now.getMinutes());
+            const seconds = pad(now.getSeconds());
+
+            return `${year}${month}${day}_${hours}${minutes}${seconds}`;
+        }
+
+        function exportToCSV() {
+            const qs = getQuestions();
+            if (qs.length === 0) return showAlert("Aucune question à exporter !");
+
+            // En-têtes du CSV
+            let csvRows = [["Question", "Options", "Reponse"]];
+
+            // Transformation des objets questions en lignes CSV
+            qs.forEach(q => {
+                csvRows.push([
+                    q.question,
+                    q.options.join(" ; "), // On rejoint les options avec un point-virgule
+                    q.bonne_reponse.join(" ; ")  // On rejoint les réponses avec un point-virgule
+                ]);
+            });
+
+            // Construction du contenu avec BOM pour le support des accents dans Excel
+            const csvContent = "\uFEFF" + csvRows.map(row =>
+                row.map(cell => `"${cell.replace(/"/g, '""')}"`).join(";")
+            ).join("\n");
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            const baseName = document.getElementById('export-name').value || "mon_questionnaire";
+            const timestamp = getTimestamp();
+            link.download = `${baseName}_${timestamp}.csv`;
+
+            link.href = URL.createObjectURL(blob);
+            link.click();
+
+            showAlert("CSV exporté avec succès ! 📄");
+        }
+
+
+        // Initialisation de la gestion du Glisser/Déposer au chargement
+        window.addEventListener('load', () => {
+            const dropZone = document.getElementById('raw-input');
+
+            // Empêcher le comportement par défaut
+            ['dragover', 'drop'].forEach(evt => {
+                window.addEventListener(evt, e => e.preventDefault());
+                dropZone.addEventListener(evt, e => e.preventDefault());
+            });
+
+            // Effet visuel
+            dropZone.addEventListener('dragover', () => dropZone.style.borderColor = '#3b82f6');
+            dropZone.addEventListener('dragleave', () => dropZone.style.borderColor = '#e2e8f0');
+
+            // Gestion du dépôt
+            dropZone.addEventListener('drop', (e) => {
+                dropZone.style.borderColor = '#e2e8f0';
+                const file = e.dataTransfer.files[0];
+                if (!file) return;
+
+                const fileName = file.name.toLowerCase();
+                const reader = new FileReader();
+
+                reader.onload = (event) => {
+                    const content = event.target.result;
+
+                    if (fileName.endsWith('.json')) {
+                        // TRAITEMENT JSON
+                        try {
+                            const json = JSON.parse(content);
+                            parseBeedeezJson(json);
+                        } catch (err) {
+                            showAlert("Erreur JSON : " + err.message);
+                        }
+                    }
+                    else if (fileName.endsWith('.csv')) {
+                        // TRAITEMENT CSV (Utilise PapaParse déjà présent dans votre projet)
+                        Papa.parse(content, {
+                            header: true,
+                            skipEmptyLines: true,
+                            complete: (res) => {
+                                if (res.data.length > 0) {
+                                    res.data.forEach(row => {
+                                        let q = row.Question || row.question || "";
+                                        let o = row.Options || row.options || "";
+                                        let a = row.Reponse || row.reponse || "";
+                                        if (q) addQuestionjson({ q, opt: o, ans: a });
+                                    });
+                                    showAlert(res.data.length + " questions importées du CSV !");
+                                } else {
+                                    showAlert("Le fichier CSV est vide ou mal formaté.");
+                                }
+                            }
+                        });
+                    }
+                    else {
+                        showAlert("Format non supporté. Déposez un fichier .json ou .csv");
+                    }
+                };
+
+                reader.readAsText(file);
+            });
+        });
+
+
+        function exportToJSON() {
+            const qs = [];
+            document.querySelectorAll('.card').forEach(card => {
+                const q = card.querySelector('.inp-q').value.trim();
+                const o = card.querySelector('.inp-o').value.trim();
+                const a = card.querySelector('.inp-a').value.trim();
+                if (q) {
+                    qs.push({
+                        question: q,
+                        choix: o.split(';').map(s => s.trim()),
+                        reponses_correctes: a.split(';').map(s => s.trim())
+                    });
+                }
+            });
+
+            if (qs.length === 0) {
+                return showAlert("Impossible d'exporter : vous n'avez saisi aucune question ! ❌");
+            }
+
+            const exportData = {
+                title: document.getElementById('export-name').value || "export_quiz",
+                quizzes: qs
+            };
+
+            const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+            const link = document.createElement("a");
+
+            // --- PARTIE MODIFIÉE POUR LA DATE ---
+            const baseName = document.getElementById('export-name').value || "mon_questionnaire";
+            const timestamp = getTimestamp(); // Utilise ta fonction existante
+            link.download = `${baseName}_${timestamp}.json`;
+            // -------------------------------------
+
+            link.href = URL.createObjectURL(blob);
+            link.click();
+
+            showAlert("JSON exporté avec succès ! 🤖");
+        }
+
+        // --- 1. FONCTIONS DE BASE ---
+
+        function reIndex() {
+            document.querySelectorAll('.card').forEach((card, i) => {
+                card.querySelector('.q-number').innerText = "QUESTION N°" + (i + 1);
+            });
+        }
+
+        function addQuestionjson(data = { q: '', opt: '', ans: '' }) {
+            const list = document.getElementById('questions-list');
+            const div = document.createElement('div');
+            div.className = 'card';
+            div.innerHTML = `
+            <button class="remove-btn" onclick="this.parentElement.remove(); reIndex();">Supprimer</button>
+            <span class="q-number"></span>
+            <label>Question</label>
+            <input type="text" class="inp-q" value="${data.q}" placeholder="Texte de la question...">
+            <label>Choix (séparés par ; )</label>
+            <input type="text" class="inp-o" value="${data.opt}" placeholder="Choix 1 ; Choix 2 ; Choix 3">
+            <label>Réponse(s) Correcte(s)</label>
+            <input type="text" class="inp-a" value="${data.ans}" placeholder="La réponse exacte">
+        `;
+            list.appendChild(div);
+            reIndex();
+        }
+
+        // --- 2. LOGIQUE D'IMPORTATION (CORRIGÉE) ---
+        function parseBeedeezJson(data) {
+            handleJsonImport(data);
+        }
+
+        function handleJsonImport(rawData) {
+            let json;
+            try {
+                json = typeof rawData === 'string' ? JSON.parse(rawData) : rawData;
+            } catch (e) {
+                alert("Erreur : Le fichier JSON est mal formé.");
+                return;
+            }
+
+            const list = document.getElementById('questions-list');
+            list.innerHTML = ""; // On vide tout
+            let count = 0;
+
+            // Détection du format (Standard ou Beedeez)
+            if (json.quizzes && Array.isArray(json.quizzes)) {
+                json.quizzes.forEach(item => {
+                    addQuestionjson({
+                        q: item.question || "",
+                        opt: Array.isArray(item.choix) ? item.choix.join(' ; ') : "",
+                        ans: Array.isArray(item.reponses_correctes) ? item.reponses_correctes.join(' ; ') : ""
+                    });
+                    count++;
+                });
+            } else if (json.chapters) {
+                json.chapters.forEach(chapter => {
+                    if (chapter.quizz && chapter.quizz.questions) {
+                        chapter.quizz.questions.forEach(qObj => {
+                            let opts = qObj.choices ? qObj.choices.map(c => c.name).join(' ; ') : "";
+                            let corrects = qObj.choices ? qObj.choices.filter(c => c.good).map(c => c.name).join(' ; ') : "";
+                            addQuestionjson({ q: qObj.title, opt: opts, ans: corrects });
+                            count++;
+                        });
+                    }
+                });
+            }
+
+            if (count > 0) {
+                document.getElementById('export-name').value = (json.title || "quiz").replace(/\s+/g, '_');
+                showAlert(count + " questions chargées !");
+            } else {
+                showAlert("Aucune question trouvée dans le fichier.");
+            }
+        }
+
+        // Écouteur pour le chargement de fichier
+        document.getElementById('file-input').addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (event) => handleJsonImport(event.target.result);
+            reader.readAsText(file);
+        });
+
+        function updateThresholdLabel(val) {
+            const info = document.getElementById('threshold-info');
+            const score = parseInt(val);
+
+            // Si vide, nul ou égal à 0
+            if (!val || score <= 0) {
+                info.innerText = "(Aucun seuil de réussite)";
+                info.style.color = "#64748b"; // Gris par défaut
+                info.style.fontWeight = "normal";
+            } else {
+                info.innerText = "(Seuil actuel : " + val + "%)";
+                info.style.color = "#3b82f6"; // Bleu quand > 0
+                info.style.fontWeight = "bold"; // Optionnel : met en gras pour plus de visibilité
+            }
+        }
+
+    </script>
+</body>
+</html>
