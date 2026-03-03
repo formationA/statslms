@@ -10,10 +10,10 @@
             font-family: 'Segoe UI', sans-serif;
             background-color: #f4f7f9;
             margin: 0;
-            padding: 0; /* Modifié pour coller la barre en haut */
+            padding: 0; /* Ajusté pour la barre de nav */
         }
 
-        /* Style de la barre de navigation */
+        /* Barre de navigation sombre */
         .nav-top {
             padding: 10px 20px;
             background: #2c3e50;
@@ -34,7 +34,7 @@
 
         .dashboard-container {
             max-width: 1100px;
-            margin: 20px auto;
+            margin: 20px auto; /* Ajout d'une marge pour décoller de la barre */
             background: white;
             padding: 25px;
             border-radius: 15px;
@@ -118,12 +118,19 @@
             border: 1px solid #eee;
             border-radius: 10px;
         }
+
+        /* Restauré : Style des liens bleus */
+        a {
+            text-decoration: none;
+            color: #3498db;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
 
     <div class="nav-top">
-        <a href="index.html">⬅️ Retour au Tableau de bord</a>
+        <a href="index.html">⬅️ Retour aux Statistiques</a>
     </div>
 
     <div class="dashboard-container">
@@ -155,6 +162,7 @@
                         <tr>
                             <th>Code / Type</th>
                             <th>Nom de la ressource</th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody id="resTableBody">
@@ -216,10 +224,12 @@
 
         function renderTable(data) {
             const tbody = document.getElementById('resTableBody');
+            // Restauré : Structure exacte du tr avec les 3 td
             tbody.innerHTML = data.map(r => `
                     <tr>
                         <td><small>${r.Code || ''}</small><br><b>${r.Format ? r.Format.replace('RESOURCE_TYPE_', '') : ''}</b></td>
                         <td>${r.Name}</td>
+                        <td></td>
                     </tr>
                 `).join('');
         }
