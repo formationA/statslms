@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
@@ -12,10 +12,28 @@
 
         body {
             font-family: 'Segoe UI', system-ui, sans-serif;
-            display: flex;
-            height: 100vh;
             margin: 0;
             background: #d1d5db;
+            height: 100vh;
+            display: flex;
+            flex-direction: column; /* Aligne la barre de retour en haut et le contenu en dessous */
+        }
+
+        /* Barre de retour en haut */
+        .top-bar {
+            padding: 10px 20px;
+            background: #2c3e50;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            z-index: 100;
+        }
+
+        /* Conteneur principal sous la barre */
+        .main-wrapper {
+            display: flex;
+            flex: 1; /* Prend tout l'espace restant */
+            overflow: hidden;
         }
 
         #editor {
@@ -24,7 +42,6 @@
             padding: 25px;
             border-right: 1px solid #94a3b8;
             overflow-y: auto;
-            z-index: 10;
         }
 
         h2 {
@@ -55,6 +72,7 @@
             border: 1px solid #cbd5e1;
             border-radius: 6px;
             font-size: 14px;
+            box-sizing: border-box;
         }
 
         textarea {
@@ -97,19 +115,27 @@
 </head>
 <body>
 
-    <div id="editor">
-        <h2>Configuration</h2>
-        <div class="group"><label>Titre de l'élément</label><input type="text" id="title" value="Gestion des temps de conduite" oninput="render()"></div>
-        <div class="group"><label>Sous-titre (Contexte)</label><input type="text" id="subtitle" value="Réglementation Sociale Européenne" oninput="render()"></div>
-        <div class="group"><label>Informations clés</label><input type="text" id="meta" value="Durée estimée : 2h | Niveau : Avancé" oninput="render()"></div>
-        <div class="group"><label>Description</label><textarea id="desc" oninput="render()">Ce contenu permet d'approfondir les règles liées au temps de travail, aux pauses et au repos quotidien/hebdomadaire des conducteurs...</textarea></div>
-        <div class="group"><label>Points clés (1 par ligne)</label><textarea id="objs" oninput="render()">Le disque et la carte tachygraphe&#10;Calcul des amplitudes&#10;Gestion des dépassements exceptionnels</textarea></div>
-        <div class="group"><label>Référence Documentaire</label><input type="text" id="ref" value="REF-AFTRAL-2026-X4" oninput="render()"></div>
-        <button class="btn-export" onclick="download()">📥 Télécharger l'HTML</button>
+    <div class="top-bar">
+        <a href="index.html" style="color: white; text-decoration: none; font-weight: bold; border: 1px solid white; padding: 5px 15px; border-radius: 5px; font-size: 0.8em;">
+            ⬅️ Retour au Tableau de bord
+        </a>
     </div>
 
-    <div id="preview-zone">
-        <div id="canvas"></div>
+    <div class="main-wrapper">
+        <div id="editor">
+            <h2>Configuration</h2>
+            <div class="group"><label>Titre de l'élément</label><input type="text" id="title" value="Gestion des temps de conduite" oninput="render()"></div>
+            <div class="group"><label>Sous-titre (Contexte)</label><input type="text" id="subtitle" value="Réglementation Sociale Européenne" oninput="render()"></div>
+            <div class="group"><label>Informations clés</label><input type="text" id="meta" value="Durée estimée : 2h | Niveau : Avancé" oninput="render()"></div>
+            <div class="group"><label>Description</label><textarea id="desc" oninput="render()">Ce contenu permet d'approfondir les règles liées au temps de travail, aux pauses et au repos quotidien/hebdomadaire des conducteurs...</textarea></div>
+            <div class="group"><label>Points clés (1 par ligne)</label><textarea id="objs" oninput="render()">Le disque et la carte tachygraphe&#10;Calcul des amplitudes&#10;Gestion des dépassements exceptionnels</textarea></div>
+            <div class="group"><label>Référence Documentaire</label><input type="text" id="ref" value="REF-AFTRAL-2026-X4" oninput="render()"></div>
+            <button class="btn-export" onclick="download()">📥 Télécharger l'HTML</button>
+        </div>
+
+        <div id="preview-zone">
+            <div id="canvas"></div>
+        </div>
     </div>
 
     <script>
@@ -122,7 +148,6 @@
             const objsRaw = document.getElementById('objs').value;
             const objs = objsRaw.split('\n').filter(t => t.trim() !== "");
 
-            // Badge à cheval (margin-top négatif pour chevaucher le bandeau)
             const metaHtml = meta.trim() !== "" ? `
                     <div style="padding: 0 50px; margin-top: -22px; position: relative; z-index: 5;">
                         <div style="background: #f1f5f9; border: 1px solid #cbd5e1; display: inline-block; padding: 10px 20px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; color: #2d3663; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
@@ -130,52 +155,40 @@
                         </div>
                     </div>` : "";
 
-            // Points clés : supprimé si vide
             let pointsClesHtml = "";
             if (objs.length > 0) {
                 const listHtml = objs.map(o => `
-                            <div style="display:flex; align-items:flex-start; margin-bottom:8px; color:#334155;">
-                                <span style="color:#5c6eb1; margin-right:12px; font-weight:bold;">•</span>
-                                <span style="font-size:1.05rem;">${o}</span>
-                            </div>`).join('');
+                        <div style="display:flex; align-items:flex-start; margin-bottom:8px; color:#334155;">
+                            <span style="color:#5c6eb1; margin-right:12px; font-weight:bold;">•</span>
+                            <span style="font-size:1.05rem;">${o}</span>
+                        </div>`).join('');
 
                 pointsClesHtml = `
-                            <div style="background: #f8fafc; padding: 20px 25px; border-radius: 10px; border: 1px solid #f1f5f9; margin-top: 15px;">
-                                <h3 style="color: #2d3663; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px;">
-                                    Points clés
-                                </h3>
-                                <div style="display: grid; grid-template-columns: 1fr;">
-                                    ${listHtml}
-                                </div>
-                            </div>`;
+                        <div style="background: #f8fafc; padding: 20px 25px; border-radius: 10px; border: 1px solid #f1f5f9; margin-top: 15px;">
+                            <h3 style="color: #2d3663; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px;">Points clés</h3>
+                            <div style="display: grid; grid-template-columns: 1fr;">${listHtml}</div>
+                        </div>`;
             }
 
             const content = `
-<div style="font-family: 'Segoe UI', Helvetica, Arial, sans-serif; color: #1e293b; background: white; margin: 0 auto; max-width: 900px; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
-                <div style="background: linear-gradient(90deg, #3f4c85 0%, #2d3663 100%); color: white; padding: 35px 50px 45px 50px;">
-                    <div style="text-transform: uppercase; font-size: 0.75rem; letter-spacing: 2px; opacity: 0.8; margin-bottom: 8px; font-weight: 500;">${subtitle}</div>
-                    <h1 style="margin: 0; font-size: 2rem; font-weight: 800; line-height: 1.1;">${title}</h1>
-                </div>
-
-                ${metaHtml}
-
-                <div style="padding: ${meta.trim() !== "" ? '30px' : '40px'} 50px 40px 50px;">
-                    <div>
-                        <h3 style="color: #2d3663; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1.5px; border-bottom: 2px solid #5c6eb1; display: inline-block; padding-bottom: 3px; margin-bottom: 15px;">
-                            Description
-                        </h3>
-                        <p style="font-size: 1.1rem; line-height: 1.6; color: #475569; text-align: justify; margin: 0;">
-                            ${desc.replace(/\n/g, '<br>')}
-                        </p>
-                    </div>
-                    ${pointsClesHtml}
-                </div>
-
-                <div style="background: #2d3663; color: white; padding: 15px 50px; display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem;">
-                    <span style="font-weight: 600; opacity: 0.9;">AFTRAL | DPSO</span>
-                    <span style="background: rgba(255,255,255,0.15); padding: 4px 10px; border-radius: 4px; font-family: monospace;">${ref}</span>
-                </div>
-</div>`;
+                    <div style="font-family: 'Segoe UI', Helvetica, Arial, sans-serif; color: #1e293b; background: white; margin: 0 auto; max-width: 900px; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
+                        <div style="background: linear-gradient(90deg, #3f4c85 0%, #2d3663 100%); color: white; padding: 35px 50px 45px 50px;">
+                            <div style="text-transform: uppercase; font-size: 0.75rem; letter-spacing: 2px; opacity: 0.8; margin-bottom: 8px; font-weight: 500;">${subtitle}</div>
+                            <h1 style="margin: 0; font-size: 2rem; font-weight: 800; line-height: 1.1;">${title}</h1>
+                        </div>
+                        ${metaHtml}
+                        <div style="padding: ${meta.trim() !== "" ? '30px' : '40px'} 50px 40px 50px;">
+                            <div>
+                                <h3 style="color: #2d3663; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1.5px; border-bottom: 2px solid #5c6eb1; display: inline-block; padding-bottom: 3px; margin-bottom: 15px;">Description</h3>
+                                <p style="font-size: 1.1rem; line-height: 1.6; color: #475569; text-align: justify; margin: 0;">${desc.replace(/\n/g, '<br>')}</p>
+                            </div>
+                            ${pointsClesHtml}
+                        </div>
+                        <div style="background: #2d3663; color: white; padding: 15px 50px; display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem;">
+                            <span style="font-weight: 600; opacity: 0.9;">AFTRAL | DPSO</span>
+                            <span style="background: rgba(255,255,255,0.15); padding: 4px 10px; border-radius: 4px; font-family: monospace;">${ref}</span>
+                        </div>
+                    </div>`;
 
             document.getElementById('canvas').innerHTML = content;
         }
@@ -184,7 +197,6 @@
             const content = document.getElementById('canvas').innerHTML;
             const refName = document.getElementById('ref').value.trim() || 'Fiche_AFTRAL';
             const fileName = refName.replace(/[/\\?%*:|"<>]/g, '-');
-
             const blob = new Blob([`<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"></head><body style="margin:40px; background:#f0f2f5; display:flex; justify-content:center;">${content}</body></html>`], { type: 'text/html' });
             const a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
