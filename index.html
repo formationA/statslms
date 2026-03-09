@@ -314,6 +314,11 @@
 
         function renderChart(type, labels, data, label, color) {
             const lightColor = color + '33';
+
+            // On calcule la valeur maximale des données + 100
+            const maxDataValue = Math.max(...data);
+            const suggestedYMax = maxDataValue + 100;
+
             myChart = new Chart(ctx, {
                 type: type,
                 data: {
@@ -331,6 +336,13 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            // On définit le max suggéré pour laisser de l'espace
+                            suggestedMax: suggestedYMax
+                        }
+                    },
                     plugins: {
                         legend: {
                             display: true,
