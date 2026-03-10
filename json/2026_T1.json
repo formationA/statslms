@@ -54,5 +54,24 @@
     },
     "archive_date": "20260310",
     "source": "ftp-sessions"
+  },
+  {
+    "date": "2026-03-10",
+    "apprenants_actifs": 845,
+    "resource_connections": 2840,
+    "sessions_ouvertes": 25,
+    "apprenants_en_cours": 7210,
+    "apprenants_dans_sessions": 42100,
+    "apprenants_100_completion": 8120,
+    "apprenants_non_termines": 31250,
+    "villes": {
+      "AGEN ESTILLAC": 2,
+      "BORDEAUX": 8,
+      "PARIS": 22,
+      "LYON": 5,
+      "NANTES": 3
+    },
+    "archive_date": "20260410",
+    "source": "ftp-sessions"
   }
 ]
