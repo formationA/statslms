@@ -12,22 +12,23 @@
             --text: #1e293b;
             --border: #e2e8f0;
             --input-bg: #f1f5f9;
+            --accent: #f59e0b;
         }
 
         [data-theme="dark"] {
             --bg: #020617;
             --card-bg: #0f172a;
             --text: #f1f5f9;
-            --border: #1e293b;
+            --border: #334155;
             --input-bg: #1e293b;
         }
 
-        /* Full Screen Layout sans Scroll */
         html, body {
             height: 100%;
             margin: 0;
             overflow: hidden;
             font-family: 'Inter', system-ui, sans-serif;
+            font-size: 16px;
         }
 
         body {
@@ -35,282 +36,395 @@
             color: var(--text);
             display: flex;
             flex-direction: column;
-            padding: 20px;
+            padding: 25px;
             box-sizing: border-box;
             transition: all 0.3s ease;
         }
 
-        /* Header ultra fin */
         header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
 
         h2 {
             margin: 0;
-            font-size: 1.2rem;
+            font-size: 1.8rem;
             font-weight: 800;
-            letter-spacing: -0.025em;
         }
 
-        /* Conteneur Principal */
         .main-container {
             display: flex;
-            gap: 20px;
-            height: calc(100% - 60px); /* Ajuste selon le header */
+            gap: 25px;
+            height: calc(100% - 80px);
         }
 
-        /* Panneau Gauche : Contrôles */
         .panel-left {
-            width: 320px;
+            width: 45%;
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 20px;
         }
 
-        /* Panneau Droit : Preview (Prend le reste) */
         .panel-right {
-            flex-grow: 1;
+            width: 55%;
             display: flex;
             flex-direction: column;
-            min-width: 0; /* Évite l'overflow flex */
+            min-width: 0;
         }
 
         .card {
             background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 20px;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            border: 2px solid var(--border);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
         }
 
-        /* Zone de Saisie */
+        label.field-label {
+            font-size: 14px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            display: block;
+            margin-bottom: 10px;
+            color: var(--primary);
+        }
+
         .token-input {
             width: 100%;
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid var(--border);
+            padding: 15px;
+            border-radius: 12px;
+            border: 2px solid var(--border);
             background: var(--input-bg);
             color: var(--text);
-            font-size: 13px;
-            margin-top: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
         }
 
-        /* Boutons */
+        .ftp-badge {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px dashed var(--accent);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+            color: var(--text);
+        }
+
+        .btn-primary, .btn-secondary-custom {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+            width: 100%;
+            box-sizing: border-box;
+            text-align: center;
+        }
+
         .btn-primary {
             background: var(--primary);
             color: white;
             border: none;
-            padding: 14px;
-            border-radius: 10px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.2s;
-            width: 100%;
+            box-shadow: 0 4px 14px 0 rgba(99, 102, 241, 0.39);
         }
 
-            .btn-primary:hover {
-                opacity: 0.9;
-                transform: translateY(-1px);
+            .btn-primary:disabled {
+                background: #94a3b8;
+                cursor: not-allowed;
+                box-shadow: none;
+                transform: none;
             }
 
-        .theme-btn {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
+        .btn-secondary-custom {
+            background: var(--input-bg);
             color: var(--text);
-            padding: 8px 12px;
-            border-radius: 8px;
-            cursor: pointer;
+            border: 2px solid var(--border);
+            margin-bottom: 15px;
         }
 
-        /* Stats horizontales */
+            .btn-primary:hover:not(:disabled), .btn-secondary-custom:hover {
+                transform: translateY(-2px);
+                filter: brightness(1.1);
+            }
+
+        #filePicker {
+            display: none;
+        }
+
+        .target-info {
+            background: #e0e7ff;
+            color: #4338ca;
+            padding: 12px;
+            border-radius: 10px;
+            margin-top: 15px;
+            font-weight: 600;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        [data-theme="dark"] .target-info {
+            background: #1e1b4b;
+            color: #c7d2fe;
+        }
+
         .stats-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 10px;
+            gap: 15px;
         }
 
         .stat-box {
-            background: var(--input-bg);
-            padding: 10px;
-            border-radius: 8px;
+            background: var(--card-bg);
+            border: 2px solid var(--border);
+            padding: 20px;
+            border-radius: 15px;
             text-align: center;
-            font-size: 12px;
-            font-weight: 700;
+            font-size: 1.2rem;
+            font-weight: 800;
         }
 
-        /* Zone de Code (Scroll Interne Uniquement) */
         .code-container {
-            background: #000;
-            color: #10b981;
-            border-radius: 12px;
+            background: #0f172a;
+            color: #34d399;
+            border-radius: 20px;
             flex-grow: 1;
-            position: relative;
             overflow: hidden;
             display: flex;
             flex-direction: column;
+            border: 2px solid #334155;
+        }
+
+        .code-header {
+            background: #1e293b;
+            padding: 12px 20px;
+            font-size: 12px;
+            color: #94a3b8;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
         }
 
         pre {
             margin: 0;
             padding: 20px;
-            font-size: 12px;
-            overflow: auto; /* Seul scroll autorisé */
+            font-size: 14px;
+            overflow: auto;
             flex-grow: 1;
             font-family: 'Fira Code', monospace;
+            line-height: 1.5;
         }
 
-        /* Alert Status */
         #statusMsg {
-            font-size: 13px;
-            padding: 12px;
-            border-radius: 8px;
+            font-size: 15px;
+            padding: 15px;
+            border-radius: 12px;
             margin-bottom: 15px;
             display: none;
             text-align: center;
-            font-weight: 600;
+            font-weight: 700;
         }
 
-        input[type="file"] {
-            font-size: 12px;
+        .theme-btn {
+            background: var(--card-bg);
+            border: 2px solid var(--border);
+            color: var(--text);
+            padding: 10px 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
         }
     </style>
 </head>
-<body>
+<body data-theme="dark">
+        <header>
+            <h2>📦 LMS Archivage <span style="font-weight: 300; opacity: 0.6;">| Production</span></h2>
+            <button class="theme-btn" onclick="toggleTheme()">🌓 Mode</button>
+        </header>
 
-    <header>
-        <h2>📦 LMS Archivage <span style="font-weight: 300; opacity: 0.6;">| formationA</span></h2>
-        <button class="theme-btn" onclick="toggleTheme()">🌓 Mode</button>
-    </header>
+        <div class="main-container">
+            <div class="panel-left">
+                <div class="card">
+                    <label class="field-label">🔑 Authentification GitHub</label>
+                    <input type="password" id="ghTokenInput" class="token-input" placeholder="Token ghp_...">
+                    <div class="target-info">
+                        📁 Cible GitHub : <span id="fileNameDisplay">...</span>
+                    </div>
+                </div>
 
-    <div class="main-container">
-        <div class="panel-left">
-            <div class="card">
-                <label style="font-size: 12px; font-weight: bold;">🔑 TOKEN GITHUB</label>
-                <input type="password" id="ghTokenInput" class="token-input" placeholder="ghp_...">
+                <div class="card">
+                    <label class="field-label">📡 Source : Serveur de production</label>
+                    <div class="ftp-badge">
+                        <strong>Hôte :</strong> lms-.com<br>
+                        <strong>Dossier :</strong> /json
+                    </div>
 
-                <p style="font-size: 11px; margin-top: 15px; opacity: 0.7;">
-                    Cible : <code>json/</code><code id="fileNameDisplay">...</code>
-                </p>
-            </div>
+                    <p style="font-size: 13px; margin-bottom: 10px; opacity: 0.8;">
+                        💡 <em>Note : Téléchargez les fichiers, puis sélectionnez les ici.</em>
+                    </p>
 
-            <div class="card">
-                <label style="font-size: 12px; font-weight: bold; display: block; margin-bottom: 10px;">📤 FICHIERS JSON</label>
-                <input type="file" id="filePicker" multiple accept=".json" style="width: 100%;">
+                    <label for="filePicker" class="btn-secondary-custom" id="pickerLabel">
+                        📂 Sélectionner les fichiers JSON
+                    </label>
+                    <input type="file" id="filePicker" multiple accept=".json" onchange="updateFileStatus()">
 
-                <div style="margin-top: 20px;">
-                    <button class="btn-primary" onclick="processAndPush()">Fusionner & Envoyer</button>
+                    <button class="btn-primary" id="mainSubmitBtn" onclick="processAndPush()">🚀 Lancer l'Archivage Trimestriel</button>
+                </div>
+
+                <div id="statusMsg"></div>
+
+                <div class="stats-grid">
+                    <div class="stat-box" id="statCount" style="color: var(--primary);">📄 0 fichier</div>
+                    <div class="stat-box" id="statSize" style="color: var(--success);">⚖️ 0 Ko</div>
                 </div>
             </div>
 
-            <div id="statusMsg"></div>
-
-            <div class="stats-grid">
-                <div class="stat-box" id="statCount">📄 0 fichier</div>
-                <div class="stat-box" id="statSize">⚖️ 0 Ko</div>
-            </div>
-        </div>
-
-        <div class="panel-right">
-            <div class="code-container">
-                <div style="background: #1e293b; padding: 8px 15px; font-size: 10px; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;">
-                    Aperçu JSON Concaténé
+            <div class="panel-right">
+                <div class="code-container">
+                    <div class="code-header">
+                        <span>FLUX DE DONNÉES CONCATÉNÉ</span>
+                    </div>
+                    <pre id="output">// Prêt pour la fusion des sessions...</pre>
                 </div>
-                <pre id="output">// Sélectionnez des fichiers pour commencer...</pre>
             </div>
         </div>
-    </div>
 
-    <script>
-        // --- LOGIQUE VISUELLE ---
-        function toggleTheme() {
-            const body = document.body;
-            const isDark = body.getAttribute('data-theme') === 'dark';
-            body.setAttribute('data-theme', isDark ? 'light' : 'dark');
-        }
-
-        // --- VOS FONCTIONS (STRICTEMENT INCHANGÉES) ---
-        const GH_USER = "formationA";
-        const GH_REPO = "statslms";
-        const now = new Date();
-        const currentYear = now.getFullYear();
-        const currentQuarter = Math.ceil((now.getMonth() + 1) / 3);
-        const TARGET_FILE_NAME = `${currentYear}_T${currentQuarter}.json`;
-        const GH_PATH = `json/${TARGET_FILE_NAME}`;
-
-        document.getElementById('fileNameDisplay').innerText = TARGET_FILE_NAME;
-
-        async function processAndPush() {
-            const fileInput = document.getElementById('filePicker');
-            const tokenInput = document.getElementById('ghTokenInput');
-            const files = Array.from(fileInput.files);
-            const GH_TOKEN = tokenInput.value.trim();
-
-            if (GH_TOKEN === "") return alert("Veuillez saisir votre Token GitHub.");
-            if (files.length === 0) return alert("Sélectionnez vos fichiers JSON !");
-
-            showStatus(`⏳ Traitement en cours...`, "#6366f1", "#e0e7ff");
-
-            try {
-                let finalData = [];
-                for (const file of files) {
-                    const text = await file.text();
-                    const json = JSON.parse(text);
-                    const arr = Array.isArray(json) ? json : [json];
-                    const tagged = arr.map(item => ({
-                        ...item,
-                        archive_date: file.name.replace('kpi_', '').replace('.json', '')
-                    }));
-                    finalData = finalData.concat(tagged);
-                }
-
-                const jsonString = JSON.stringify(finalData, null, 2);
-                const sizeInKb = (new Blob([jsonString]).size / 1024).toFixed(2);
-
-                document.getElementById('statCount').innerText = `📄 ${files.length} fichiers`;
-                document.getElementById('statSize').innerText = `⚖️ ${sizeInKb} Ko`;
-                document.getElementById('output').innerText = jsonString;
-
-                const contentBase64 = btoa(unescape(encodeURIComponent(jsonString)));
-                const url = `https://api.github.com/repos/${GH_USER}/${GH_REPO}/contents/${GH_PATH}`;
-
-                let sha = null;
-                const check = await fetch(url, { headers: { "Authorization": `token ${GH_TOKEN}` } });
-                if (check.ok) {
-                    const existing = await check.json();
-                    sha = existing.sha;
-                }
-
-                const res = await fetch(url, {
-                    method: "PUT",
-                    headers: { "Authorization": `token ${GH_TOKEN}`, "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        message: `Archive ${TARGET_FILE_NAME} mise à jour (${files.length} fichiers)`,
-                        content: contentBase64,
-                        sha: sha
-                    })
-                });
-
-                if (res.ok) {
-                    showStatus(`✅ Succès ! Envoyé vers GitHub`, "#059669", "#d1fae5");
-                } else {
-                    const err = await res.json();
-                    throw new Error(err.message);
-                }
-            } catch (e) {
-                showStatus("❌ Erreur : " + e.message, "#b91c1c", "#fee2e2");
+        <script>
+            function toggleTheme() {
+                const body = document.body;
+                const isDark = body.getAttribute('data-theme') === 'dark';
+                body.setAttribute('data-theme', isDark ? 'light' : 'dark');
             }
-        }
 
-        function showStatus(text, color, bg) {
-            const msg = document.getElementById('statusMsg');
-            msg.style.display = "block";
-            msg.style.color = color;
-            msg.style.background = bg;
-            msg.innerText = text;
-        }
-    </script>
-</body>
+            // Helper pour extraire Année et Trimestre
+            function getQuarterInfo(filename) {
+                const match = filename.match(/(\d{4})-?(\d{2})/);
+                if (!match) return null;
+                return { year: match[1], quarter: Math.ceil(parseInt(match[2]) / 3) };
+            }
+
+            function updateFileStatus() {
+                const fileInput = document.getElementById('filePicker');
+                const files = Array.from(fileInput.files);
+                const count = files.length;
+                const label = document.getElementById('pickerLabel');
+                const submitBtn = document.getElementById('mainSubmitBtn');
+                const display = document.getElementById('fileNameDisplay');
+
+                document.getElementById('statCount').innerText = `📄 ${count} fichier(s)`;
+
+                if (count > 0) {
+                    const firstInfo = getQuarterInfo(files[0].name);
+                    let isConsistent = true;
+
+                    // Vérification de la cohérence de TOUS les fichiers
+                    files.forEach(f => {
+                        const info = getQuarterInfo(f.name);
+                        if (!info || info.year !== firstInfo.year || info.quarter !== firstInfo.quarter) {
+                            isConsistent = false;
+                        }
+                    });
+
+                    if (!isConsistent) {
+                        label.innerText = `❌ Conflit de Trimestre !`;
+                        label.style.borderColor = "#ef4444";
+                        display.innerText = "SÉLECTION INVALIDE";
+                        submitBtn.disabled = true;
+                        showStatus("Erreur : Vous avez mélangé des fichiers de trimestres différents.", "#b91c1c", "#fee2e2");
+                    } else {
+                        label.innerText = `✅ ${count} fichiers (T${firstInfo.quarter})`;
+                        label.style.borderColor = "var(--success)";
+                        display.innerText = `json/${firstInfo.year}_T${firstInfo.quarter}.json`;
+                        submitBtn.disabled = false;
+                        document.getElementById('statusMsg').style.display = "none";
+                    }
+                }
+            }
+
+            const GH_USER = "formationA";
+            const GH_REPO = "statslms";
+
+            async function processAndPush() {
+                const fileInput = document.getElementById('filePicker');
+                const tokenInput = document.getElementById('ghTokenInput');
+                const files = Array.from(fileInput.files);
+                const GH_TOKEN = tokenInput.value.trim();
+
+                if (GH_TOKEN === "") return alert("Veuillez saisir votre Token GitHub.");
+
+                const info = getQuarterInfo(files[0].name);
+                const TARGET_FILE_NAME = `${info.year}_T${info.quarter}.json`;
+                const GH_PATH = `json/${TARGET_FILE_NAME}`;
+
+                showStatus(`⏳ Fusion vers ${TARGET_FILE_NAME}...`, "#6366f1", "#e0e7ff");
+
+                try {
+                    let finalData = [];
+                    for (const file of files) {
+                        const text = await file.text();
+                        const json = JSON.parse(text);
+                        const arr = Array.isArray(json) ? json : [json];
+                        const tagged = arr.map(item => ({
+                            ...item,
+                            archive_date: file.name.replace('kpi_', '').replace('.json', ''),
+                            source: "ftp-sessions"
+                        }));
+                        finalData = finalData.concat(tagged);
+                    }
+
+                    const jsonString = JSON.stringify(finalData, null, 2);
+                    const sizeInKb = (new Blob([jsonString]).size / 1024).toFixed(2);
+
+                    document.getElementById('statSize').innerText = `⚖️ ${sizeInKb} Ko`;
+                    document.getElementById('output').innerText = jsonString;
+
+                    const contentBase64 = btoa(unescape(encodeURIComponent(jsonString)));
+                    const url = `https://api.github.com/repos/${GH_USER}/${GH_REPO}/contents/${GH_PATH}`;
+
+                    let sha = null;
+                    const check = await fetch(url, { headers: { "Authorization": `token ${GH_TOKEN}` } });
+                    if (check.ok) {
+                        const existing = await check.json();
+                        sha = existing.sha;
+                    }
+
+                    const res = await fetch(url, {
+                        method: "PUT",
+                        headers: { "Authorization": `token ${GH_TOKEN}`, "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            message: `Archive Sessions ${TARGET_FILE_NAME} (${files.length} fichiers)`,
+                            content: contentBase64,
+                            sha: sha
+                        })
+                    });
+
+                    if (res.ok) {
+                        showStatus(`✅ Succès ! Données poussées vers ${TARGET_FILE_NAME}`, "#059669", "#d1fae5");
+                    } else {
+                        const err = await res.json();
+                        throw new Error(err.message);
+                    }
+                } catch (e) {
+                    showStatus("❌ Erreur : " + e.message, "#b91c1c", "#fee2e2");
+                }
+            }
+
+            function showStatus(text, color, bg) {
+                const msg = document.getElementById('statusMsg');
+                msg.style.display = "block";
+                msg.style.color = color;
+                msg.style.background = bg;
+                msg.innerText = text;
+            }
+        </script>
+    </body>
 </html>
