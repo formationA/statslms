@@ -2,225 +2,280 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>KPI LMS - Nettoyeur Quotidien vers Trimestriel</title>
+    <title>KPI LMS - Accumulateur Trimestriel Complet</title>
     <style>
         :root {
-            --primary: #2563eb;
-            --bg: #f1f5f9;
+            --primary: #4f46e5;
+            --bg: #f8fafc;
             --text: #0f172a;
-            --danger: #e11d48;
-            --success: #16a34a;
+            --accent: #06b6d4;
         }
 
         body {
-            font-family: 'Segoe UI', system-ui, sans-serif;
+            font-family: 'Inter', system-ui, sans-serif;
             background: var(--bg);
             color: var(--text);
             padding: 20px;
+            line-height: 1.5;
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1300px;
             margin: 0 auto;
         }
 
-        .status-bar {
+        /* Header */
+        .header-card {
             background: white;
-            padding: 15px;
-            border-radius: 12px;
-            margin-bottom: 20px;
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             border: 1px solid #e2e8f0;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
 
-        .stats-row {
+        h2 {
+            margin: 0;
+            color: var(--primary);
+            font-size: 1.5rem;
+        }
+
+        .info-pill {
+            background: #e0e7ff;
+            color: #4338ca;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-top: 5px;
+            display: inline-block;
+        }
+
+        /* Dashboard Stats */
+        .stats-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
-            margin-bottom: 20px;
+            gap: 20px;
+            margin-bottom: 25px;
         }
 
         .stat-card {
             background: white;
             padding: 20px;
             border-radius: 12px;
+            border-bottom: 4px solid var(--primary);
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            border-top: 4px solid var(--primary);
         }
 
             .stat-card h4 {
                 margin: 0;
-                font-size: 0.8rem;
+                font-size: 0.75rem;
                 color: #64748b;
                 text-transform: uppercase;
+                letter-spacing: 0.05em;
             }
 
             .stat-card .val {
-                font-size: 1.8rem;
-                font-weight: bold;
-                margin-top: 5px;
+                font-size: 1.75rem;
+                font-weight: 800;
+                margin-top: 8px;
+                color: var(--text);
             }
 
-            .stat-card.warning {
-                border-top-color: var(--danger);
-            }
-
-        .grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-
+        /* JSON Display */
         .panel {
             background: white;
             padding: 20px;
-            border-radius: 12px;
+            border-radius: 16px;
             border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        h3 {
+            margin-top: 0;
+            font-size: 1.1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         pre {
-            background: #1e293b;
+            background: #0f172a;
             color: #38bdf8;
-            padding: 15px;
-            border-radius: 8px;
+            padding: 20px;
+            border-radius: 10px;
             font-size: 11px;
-            height: 450px;
+            height: 550px;
             overflow: auto;
+            border: 1px solid #334155;
+        }
+
+        /* Buttons */
+        .btn-group {
+            display: flex;
+            gap: 10px;
         }
 
         button {
             background: var(--primary);
             color: white;
             border: none;
-            padding: 10px 20px;
-            border-radius: 6px;
+            padding: 12px 24px;
+            border-radius: 8px;
             cursor: pointer;
             font-weight: 600;
+            transition: all 0.2s;
         }
 
-        .loader {
-            color: #2563eb;
+            button:hover {
+                background: #4338ca;
+                transform: translateY(-1px);
+            }
+
+            button.secondary {
+                background: #0f172a;
+            }
+
+        .loading {
+            color: var(--primary);
             font-weight: bold;
-            display: none;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+
+            100% {
+                opacity: 1;
+            }
         }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <div class="status-bar">
+        <div class="header-card">
             <div>
-                <strong>Période :</strong> <span id="periodLabel">Trimestre en cours</span>
-                <span id="loadingMsg" class="loader" style="margin-left:20px;">⚡ Scan du dossier...</span>
+                <h2>📦 Accumulateur KPI Trimestriel</h2>
+                <div id="periodDisplay" class="info-pill">Calcul de la période...</div>
             </div>
-            <button onclick="runDailyMerge()">Lancer la Fusion du Trimestre</button>
+            <div class="btn-group">
+                <button onclick="compileQuarter()">Compiler le Trimestre</button>
+                <button class="secondary" onclick="downloadJSON()">Télécharger .json</button>
+            </div>
         </div>
 
-        <div class="stats-row">
+        <div class="stats-grid">
             <div class="stat-card">
-                <h4>Fichiers Journaliers Lus</h4>
+                <h4>Jours Trouvés</h4>
                 <div id="statFiles" class="val">0</div>
             </div>
             <div class="stat-card">
-                <h4>Lignes Brutes Cumulées</h4>
-                <div id="statRaw" class="val">0</div>
+                <h4>Total Entrées</h4>
+                <div id="statTotal" class="val">0</div>
             </div>
-            <div class="stat-card warning">
-                <h4>Doublons Éliminés</h4>
-                <div id="statDiff" class="val">0</div>
+            <div id="loader" class="stat-card" style="display:none; border-color: var(--accent);">
+                <h4>Statut</h4>
+                <div class="val loading">Lecture...</div>
             </div>
-            <div class="stat-card" style="border-top-color: #16a34a;">
-                <h4>Sessions Uniques (ACWW...)</h4>
-                <div id="statUnique" class="val">0</div>
+            <div class="stat-card" style="border-color: #10b981;">
+                <h4>Poids Final</h4>
+                <div id="statSize" class="val">0 KB</div>
             </div>
         </div>
 
-        <div class="grid">
-            <div class="panel">
-                <h3>Flux Avant (Multi-fichiers)</h3>
-                <pre id="viewBefore">// Les données brutes s'afficheront ici</pre>
-            </div>
-            <div class="panel">
-                <h3>JSON Final (Dédupliqué)</h3>
-                <pre id="viewAfter">// Le résultat propre s'affichera ici</pre>
-            </div>
+        <div class="panel">
+            <h3>Aperçu du JSON Accumulé <small style="color:#64748b; font-weight:normal;">(Historique complet sans déduplication)</small></h3>
+            <pre id="jsonOutput">// Cliquez sur le bouton pour lancer la compilation des fichiers /json/kpi_YYYYMMDD.json</pre>
         </div>
     </div>
 
-
-
     <script>
-        async function runDailyMerge() {
-            const loader = document.getElementById('loadingMsg');
-            loader.style.display = "inline";
+        let globalAccumulatedData = [];
+
+        async function compileQuarter() {
+            const loader = document.getElementById('loader');
+            const output = document.getElementById('jsonOutput');
+            loader.style.display = 'block';
+            globalAccumulatedData = [];
 
             const folder = "json/";
             const now = new Date();
             const year = now.getFullYear();
-            const currentMonth = now.getMonth();
-            const quarter = Math.ceil((currentMonth + 1) / 3);
+            const quarter = Math.ceil((now.getMonth() + 1) / 3);
 
-            // Calculer le premier jour du trimestre
+            // Définir les bornes du trimestre
             const startMonth = (quarter - 1) * 3;
-            const startDate = new Date(year, startMonth, 1);
+            let tempDate = new Date(year, startMonth, 1);
 
-            let fileNames = [];
-            let tempDate = new Date(startDate);
+            document.getElementById('periodDisplay').innerText = `Trimestre ${quarter} ${year} (depuis le 01/${String(startMonth + 1).padStart(2, '0')})`;
 
-            // On génère tous les noms de fichiers possibles du début du trimestre jusqu'à AUJOURD'HUI
+            let filesProcessed = 0;
+
+            // On scanne chaque jour du trimestre jusqu'à aujourd'hui
             while (tempDate <= now) {
                 const y = tempDate.getFullYear();
                 const m = String(tempDate.getMonth() + 1).padStart(2, '0');
                 const d = String(tempDate.getDate()).padStart(2, '0');
-                fileNames.push(`kpi_${y}${m}${d}.json`);
+                const fileName = `kpi_${y}${m}${d}.json`;
+
+                try {
+                    const response = await fetch(folder + fileName);
+                    if (response.ok) {
+                        const dailyData = await response.json();
+
+                        // On ajoute la date source à chaque objet pour garder la trace temporelle
+                        const dataWithTimestamp = dailyData.map(item => ({
+                            ...item,
+                            snapshot_date: `${y}-${m}-${d}`
+                        }));
+
+                        // ACCUMULATION : On ajoute au tableau global (sans écraser)
+                        globalAccumulatedData = globalAccumulatedData.concat(dataWithTimestamp);
+                        filesProcessed++;
+                    }
+                } catch (err) {
+                    // Fichier absent (week-end ou jour férié), on continue
+                }
                 tempDate.setDate(tempDate.getDate() + 1);
             }
 
-            try {
-                // Lecture en parallèle de tous les fichiers (on ignore les erreurs si le fichier n'existe pas)
-                const results = await Promise.all(fileNames.map(name =>
-                    fetch(folder + name)
-                        .then(res => res.ok ? res.json() : null)
-                        .catch(() => null)
-                ));
+            // Mise à jour de l'affichage
+            document.getElementById('statFiles').innerText = filesProcessed;
+            document.getElementById('statTotal').innerText = globalAccumulatedData.length;
 
-                // Filtrer les fichiers qui ont vraiment été trouvés
-                const validData = results.filter(d => d !== null);
-                const rawData = validData.flat();
+            const size = (JSON.stringify(globalAccumulatedData).length / 1024).toFixed(1);
+            document.getElementById('statSize').innerText = size + " KB";
 
-                // --- DÉDUPLICATION CRUCIALE ---
-                const uniqueMap = new Map();
-                rawData.forEach(item => {
-                    // On utilise session_id (ex: ACWW62300001)
-                    // Comme on boucle dans l'ordre chronologique, la version du 10 mars
-                    // écrasera celle du 08 mars. On garde donc les infos les plus fraîches.
-                    uniqueMap.set(item.session_id, item);
-                });
-                const cleanData = Array.from(uniqueMap.values());
-
-                // --- MAJ INTERFACE ---
-                document.getElementById('statFiles').innerText = validData.length;
-                document.getElementById('statRaw').innerText = rawData.length;
-                document.getElementById('statUnique').innerText = cleanData.length;
-                document.getElementById('statDiff').innerText = rawData.length - cleanData.length;
-
-                document.getElementById('viewBefore').innerText = JSON.stringify(rawData.slice(0, 50), null, 2);
-                document.getElementById('viewAfter').innerText = JSON.stringify(cleanData, null, 2);
-
-                document.getElementById('periodLabel').innerText = `Trimestre ${quarter} ${year} (${validData.length} jours trouvés)`;
-
-            } catch (err) {
-                alert("Erreur lors de la fusion : " + err.message);
-            } finally {
-                loader.style.display = "none";
-            }
+            output.innerText = JSON.stringify(globalAccumulatedData, null, 2);
+            loader.style.display = 'none';
         }
 
-        // Lancement auto
-        runDailyMerge();
+        function downloadJSON() {
+            if (globalAccumulatedData.length === 0) {
+                alert("Aucune donnée à télécharger. Lancez d'abord la compilation.");
+                return;
+            }
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(globalAccumulatedData));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", `kpi_trimestre_accumule.json`);
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+        }
+
+        // Lancement automatique au chargement de la page
+        compileQuarter();
     </script>
 
 </body>
