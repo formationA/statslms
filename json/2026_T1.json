@@ -1,42 +1,5 @@
 [
   {
-    "date": "2026-03-08",
-    "apprenants_actifs": 710,
-    "resource_connections": 2615,
-    "sessions_ouvertes": 8,
-    "apprenants_en_cours": 7160,
-    "apprenants_dans_sessions": 40100,
-    "apprenants_100_completion": 7120,
-    "apprenants_non_termines": 30250,
-    "villes": {
-      "AGEN ESTILLAC": 1,
-      "BORDEAUX": 8,
-      "MONCHY": 12,
-      "PARIS": 8,
-      "NANTES": 4
-    },
-    "archive_date": "20260308",
-    "source": "ftp-sessions"
-  },
-  {
-    "date": "2026-03-09",
-    "apprenants_actifs": 801,
-    "resource_connections": 2610,
-    "sessions_ouvertes": 20,
-    "apprenants_en_cours": 7150,
-    "apprenants_dans_sessions": 42500,
-    "apprenants_100_completion": 8000,
-    "apprenants_non_termines": 31850,
-    "villes": {
-      "BORDEAUX": 10,
-      "PARIS": 25,
-      "LYON": 15,
-      "NANTES": 23
-    },
-    "archive_date": "20260309",
-    "source": "ftp-sessions"
-  },
-  {
     "date": "2026-03-10",
     "apprenants_actifs": 845,
     "resource_connections": 2840,
@@ -53,25 +16,6 @@
       "NANTES": 3
     },
     "archive_date": "20260310",
-    "source": "ftp-sessions"
-  },
-  {
-    "date": "2026-04-10",
-    "apprenants_actifs": 845,
-    "resource_connections": 2840,
-    "sessions_ouvertes": 25,
-    "apprenants_en_cours": 7210,
-    "apprenants_dans_sessions": 42100,
-    "apprenants_100_completion": 8120,
-    "apprenants_non_termines": 31250,
-    "villes": {
-      "AGEN ESTILLAC": 2,
-      "BORDEAUX": 8,
-      "PARIS": 22,
-      "LYON": 5,
-      "NANTES": 3
-    },
-    "archive_date": "20260410",
     "source": "ftp-sessions"
   }
 ]
