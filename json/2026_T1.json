@@ -15,7 +15,8 @@
       "PARIS": 8,
       "NANTES": 4
     },
-    "archive_date": "20260308"
+    "archive_date": "20260308",
+    "source": "ftp-sessions"
   },
   {
     "date": "2026-03-09",
@@ -32,7 +33,8 @@
       "LYON": 15,
       "NANTES": 23
     },
-    "archive_date": "20260309"
+    "archive_date": "20260309",
+    "source": "ftp-sessions"
   },
   {
     "date": "2026-03-10",
@@ -50,6 +52,7 @@
       "LYON": 5,
       "NANTES": 3
     },
-    "archive_date": "20260310"
+    "archive_date": "20260310",
+    "source": "ftp-sessions"
   }
 ]
