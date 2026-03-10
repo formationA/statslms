@@ -1,0 +1,316 @@
+﻿<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>LMS - Dashboard Archivage</title>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --success: #10b981;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #1e293b;
+            --border: #e2e8f0;
+            --input-bg: #f1f5f9;
+        }
+
+        [data-theme="dark"] {
+            --bg: #020617;
+            --card-bg: #0f172a;
+            --text: #f1f5f9;
+            --border: #1e293b;
+            --input-bg: #1e293b;
+        }
+
+        /* Full Screen Layout sans Scroll */
+        html, body {
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+
+        /* Header ultra fin */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            margin: 0;
+            font-size: 1.2rem;
+            font-weight: 800;
+            letter-spacing: -0.025em;
+        }
+
+        /* Conteneur Principal */
+        .main-container {
+            display: flex;
+            gap: 20px;
+            height: calc(100% - 60px); /* Ajuste selon le header */
+        }
+
+        /* Panneau Gauche : Contrôles */
+        .panel-left {
+            width: 320px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        /* Panneau Droit : Preview (Prend le reste) */
+        .panel-right {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0; /* Évite l'overflow flex */
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        }
+
+        /* Zone de Saisie */
+        .token-input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--input-bg);
+            color: var(--text);
+            font-size: 13px;
+            margin-top: 5px;
+        }
+
+        /* Boutons */
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            width: 100%;
+        }
+
+            .btn-primary:hover {
+                opacity: 0.9;
+                transform: translateY(-1px);
+            }
+
+        .theme-btn {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        /* Stats horizontales */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .stat-box {
+            background: var(--input-bg);
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        /* Zone de Code (Scroll Interne Uniquement) */
+        .code-container {
+            background: #000;
+            color: #10b981;
+            border-radius: 12px;
+            flex-grow: 1;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        pre {
+            margin: 0;
+            padding: 20px;
+            font-size: 12px;
+            overflow: auto; /* Seul scroll autorisé */
+            flex-grow: 1;
+            font-family: 'Fira Code', monospace;
+        }
+
+        /* Alert Status */
+        #statusMsg {
+            font-size: 13px;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: none;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        input[type="file"] {
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h2>📦 LMS Archivage <span style="font-weight: 300; opacity: 0.6;">| formationA</span></h2>
+        <button class="theme-btn" onclick="toggleTheme()">🌓 Mode</button>
+    </header>
+
+    <div class="main-container">
+        <div class="panel-left">
+            <div class="card">
+                <label style="font-size: 12px; font-weight: bold;">🔑 TOKEN GITHUB</label>
+                <input type="password" id="ghTokenInput" class="token-input" placeholder="ghp_...">
+
+                <p style="font-size: 11px; margin-top: 15px; opacity: 0.7;">
+                    Cible : <code>json/</code><code id="fileNameDisplay">...</code>
+                </p>
+            </div>
+
+            <div class="card">
+                <label style="font-size: 12px; font-weight: bold; display: block; margin-bottom: 10px;">📤 FICHIERS JSON</label>
+                <input type="file" id="filePicker" multiple accept=".json" style="width: 100%;">
+
+                <div style="margin-top: 20px;">
+                    <button class="btn-primary" onclick="processAndPush()">Fusionner & Envoyer</button>
+                </div>
+            </div>
+
+            <div id="statusMsg"></div>
+
+            <div class="stats-grid">
+                <div class="stat-box" id="statCount">📄 0 fichier</div>
+                <div class="stat-box" id="statSize">⚖️ 0 Ko</div>
+            </div>
+        </div>
+
+        <div class="panel-right">
+            <div class="code-container">
+                <div style="background: #1e293b; padding: 8px 15px; font-size: 10px; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;">
+                    Aperçu JSON Concaténé
+                </div>
+                <pre id="output">// Sélectionnez des fichiers pour commencer...</pre>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- LOGIQUE VISUELLE ---
+        function toggleTheme() {
+            const body = document.body;
+            const isDark = body.getAttribute('data-theme') === 'dark';
+            body.setAttribute('data-theme', isDark ? 'light' : 'dark');
+        }
+
+        // --- VOS FONCTIONS (STRICTEMENT INCHANGÉES) ---
+        const GH_USER = "formationA";
+        const GH_REPO = "statslms";
+        const now = new Date();
+        const currentYear = now.getFullYear();
+        const currentQuarter = Math.ceil((now.getMonth() + 1) / 3);
+        const TARGET_FILE_NAME = `${currentYear}_T${currentQuarter}.json`;
+        const GH_PATH = `json/${TARGET_FILE_NAME}`;
+
+        document.getElementById('fileNameDisplay').innerText = TARGET_FILE_NAME;
+
+        async function processAndPush() {
+            const fileInput = document.getElementById('filePicker');
+            const tokenInput = document.getElementById('ghTokenInput');
+            const files = Array.from(fileInput.files);
+            const GH_TOKEN = tokenInput.value.trim();
+
+            if (GH_TOKEN === "") return alert("Veuillez saisir votre Token GitHub.");
+            if (files.length === 0) return alert("Sélectionnez vos fichiers JSON !");
+
+            showStatus(`⏳ Traitement en cours...`, "#6366f1", "#e0e7ff");
+
+            try {
+                let finalData = [];
+                for (const file of files) {
+                    const text = await file.text();
+                    const json = JSON.parse(text);
+                    const arr = Array.isArray(json) ? json : [json];
+                    const tagged = arr.map(item => ({
+                        ...item,
+                        archive_date: file.name.replace('kpi_', '').replace('.json', '')
+                    }));
+                    finalData = finalData.concat(tagged);
+                }
+
+                const jsonString = JSON.stringify(finalData, null, 2);
+                const sizeInKb = (new Blob([jsonString]).size / 1024).toFixed(2);
+
+                document.getElementById('statCount').innerText = `📄 ${files.length} fichiers`;
+                document.getElementById('statSize').innerText = `⚖️ ${sizeInKb} Ko`;
+                document.getElementById('output').innerText = jsonString;
+
+                const contentBase64 = btoa(unescape(encodeURIComponent(jsonString)));
+                const url = `https://api.github.com/repos/${GH_USER}/${GH_REPO}/contents/${GH_PATH}`;
+
+                let sha = null;
+                const check = await fetch(url, { headers: { "Authorization": `token ${GH_TOKEN}` } });
+                if (check.ok) {
+                    const existing = await check.json();
+                    sha = existing.sha;
+                }
+
+                const res = await fetch(url, {
+                    method: "PUT",
+                    headers: { "Authorization": `token ${GH_TOKEN}`, "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        message: `Archive ${TARGET_FILE_NAME} mise à jour (${files.length} fichiers)`,
+                        content: contentBase64,
+                        sha: sha
+                    })
+                });
+
+                if (res.ok) {
+                    showStatus(`✅ Succès ! Envoyé vers GitHub`, "#059669", "#d1fae5");
+                } else {
+                    const err = await res.json();
+                    throw new Error(err.message);
+                }
+            } catch (e) {
+                showStatus("❌ Erreur : " + e.message, "#b91c1c", "#fee2e2");
+            }
+        }
+
+        function showStatus(text, color, bg) {
+            const msg = document.getElementById('statusMsg');
+            msg.style.display = "block";
+            msg.style.color = color;
+            msg.style.background = bg;
+            msg.innerText = text;
+        }
+    </script>
+</body>
+</html>
