@@ -1,5 +1,5 @@
 [
-{"Start Date: Heure":"","Nombre de lignes":"1,326,277"},
+{"Start Date: Heure":"","Nombre de lignes":"1,377,518"},
 {"Start Date: Heure":"septembre 24, 2023, 10 PM","Nombre de lignes":"1"},
 {"Start Date: Heure":"octobre 1, 2023, 10 PM","Nombre de lignes":"1"},
 {"Start Date: Heure":"octobre 3, 2023, 10 PM","Nombre de lignes":"1"},
@@ -17,7 +17,7 @@
 {"Start Date: Heure":"septembre 26, 2024, 10 PM","Nombre de lignes":"1"},
 {"Start Date: Heure":"septembre 29, 2024, 10 PM","Nombre de lignes":"4"},
 {"Start Date: Heure":"octobre 2, 2024, 10 PM","Nombre de lignes":"1"},
-{"Start Date: Heure":"octobre 6, 2024, 10 PM","Nombre de lignes":"8"},
+{"Start Date: Heure":"octobre 6, 2024, 10 PM","Nombre de lignes":"9"},
 {"Start Date: Heure":"octobre 13, 2024, 10 PM","Nombre de lignes":"6"},
 {"Start Date: Heure":"octobre 14, 2024, 10 PM","Nombre de lignes":"1"},
 {"Start Date: Heure":"octobre 16, 2024, 10 PM","Nombre de lignes":"2"},
@@ -272,7 +272,7 @@
 {"Start Date: Heure":"septembre 30, 2025, 10 PM","Nombre de lignes":"43"},
 {"Start Date: Heure":"octobre 1, 2025, 10 PM","Nombre de lignes":"33"},
 {"Start Date: Heure":"octobre 2, 2025, 10 PM","Nombre de lignes":"6"},
-{"Start Date: Heure":"octobre 5, 2025, 10 PM","Nombre de lignes":"95"},
+{"Start Date: Heure":"octobre 5, 2025, 10 PM","Nombre de lignes":"96"},
 {"Start Date: Heure":"octobre 6, 2025, 10 PM","Nombre de lignes":"19"},
 {"Start Date: Heure":"octobre 7, 2025, 10 PM","Nombre de lignes":"24"},
 {"Start Date: Heure":"octobre 8, 2025, 10 PM","Nombre de lignes":"39"},
@@ -391,6 +391,11 @@
 {"Start Date: Heure":"mars 3, 2026, 11 PM","Nombre de lignes":"308"},
 {"Start Date: Heure":"mars 4, 2026, 11 PM","Nombre de lignes":"302"},
 {"Start Date: Heure":"mars 5, 2026, 11 PM","Nombre de lignes":"50"},
-{"Start Date: Heure":"mars 8, 2026, 11 PM","Nombre de lignes":"737"},
-{"Start Date: Heure":"mars 9, 2026, 11 PM","Nombre de lignes":"314"}
+{"Start Date: Heure":"mars 8, 2026, 11 PM","Nombre de lignes":"745"},
+{"Start Date: Heure":"mars 9, 2026, 11 PM","Nombre de lignes":"324"},
+{"Start Date: Heure":"mars 10, 2026, 11 PM","Nombre de lignes":"358"},
+{"Start Date: Heure":"mars 11, 2026, 11 PM","Nombre de lignes":"268"},
+{"Start Date: Heure":"mars 12, 2026, 11 PM","Nombre de lignes":"47"},
+{"Start Date: Heure":"mars 13, 2026, 11 PM","Nombre de lignes":"1"},
+{"Start Date: Heure":"mars 15, 2026, 11 PM","Nombre de lignes":"725"}
 ]
