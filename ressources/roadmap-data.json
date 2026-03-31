@@ -2,50 +2,50 @@
   {
     "ui": "Formateur",
     "task": "Ajout sur les visios à venir d'une action afin d'ajouter dans son agenda la visio",
-    "preprod": "00/00/0000",
-    "prod": "13/03/2026"
+    "preprod": "31/03/2026",
+    "prod": "à venir"
   },
   {
     "ui": "Tous",
     "task": "Tri des listes déroulantes de plateforme par ordre alpha",
-    "preprod": "à venir",
-    "prod": "13/03/2026"
+    "preprod": "31/03/2026",
+    "prod": "à venir"
   },
   {
     "ui": "Formateur",
     "task": "Correction de la pagination des participants d'une visio passée + tri par ordre alpha sur les noms de famille",
-    "preprod": "13/03/2026",
-    "prod": "13/03/2026"
+    "preprod": "31/03/2026",
+    "prod": "à venir"
   },
   {
     "ui": "Formateur",
     "task": "Intégration d'une page avec : Tous les nom + prenom + adresse mail + identifiant par défaut + code session. Recherche multi-sessions.",
-    "preprod": "13/03/2026",
-    "prod": "13/03/2026"
+    "preprod": "31/03/2026",
+    "prod": "à venir"
   },
   {
     "ui": "HelpDesk",
     "task": "Modification du menu : 'Codes produits' est maintenant 'CMS' avec accès aux stats, codes produits et gestion des comptes",
-    "preprod": "13/03/2026",
-    "prod": "13/03/2026"
+    "preprod": "31/03/2026",
+    "prod": "à venir"
   },
   {
     "ui": "Admin",
     "task": "Ajout de la fonctionnalité : 'se connecter en tant que' / dispo sur gestion des comptes + optimisation UI",
-    "preprod": "13/03/2026",
-    "prod": "13/03/2026"
+    "preprod": "31/03/2026",
+    "prod": "à venir"
   },
   {
     "ui": "Tous",
     "task": "Fichier CSV des réponses aux enquêtes de satisfaction",
-    "preprod": "13/03/2026",
-    "prod": "13/03/2026"
+    "preprod": "31/03/2026",
+    "prod": "à venir"
   },
   {
     "ui": "Tous",
     "task": "Fichier json data",
-    "preprod": "13/03/2026",
-    "prod": "13/03/2026"
+    "preprod": "30/03/2026",
+    "prod": "30/03/2026"
   },
   {
     "ui": "Tous",
