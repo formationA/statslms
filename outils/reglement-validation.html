@@ -292,6 +292,10 @@
             border: none;
             box-shadow: none;
             max-width: 100%;
+            /* Espace extérieur autour de la carte */
+            margin: 20px;
+            /* Espace intérieur entre le bord de la carte et votre contenu SCORM */
+            padding: 15px;
         }
     </style>
 </head>
@@ -556,47 +560,27 @@
         function generateSCORM() {
             const zip = new JSZip();
 
-            // 1. On récupère le contenu actuel de la box
+            // 1. On récupère le contenu actuel de la box (celui généré par le JSON)
             const contenuFixe = document.getElementById('rulesBox').innerHTML;
 
-            // 2. On clone le document
+            // 2. On clone le document pour ne pas modifier la page actuelle
             let docClone = document.documentElement.cloneNode(true);
 
-            // 3. On remplace le contenu
+            // 3. On remplace le contenu de la box par le texte fixe dans le clone
+            // Cela évite que le SCORM cherche le fichier JSON au lancement
             docClone.querySelector('#rulesBox').innerHTML = contenuFixe;
 
-            // 4. On désactive l'appel à chargerReglement()
+            // 4. On désactive l'appel à chargerReglement() dans le clone pour éviter les erreurs
             let scriptClone = docClone.querySelector('script');
-
-            // --- NOUVEAU : 4.bis Injection CSS pour réduire les marges ---
-            const styleOptimisation = docClone.createElement('style');
-            styleOptimisation.innerHTML = `
-        body.scorm-mode { 
-            margin: 0 !important; 
-            padding: 10px !important; 
-            width: 100% !important;
-            overflow-x: hidden;
-        }
-        #rulesBox, .container, .card { 
-            max-width: 100% !important; 
-            margin-left: 0 !important; 
-            margin-right: 0 !important; 
-            padding-left: 5px !important; 
-            padding-right: 5px !important; 
-        }
-    `;
-            docClone.head.appendChild(styleOptimisation);
-            // ---------------------------------------------------------
-
             let propreHtml = docClone.outerHTML;
 
-            // On retire l'appel automatique et on ajoute la classe scorm-mode
+            // On retire l'appel automatique au chargement du JSON dans le ZIP
             propreHtml = propreHtml.replace('chargerReglement();', '// contenu déjà chargé');
             propreHtml = propreHtml.replace('<body', '<body class="scorm-mode"');
 
             // 5. Création du Manifest SCORM 1.2
             const manifest = `<?xml version="1.0" encoding="UTF-8"?>
-<manifest identifier="RI_AFTRAL" version="1.0" xmlns="http://www.imsproject.org/xsd/imscp_rootv1p1p2" xmlns:adlcp="http://www.adlnet.org/xsd/adlcp_rootv1p2">
+<manifest identifier="RI_AFTRAL" version="1.0" xmlns="http://www.imsproject.org/xsd/imscp_rootv1p1p2">
     <metadata>
         <schema>ADL SCORM</schema>
         <schemaversion>1.2</schemaversion>
@@ -624,7 +608,7 @@
                 a.href = URL.createObjectURL(content);
                 a.download = "SCORM_RI_Final.zip";
                 a.click();
-                showModal("SCORM Généré", "L'archive est prête.");
+                showModal("SCORM Généré", "L'archive contient maintenant le texte complet du règlement.");
             });
         }
     </script>
