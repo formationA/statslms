@@ -144,34 +144,52 @@
             <p style="color:var(--muted)">Sélectionnez un guide pour apprendre à maîtriser le LMS.</p>
         </header>
 
-        <div class="tuto-grid">
-
-            <div class="tuto-card">
-                <div>
-                    <div class="tag">Flux Ammon</div>
-                    <i class="fas fa-sync tuto-icon"></i>
-                    <div class="tuto-title">Gérer les inscriptions</div>
-                    <div class="tuto-desc">Comment réinitialiser un mot de passe apprenant.</div>
-                </div>
-                <a href="https://lms-aftral.com/tutoriels-detail?id=696e2f3c5a08d143b52885a1" target="_blank" class="btn-launch">
-                    Lancer le tuto <i class="fas fa-external-link-alt"></i>
-                </a>
-            </div>
-
-            <div class="tuto-card">
-                <div>
-                    <div class="tag">Pédagogie</div>
-                    <i class="fas fa-graduation-cap tuto-icon"></i>
-                    <div class="tuto-title">Suivi des apprenants</div>
-                    <div class="tuto-desc">Suivre la progression de vos apprenants.</div>
-                </div>
-                <a href="https://lms-aftral.com/tutoriels-detail?id=692db57b0e5b7b47028d0362" target="_blank" class="btn-launch">
-                    Lancer le tuto <i class="fas fa-external-link-alt"></i>
-                </a>
-            </div>
-
+        <div class="tuto-grid" id="tutoContainer">
+            <p style="text-align: center; grid-column: 1/-1;">Chargement des tutoriels...</p>
         </div>
     </div>
+
+    <script>
+
+        async function loadTutos() {
+        const container = document.getElementById('tutoContainer');
+
+        try {
+            // Récupération du fichier JSON
+            const response = await fetch('tutos.json');
+            if (!response.ok) throw new Error('Erreur lors du chargement du JSON');
+
+            const tutos = await response.json();
+
+            // Effacer le message de chargement
+            container.innerHTML = '';
+
+            // Génération des cartes
+            tutos.forEach(tuto => {
+                const card = `
+                    <div class="tuto-card">
+                        <div>
+                            <div class="tag">${tuto.tag}</div>
+                            <i class="${tuto.icon} tuto-icon"></i>
+                            <div class="tuto-title">${tuto.title}</div>
+                            <div class="tuto-desc">${tuto.desc}</div>
+                        </div>
+                        <a href="${tuto.url}" target="_blank" class="btn-launch">
+                            Lancer le tuto <i class="fas fa-external-link-alt"></i>
+                        </a>
+                    </div>
+                `;
+                container.innerHTML += card;
+            });
+
+        } catch (error) {
+            console.error('Erreur:', error);
+            container.innerHTML = `<p style="text-align:center; color:var(--orange);">Erreur : Impossible de charger les tutos.</p>`;
+        }
+    }
+
+    // Lancer la fonction au chargement de la page
+    window.onload = loadTutos;</script>
 
 </body>
 </html>

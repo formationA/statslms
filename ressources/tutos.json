@@ -1,0 +1,16 @@
+[
+    {
+        "tag": "Flux Ammon",
+        "icon": "fas fa-sync",
+        "title": "Gérer les inscriptions",
+        "desc": "Comment réinitialiser un mot de passe apprenant.",
+        "url": "https://lms-aftral.com/tutoriels-detail?id=696e2f3c5a08d143b52885a1"
+    },
+    {
+        "tag": "Pédagogie",
+        "icon": "fas fa-graduation-cap",
+        "title": "Suivi des apprenants",
+        "desc": "Suivre la progression de vos apprenants.",
+        "url": "https://lms-aftral.com/tutoriels-detail?id=692db57b0e5b7b47028d0362"
+    }
+]
