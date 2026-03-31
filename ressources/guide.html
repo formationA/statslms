@@ -111,6 +111,10 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            font-family: inherit;
         }
 
             .btn-launch:hover {
@@ -127,6 +131,50 @@
             width: fit-content;
             margin-bottom: 10px;
         }
+
+        /* Styles de la Modale */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.9);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            position: relative;
+            width: 90%;
+            max-width: 900px;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            color: white;
+            font-size: 35px;
+            cursor: pointer;
+        }
+
+        .video-container {
+            padding-top: 56.25%;
+            position: relative;
+        }
+
+            .video-container iframe {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                border: 0;
+                border-radius: 8px;
+            }
     </style>
 </head>
 <body>
@@ -149,47 +197,76 @@
         </div>
     </div>
 
+    <div id="videoModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+            <div class="video-container">
+                <iframe id="videoFrame" src="" allow="autoplay; fullscreen" allowfullscreen></iframe>
+            </div>
+        </div>
+    </div>
+
     <script>
-
         async function loadTutos() {
-        const container = document.getElementById('tutoContainer');
+            const container = document.getElementById('tutoContainer');
 
-        try {
-            // Récupération du fichier JSON
-            const response = await fetch('tutos.json');
-            if (!response.ok) throw new Error('Erreur lors du chargement du JSON');
+            try {
+                const response = await fetch('tutos.json');
+                if (!response.ok) throw new Error('Erreur lors du chargement du JSON');
 
-            const tutos = await response.json();
+                const tutos = await response.json();
+                container.innerHTML = '';
 
-            // Effacer le message de chargement
-            container.innerHTML = '';
+                tutos.forEach(tuto => {
+                    const card = `
+                            <div class="tuto-card">
+                                <div>
+                                    <div class="tag">${tuto.tag}</div>
+                                    <i class="${tuto.icon} tuto-icon"></i>
+                                    <div class="tuto-title">${tuto.title}</div>
+                                    <div class="tuto-desc">${tuto.desc}</div>
+                                </div>
+                                <button onclick="openModal('${tuto.url}')" class="btn-launch">
+                                    Lancer le tuto <i class="fas fa-play-circle"></i>
+                                </button>
+                            </div>
+                        `;
+                    container.innerHTML += card;
+                });
 
-            // Génération des cartes
-            tutos.forEach(tuto => {
-                const card = `
-                    <div class="tuto-card">
-                        <div>
-                            <div class="tag">${tuto.tag}</div>
-                            <i class="${tuto.icon} tuto-icon"></i>
-                            <div class="tuto-title">${tuto.title}</div>
-                            <div class="tuto-desc">${tuto.desc}</div>
-                        </div>
-                        <a href="${tuto.url}" target="_blank" class="btn-launch">
-                            Lancer le tuto <i class="fas fa-external-link-alt"></i>
-                        </a>
-                    </div>
-                `;
-                container.innerHTML += card;
-            });
-
-        } catch (error) {
-            console.error('Erreur:', error);
-            container.innerHTML = `<p style="text-align:center; color:var(--orange);">Erreur : Impossible de charger les tutos.</p>`;
+            } catch (error) {
+                console.error('Erreur:', error);
+                container.innerHTML = `<p style="text-align:center; color:#f97316;">Erreur : Impossible de charger les tutos.</p>`;
+            }
         }
-    }
 
-    // Lancer la fonction au chargement de la page
-    window.onload = loadTutos;</script>
+        // Fonctions pour gérer la modale
+        function openModal(url) {
+            const modal = document.getElementById('videoModal');
+            const iframe = document.getElementById('videoFrame');
+            iframe.src = url;
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden'; // Bloque le scroll derrière
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('videoModal');
+            const iframe = document.getElementById('videoFrame');
+            iframe.src = ''; // Arrête la vidéo
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto'; // Réactive le scroll
+        }
+
+        // Fermeture au clic à l'extérieur de la vidéo
+        window.onclick = function (event) {
+            const modal = document.getElementById('videoModal');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+
+        window.onload = loadTutos;
+    </script>
 
 </body>
 </html>
