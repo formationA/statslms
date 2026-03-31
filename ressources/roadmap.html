@@ -233,26 +233,33 @@
             try {
                 const response = await fetch('roadmap-data.json');
                 allData = await response.json();
+
+                // TRI : On place les dates les plus récentes en haut
+                allData.sort((a, b) => {
+                    // On transforme les chaînes "JJ/MM/AAAA" en objets Date pour comparer
+                    const dateA = new Date(a.prod.split('/').reverse().join('-'));
+                    const dateB = new Date(b.prod.split('/').reverse().join('-'));
+                    return dateB - dateA; // Ordre décroissant
+                });
+
                 renderTable(allData);
             } catch (error) {
-                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:20px; color:var(--text-dim);">Erreur de chargement du fichier JSON.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="4" ...>Erreur de chargement.</td></tr>`;
             }
         }
 
         function renderTable(dataArray) {
             const tbody = document.getElementById('tableBody');
             tbody.innerHTML = '';
-            const displayData = [...dataArray].reverse();
 
-            displayData.forEach((item, index) => {
-                const realIndex = dataArray.length - 1 - index;
+            dataArray.forEach((item, index) => {
                 const row = `
-                            <tr data-index="${realIndex}">
-                                <td><span class="badge-ui" contenteditable="${isAdmin}">${item.ui}</span></td>
-                                <td contenteditable="${isAdmin}">${item.task}</td>
-                                <td class="date-col hide-mobile" contenteditable="${isAdmin}">${item.preprod}</td>
-                                <td class="date-col prod-ready" contenteditable="${isAdmin}">${item.prod}</td>
-                            </tr>`;
+            <tr data-index="${index}">
+                <td><span class="badge-ui" contenteditable="${isAdmin}">${item.ui}</span></td>
+                <td contenteditable="${isAdmin}">${item.task}</td>
+                <td class="date-col hide-mobile" contenteditable="${isAdmin}">${item.preprod}</td>
+                <td class="date-col prod-ready" contenteditable="${isAdmin}">${item.prod}</td>
+            </tr>`;
                 tbody.innerHTML += row;
             });
         }
@@ -295,9 +302,10 @@
         async function saveChanges() {
             const rows = document.querySelectorAll('#tableBody tr');
             const updatedData = [];
+
             rows.forEach(row => {
                 const cells = row.querySelectorAll('td');
-                updatedData.unshift({
+                updatedData.push({ // .push garde l'ordre visuel (récent en premier)
                     ui: cells[0].innerText.trim(),
                     task: cells[1].innerText.trim(),
                     preprod: cells[2].innerText.trim(),
