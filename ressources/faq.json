@@ -45,7 +45,7 @@
     "id": 8,
     "cat": "connexion",
     "question": "Un apprenant a oublié son mot de passe ? <span class=\"tag-fictif\">(cas e-mail fictif)</span>",
-    "answer": "<p>Le formateur doit réinitialiser l'accès manuellement :</p><ul style=\"padding-left: 20px; margin: 10px 0;\"><li>Aller dans la session > menu <span class=\"highlight\">Participants</span>.</li><li>Cliquer sur <span class=\"highlight\">Réinitialiser</span> sur la ligne du stagiaire.</li><li>Communiquer à nouveau la <span class=\"highlight\">Référence Stagiaire</span> pour permettre la reconnexion.</li></ul>"
+    "answer": "<p>Le formateur doit réinitialiser l'accès manuellement :</p><ul style=\"padding-left: 20px; margin: 10px 0;\"><li>Aller dans la session > menu <span class=\"highlight\">Participants</span>.</li><li>Cliquer sur <span class=\"highlight\">Réinitialiser</span> sur la ligne du stagiaire.</li><li>Communiquer à nouveau la <span class=\"highlight\">Référence Stagiair et son e-mail</span> pour permettre la reconnexion.</li></ul>"
   },
   {
     "id": 9,
