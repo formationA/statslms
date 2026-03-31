@@ -241,6 +241,30 @@
             color: #9a3412;
         }
 
+
+        /* Style pour les listes dans les réponses */
+        .faq-answer ul {
+            padding-left: 25px !important; /* Espace pour les puces standards */
+            margin: 15px 0;
+        }
+
+        .faq-answer li {
+            margin-bottom: 15px; /* Espace entre chaque point de la liste */
+            color: var(--muted); /* Couleur de texte plus douce pour l'explication */
+        }
+
+            /* Mise en évidence des alertes orange dans la liste */
+            .faq-answer li .warning {
+                display: inline-block; /* Permet un meilleur positionnement */
+                color: var(--orange);
+                font-weight: 600;
+                margin-bottom: 4px;
+            }
+
+        /* Style pour les textes importants en fin de réponse */
+        .faq-answer p {
+            margin-top: 15px;
+        }
     </style>
 </head>
 <body>
