@@ -2,7 +2,7 @@
   {
     "ui": "Formateur",
     "task": "Ajout sur les visios à venir d'une action afin d'ajouter dans son agenda la visio",
-    "preprod": "attente",
+    "preprod": "00/00/0000",
     "prod": "13/03/2026"
   },
   {
