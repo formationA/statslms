@@ -484,8 +484,8 @@
 
             <div class="card">
                 <div class="tab-controls">
-                    <button class="tab-btn active" onclick="switchRank('top')">🏆 Top Centres</button>
-                    <button class="tab-btn" onclick="switchRank('flop')">📉 En vigilance</button>
+                    <button class="tab-btn active" onclick="switchRank('top'); setTimeFilter('ALL', this)">🏆 Top Centres</button>
+                    <button class="tab-btn" onclick="switchRank('flop'); setTimeFilter('OVERDUE', this)">📉 En vigilance</button>
                 </div>
                 <div id="topSection" class="rank-section active"><div id="topRank"></div></div>
                 <div id="flopSection" class="rank-section"><div id="flopRank"></div></div>
@@ -545,29 +545,232 @@
     </div>
 
     <script>
-        const BASE_URL = "https://formationa.github.io/statslms/json_conception/";
+        // 1. CONFIGURATION GITHUB (Synchronisée avec stats_apprenants)
+        const BASE_URL = "https://raw.githubusercontent.com/formationa/statslms/main/json-kpi/";
+        const INDEX_URL = BASE_URL + "index.json";
+
         let rawData = [];
         let currentProcessedData = [];
         let chartInstance = null;
         let sortDirections = [true, true, true, true, true, true];
         let currentProgFilter = 'ALL';
         let currentTimeFilter = 'ALL';
+        let currentView = 'progress';
 
-        let currentView = 'progress'; // Variable globale pour suivre la vue actuelle
+        // --- FONCTIONS DE RÉCUPÉRATION DES DONNÉES ---
 
-        function toggleChartType() {
-            currentView = (currentView === 'progress') ? 'code' : 'progress';
-            renderChart(currentProcessedData);
+        async function fetchIndex() {
+            const syncStatus = document.getElementById('syncStatus');
+            if (syncStatus) syncStatus.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Sync GitHub...';
+
+            try {
+                // Lecture de l'index centralisé
+                const response = await fetch(INDEX_URL + '?nocache=' + Date.now());
+                const index = await response.json();
+
+                // On vérifie la structure (tableau simple ou objet .kpis)
+                const fileList = index.sessions;
+
+                if (!fileList) throw new Error("Format d'index invalide");
+
+                // Chargement de chaque fichier JSON listé
+                let promises = fileList.map(f =>
+                    fetch(BASE_URL + f)
+                        .then(r => r.ok ? r.json() : null)
+                        .then(data => ({
+                            // Extraction de la date du nom du fichier (ex: kpi-2026-03-31.json)
+                            date: f.match(/\d{4}-\d{2}-\d{2}/) ? f.match(/\d{4}-\d{2}-\d{2}/)[0] : "2000-01-01",
+                            data: data
+                        }))
+                );
+
+                const results = await Promise.all(promises);
+                rawData = results.filter(r => r.data !== null);
+                rawData.sort((a, b) => a.date.localeCompare(b.date));
+
+                if (rawData.length > 0) {
+                    // On initialise les dates par défaut si elles ne sont pas déjà forcées par l'URL ou l'utilisateur
+                    const dateStartInput = document.getElementById('dateStart');
+                    const dateEndInput = document.getElementById('dateEnd');
+
+                    if (!dateStartInput.value) dateStartInput.value = rawData[0].date;
+                    if (!dateEndInput.value) dateEndInput.value = rawData[rawData.length - 1].date;
+
+                    populateCenters();
+                    process();
+                }
+                if (syncStatus) syncStatus.innerHTML = '<i class="fas fa-check-circle"></i> Connecté';
+            } catch (e) {
+                console.error("Erreur critique :", e);
+                if (syncStatus) syncStatus.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Erreur';
+            }
         }
 
-        function toggleTheme() {
-            const body = document.body;
-            const icon = document.getElementById('themeIcon');
-            body.classList.toggle('light-mode');
-            const isLight = body.classList.contains('light-mode');
-            icon.className = isLight ? 'fas fa-sun' : 'fas fa-moon';
-            localStorage.setItem('theme', isLight ? 'light' : 'dark');
-            if (currentProcessedData.length > 0) renderChart(currentProcessedData);
+        function populateCenters() {
+            const centers = new Set();
+            // On prend les centres du dernier fichier disponible
+            const lastDay = rawData[rawData.length - 1];
+            if (lastDay && lastDay.data) {
+                lastDay.data.forEach(s => { if (s.centre) centers.add(s.centre); });
+            }
+
+            const select = document.getElementById('centerFilter');
+            if (!select) return;
+
+            const currentVal = select.value;
+            select.innerHTML = '<option value="ALL">Tous les centres</option>';
+            Array.from(centers).sort().forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = opt.innerText = c;
+                select.appendChild(opt);
+            });
+            select.value = currentVal;
+        }
+
+        // --- LOGIQUE DE CALCUL ET FILTRES ---
+
+        function process() {
+            const start = document.getElementById('dateStart').value;
+            const end = document.getElementById('dateEnd').value;
+            const center = document.getElementById('centerFilter').value;
+
+            if (!rawData || rawData.length === 0) return;
+
+            const lastDay = rawData[rawData.length - 1];
+            const firstDay = rawData.find(d => d.date >= start) || rawData[0];
+
+            const startMap = {};
+            firstDay.data.forEach(s => startMap[s.session_id] = parseFloat(s.avancement_moyen) || 0);
+
+            let totalGain = 0;
+            let countGain = 0;
+            currentProcessedData = [];
+            const todayStr = new Date().toISOString().split('T')[0];
+
+            lastDay.data.forEach(s => {
+                if (center !== "ALL" && s.centre !== center) return;
+
+                // Filtre de période basé sur les dates internes de la session
+                const sessDebut = s.date_debut || "1900-01-01";
+                const sessFin = s.date_fin || "2099-12-31";
+                if (!(sessDebut <= end && sessFin >= start)) return;
+
+                const progressFinal = parseFloat(s.avancement_moyen) || 0;
+                const progressInitial = startMap[s.session_id] !== undefined ? startMap[s.session_id] : 0;
+                const gainSurPeriode = progressFinal - progressInitial;
+
+                totalGain += gainSurPeriode;
+                countGain++;
+
+                const isOverdue = (s.date_fin && s.date_fin < todayStr && progressFinal < 100);
+
+                currentProcessedData.push({
+                    ...s,
+                    progress: progressFinal,
+                    gain: gainSurPeriode,
+                    isOverdue: isOverdue
+                });
+            });
+
+            const avgGain = countGain > 0 ? (totalGain / countGain).toFixed(1) : 0;
+            const kpiDelta = document.getElementById('kpiDelta');
+            if (kpiDelta) kpiDelta.innerText = `+${avgGain}%`;
+
+            const options = { day: 'numeric', month: 'long', year: 'numeric' };
+            const lastUpdateEl = document.getElementById('lastUpdate');
+            if (lastUpdateEl) {
+                lastUpdateEl.innerText = `Sessions du ${new Date(start).toLocaleDateString('fr-FR', options)} au ${new Date(end).toLocaleDateString('fr-FR', options)}`;
+            }
+
+            renderTable(currentProcessedData);
+            filterTable();
+        }
+
+        // --- INTERFACE ET RENDU ---
+
+        function renderTable(data) {
+            const tbody = document.getElementById('tableBody');
+            if (!tbody) return;
+
+            tbody.innerHTML = data.map(s => {
+                const dDebut = s.date_debut ? new Date(s.date_debut).toLocaleDateString('fr-FR') : '-';
+                const dFin = s.date_fin ? new Date(s.date_fin).toLocaleDateString('fr-FR') : '-';
+                const tooltipDate = `Formation du ${dDebut} au ${dFin}`;
+
+                return `
+                <tr class="${s.isOverdue ? 'row-overdue' : ''}" data-prog="${s.progress}" data-overdue="${s.isOverdue}" title="${tooltipDate}">
+                    <td><span class="tag-code">${s.code_produit}</span></td>
+                    <td style="font-family: monospace; font-size: 0.75rem;">${s.session_id}</td>
+                    <td style="font-weight:600; font-size: 0.8rem;">
+                        ${s.libelle}
+                        ${s.isOverdue ? '<i class="fas fa-clock" style="color:var(--danger); margin-left:5px;"></i>' : ''}
+                    </td>
+                    <td style="color:var(--text-dim); font-size: 0.8rem;">${s.centre}</td>
+                    <td><strong>${s.inscrits}</strong></td>
+                    <td>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <div class="progress-mini" style="flex:1;">
+                                <div class="progress-fill" style="width:${s.progress}%; background:${s.progress >= 100 ? 'var(--success)' : (s.progress === 0 ? 'var(--danger)' : 'var(--warning)')}"></div>
+                            </div>
+                            <div style="display:flex; flex-direction:column; line-height:1;">
+                                <span style="font-size:0.75rem; font-weight:bold;">${s.progress.toFixed(0)}%</span>
+                                <span style="font-size:0.65rem; color:${s.gain > 0 ? 'var(--success)' : 'var(--text-dim)'};">
+                                    ${s.gain > 0 ? '+' + s.gain.toFixed(1) + '%' : ''}
+                                </span>
+                            </div>
+                        </div>
+                    </td>
+                </tr>`;
+            }).join('');
+        }
+
+        // --- KPI DYNAMIQUES, THEME, TRI, RANKING (Inchangés mais conservés) ---
+
+        function updateDynamicKPIs() {
+            const rows = Array.from(document.getElementById('tableBody').querySelectorAll('tr'));
+            const visibleRows = rows.filter(row => row.style.display !== "none");
+
+            let filteredDataForSync = [];
+            let counts = { zeroSess: 0, zeroApp: 0, pendingSess: 0, pendingApp: 0, doneSess: 0, doneApp: 0, overdueSess: 0, overdueApp: 0, totalApp: 0 };
+
+            visibleRows.forEach(row => {
+                const inscrits = parseInt(row.cells[4].innerText) || 0;
+                const prog = parseFloat(row.getAttribute('data-prog')) || 0;
+                const isOverdue = row.getAttribute('data-overdue') === 'true';
+                const centre = row.cells[3].innerText;
+
+                filteredDataForSync.push({ progress: prog, centre: centre });
+                counts.totalApp += inscrits;
+
+                if (prog === 0) { counts.zeroSess++; counts.zeroApp += inscrits; }
+                else if (prog >= 100) { counts.doneSess++; counts.doneApp += inscrits; }
+                else { counts.pendingSess++; counts.pendingApp += inscrits; }
+
+                if (isOverdue) { counts.overdueSess++; counts.overdueApp += inscrits; }
+            });
+
+            const renderBadgeContent = (sess, app, label, colorAccent) => `
+                <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 5px 0; text-align: center;">
+                    <div style="font-size: 0.6rem; color: var(--text-dim); text-transform: uppercase; font-weight: 800; letter-spacing: 1px; margin-bottom: 8px;">${label}</div>
+                    <div style="line-height: 1;">
+                        <strong style="font-size: 1.8rem; color: ${colorAccent || 'var(--accent)'}; letter-spacing: -1px;">${app.toLocaleString()}</strong>
+                        <span style="font-size: 0.65rem; color: var(--text-dim); font-weight: 700; margin-left: 2px;">APP.</span>
+                    </div>
+                    <div style="margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--border-color); width: 80%;">
+                        <span style="font-size: 0.75rem; color: var(--text-main); font-weight: 700;">${sess} <small>Sessions</small></span>
+                    </div>
+                </div>`;
+
+            document.getElementById('kpiApprenants').innerHTML = renderBadgeContent(visibleRows.length, counts.totalApp, "GLOBAL", "var(--text-main)");
+            document.getElementById('kpiZero').innerHTML = renderBadgeContent(counts.zeroSess, counts.zeroApp, "À DÉBUTER", "var(--danger)");
+            document.getElementById('kpiPending').innerHTML = renderBadgeContent(counts.pendingSess, counts.pendingApp, "EN COURS", "var(--warning)");
+            document.getElementById('kpiDone').innerHTML = renderBadgeContent(counts.doneSess, counts.doneApp, "TERMINÉS", "var(--success)");
+
+            const overdueEl = document.getElementById('kpiOverdue');
+            if (overdueEl) overdueEl.innerHTML = renderBadgeContent(counts.overdueSess, counts.overdueApp, "EN RETARD", "#f472b6");
+
+            renderChart(filteredDataForSync);
+            updateCentresRanking(filteredDataForSync);
         }
 
         function switchRank(type) {
@@ -582,71 +785,17 @@
             }
         }
 
-        function updateDynamicKPIs() {
-            const rows = Array.from(document.getElementById('tableBody').querySelectorAll('tr'));
-            const visibleRows = rows.filter(row => row.style.display !== "none");
+        function toggleChartType() {
+            currentView = (currentView === 'progress') ? 'code' : 'progress';
+            renderChart(currentProcessedData);
+        }
 
-            let filteredDataForSync = [];
-            let counts = {
-                zeroSess: 0, zeroApp: 0,
-                pendingSess: 0, pendingApp: 0,
-                doneSess: 0, doneApp: 0,
-                overdueSess: 0, overdueApp: 0,
-                totalApp: 0
-            };
-
-            visibleRows.forEach(row => {
-                const inscrits = parseInt(row.cells[4].innerText) || 0;
-                const prog = parseFloat(row.getAttribute('data-prog')) || 0;
-                const isOverdue = row.getAttribute('data-overdue') === 'true';
-                const centre = row.cells[3].innerText;
-
-                filteredDataForSync.push({ progress: prog, centre: centre });
-
-                counts.totalApp += inscrits;
-
-                // Calcul par statut
-                if (prog === 0) { counts.zeroSess++; counts.zeroApp += inscrits; }
-                else if (prog >= 100) { counts.doneSess++; counts.doneApp += inscrits; }
-                else { counts.pendingSess++; counts.pendingApp += inscrits; }
-
-                // Calcul des retards
-                if (isOverdue) { counts.overdueSess++; counts.overdueApp += inscrits; }
-            });
-
-            // NOUVEAU RENDER : Titre > Apprenants (Gros) > Sessions (Petit)
-            const renderBadgeContent = (sess, app, label, colorAccent) => `
-        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 5px 0; text-align: center;">
-            <div style="font-size: 0.6rem; color: var(--text-dim); text-transform: uppercase; font-weight: 800; letter-spacing: 1px; margin-bottom: 8px;">
-                ${label}
-            </div>
-            <div style="line-height: 1;">
-                <strong style="font-size: 1.8rem; color: ${colorAccent || 'var(--accent)'}; letter-spacing: -1px;">
-                    ${app.toLocaleString()}
-                </strong>
-                <span style="font-size: 0.65rem; color: var(--text-dim); font-weight: 700; margin-left: 2px;">APP.</span>
-            </div>
-            <div style="margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--border-color); width: 80%;">
-                <span style="font-size: 0.75rem; color: var(--text-main); font-weight: 700;">
-                    ${sess} <small style="font-size: 0.6rem; color: var(--text-dim); text-transform: uppercase;">Sessions</small>
-                </span>
-            </div>
-        </div>`;
-
-            // Mise à jour des 5 vignettes
-            document.getElementById('kpiApprenants').innerHTML = renderBadgeContent(visibleRows.length, counts.totalApp, "GLOBAL", "var(--text-main)");
-            document.getElementById('kpiZero').innerHTML = renderBadgeContent(counts.zeroSess, counts.zeroApp, "À DÉBUTER", "var(--danger)");
-            document.getElementById('kpiPending').innerHTML = renderBadgeContent(counts.pendingSess, counts.pendingApp, "EN COURS", "var(--warning)");
-            document.getElementById('kpiDone').innerHTML = renderBadgeContent(counts.doneSess, counts.doneApp, "TERMINÉS", "var(--success)");
-
-            // Ajout d'une 5ème vignette (assurez-vous d'avoir un ID 'kpiOverdue' dans votre HTML)
-            const overdueElement = document.getElementById('kpiOverdue');
-            if (overdueElement) {
-                overdueElement.innerHTML = renderBadgeContent(counts.overdueSess, counts.overdueApp, "EN RETARD", "#f472b6");
-            }
-
-            renderChart(filteredDataForSync);
-            updateCentresRanking(filteredDataForSync);
+        function toggleTheme() {
+            document.body.classList.toggle('light-mode');
+            const isLight = document.body.classList.contains('light-mode');
+            document.getElementById('themeIcon').className = isLight ? 'fas fa-sun' : 'fas fa-moon';
+            localStorage.setItem('theme', isLight ? 'light' : 'dark');
+            if (currentProcessedData.length > 0) renderChart(currentProcessedData);
         }
 
         function setProgFilter(status, el) {
@@ -657,9 +806,18 @@
         }
 
         function setTimeFilter(status, el) {
+            // 1. Mise à jour de la variable globale (indispensable pour filterTable)
             currentTimeFilter = status;
-            document.querySelectorAll('#timeFilters .filter-pill').forEach(p => p.classList.remove('active'));
-            el.classList.add('active');
+
+            // 2. Gestion visuelle des boutons
+            if (el && el.classList) {
+                // On cherche le parent pour désactiver les autres boutons du même groupe
+                const parent = el.parentElement;
+                parent.querySelectorAll('.filter-pill, .tab-btn').forEach(p => p.classList.remove('active'));
+                el.classList.add('active');
+            }
+
+            // 3. Déclenchement du filtrage effectif
             filterTable();
         }
 
@@ -680,158 +838,10 @@
             updateDynamicKPIs();
         }
 
-        async function fetchIndex() {
-            const syncStatus = document.getElementById('syncStatus');
-            syncStatus.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Synchronisation...';
-
-            try {
-                const response = await fetch(BASE_URL + 'index.json?nocache=' + Date.now());
-                const files = await response.json();
-                let promises = files.map(f => fetch(BASE_URL + f).then(r => r.json().then(data => ({
-                    date: f.match(/\d{4}-\d{2}-\d{2}/)[0],
-                    data
-                }))));
-
-                rawData = await Promise.all(promises);
-                rawData.sort((a, b) => a.date.localeCompare(b.date));
-
-                if (rawData.length > 0) {
-                    // On remplit les champs sans déclencher 'change' pour éviter les boucles au départ
-                    document.getElementById('dateStart').value = rawData[0].date;
-                    document.getElementById('dateEnd').value = rawData[rawData.length - 1].date;
-
-                    populateCenters();
-                    process(); // Premier calcul
-                }
-                syncStatus.innerHTML = '<i class="fas fa-check-circle"></i> Synchronisé';
-            } catch (e) {
-                console.error(e);
-                syncStatus.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Erreur';
-            }
-        }
-
-        function populateCenters() {
-            const centers = new Set();
-            rawData.forEach(day => day.data.forEach(s => centers.add(s.centre)));
-            const select = document.getElementById('centerFilter');
-            select.innerHTML = '<option value="ALL">Tous les centres</option>';
-            Array.from(centers).sort().forEach(c => {
-                const opt = document.createElement('option');
-                opt.value = opt.innerText = c;
-                select.appendChild(opt);
-            });
-        }
-
-        function process() {
-            const start = document.getElementById('dateStart').value;
-            const end = document.getElementById('dateEnd').value;
-            const center = document.getElementById('centerFilter').value;
-
-            if (!rawData || rawData.length === 0) return;
-
-            // 1. On prend toujours le dernier fichier JSON pour avoir l'avancement le plus récent
-            const lastDay = rawData[rawData.length - 1];
-
-            // 2. On cherche un point de comparaison historique (le premier fichier ou celui à dateStart)
-            const firstDay = rawData.find(d => d.date >= start) || rawData[0];
-            const startMap = {};
-            firstDay.data.forEach(s => startMap[s.session_id] = parseFloat(s.avancement_moyen) || 0);
-
-            let totalGain = 0;
-            let countGain = 0;
-            currentProcessedData = [];
-            const todayStr = new Date().toISOString().split('T')[0];
-
-            lastDay.data.forEach(s => {
-                // --- FILTRE 1 : CENTRE ---
-                if (center !== "ALL" && s.centre !== center) return;
-
-                // --- FILTRE 2 : PÉRIODE (basé sur les dates de la session dans le JSON) ---
-                // On vérifie si la session existe durant la plage sélectionnée par l'utilisateur
-                const sessDebut = s.date_debut || "1900-01-01";
-                const sessFin = s.date_fin || "2099-12-31";
-
-                const isVisibleInPeriod = (sessDebut <= end && sessFin >= start);
-                if (!isVisibleInPeriod) return;
-
-                // --- CALCULS ---
-                const progressFinal = parseFloat(s.avancement_moyen) || 0;
-                const progressInitial = startMap[s.session_id] !== undefined ? startMap[s.session_id] : 0;
-                const gainSurPeriode = progressFinal - progressInitial;
-
-                totalGain += gainSurPeriode;
-                countGain++;
-
-                const isOverdue = (s.date_fin && s.date_fin < todayStr && progressFinal < 100);
-
-                currentProcessedData.push({
-                    ...s,
-                    progress: progressFinal,
-                    gain: gainSurPeriode,
-                    isOverdue: isOverdue
-                });
-            });
-
-            // Mise à jour de l'interface
-            const avgGain = countGain > 0 ? (totalGain / countGain).toFixed(1) : 0;
-            document.getElementById('kpiDelta').innerText = `+${avgGain}%`;
-
-            const options = { day: 'numeric', month: 'long', year: 'numeric' };
-            document.getElementById('lastUpdate').innerText = `Sessions du ${new Date(start).toLocaleDateString('fr-FR', options)} au ${new Date(end).toLocaleDateString('fr-FR', options)}`;
-
-            renderTable(currentProcessedData);
-            filterTable();
-        }
-
-        function renderTable(data) {
-            const tbody = document.getElementById('tableBody');
-            tbody.innerHTML = data.map(s => {
-                // Préparation des dates pour le mouse over de la ligne
-                const dDebut = s.date_debut ? new Date(s.date_debut).toLocaleDateString('fr-FR') : '-';
-                const dFin = s.date_fin ? new Date(s.date_fin).toLocaleDateString('fr-FR') : '-';
-                const tooltipDate = `Formation du ${dDebut} au ${dFin}`;
-
-                // Légende spécifique pour le gain (apparaît au survol du texte vert)
-                const tooltipGain = `Progression réalisée sur la période sélectionnée`;
-
-                return `
-    <tr class="${s.isOverdue ? 'row-overdue' : ''}" data-prog="${s.progress}" data-overdue="${s.isOverdue}" title="${tooltipDate}">
-        <td><span class="tag-code">${s.code_produit}</span></td>
-        <td style="font-family: monospace; font-size: 0.75rem;">${s.session_id}</td>
-        <td style="font-weight:600; font-size: 0.8rem;">
-            ${s.libelle} 
-            ${s.isOverdue ? '<i class="fas fa-clock" style="color:var(--danger); margin-left:5px;"></i>' : ''}
-        </td>
-        <td style="color:var(--text-dim); font-size: 0.8rem;">${s.centre}</td>
-        <td><strong>${s.inscrits}</strong></td>
-        <td>
-            <div style="display:flex; align-items:center; gap:8px;">
-                <div class="progress-mini" style="flex:1;">
-                    <div class="progress-fill" style="width:${s.progress}%; background:${s.progress >= 100 ? 'var(--success)' : (s.progress === 0 ? 'var(--danger)' : 'var(--warning)')}"></div>
-                </div>
-                <div style="display:flex; flex-direction:column; line-height:1;">
-                    <span style="font-size:0.75rem; font-weight:bold;">${s.progress.toFixed(0)}%</span>
-                    
-                    <span 
-                        title="${tooltipGain}" 
-                        style="font-size:0.65rem; cursor:help; color:${s.gain > 0 ? 'var(--success)' : 'var(--text-dim)'};">
-                        ${s.gain > 0 ? '+' + s.gain.toFixed(1) + '%' : ''}
-                    </span>
-                </div>
-            </div>
-        </td>
-    </tr>`;
-            }).join('');
-        }
-
         function sortTable(columnIndex) {
             const keys = ['code_produit', 'session_id', 'libelle', 'centre', 'inscrits', 'progress'];
             const key = keys[columnIndex];
             const dir = sortDirections[columnIndex] ? 1 : -1;
-
-            const headers = document.querySelectorAll('th i');
-            headers.forEach(h => h.className = 'fas fa-sort');
-            headers[columnIndex].className = dir === 1 ? 'fas fa-sort-up' : 'fas fa-sort-down';
 
             currentProcessedData.sort((a, b) => {
                 let valA = a[key], valB = b[key];
@@ -860,22 +870,12 @@
             const barStyle = "height: 8px; display: flex; background: rgba(128,128,128,0.1); border-radius: 10px; overflow: hidden; margin-bottom: 15px;";
 
             document.getElementById('topRank').innerHTML = [...baseRanking].sort((a, b) => b.actives - a.actives || b.total - a.total).slice(0, 4).map(c => `
-                        <div class="perf-item">
-                            <span style="font-weight:600; color:var(--accent);">${c.name}</span>
-                            <span style="font-size: 0.75rem; color:var(--text-dim)">
-                                <b style="color:var(--success)">${c.finished}</b> finis | <b style="color:var(--warning)">${c.enCours}</b> en cours | <b>${c.total}</b> total
-                            </span>
-                        </div>
-                        <div style="${barStyle}"><div style="width: ${c.ratioFin}%; background: var(--success);"></div><div style="width: ${c.ratioEnCours}%; background: var(--warning);"></div><div style="width: ${c.ratioZero}%; background: var(--danger); opacity: 0.3;"></div></div>`).join('');
+                <div class="perf-item"><span style="font-weight:600; color:var(--accent);">${c.name}</span><span style="font-size: 0.75rem; color:var(--text-dim)"><b style="color:var(--success)">${c.finished}</b> finis | <b>${c.total}</b> total</span></div>
+                <div style="${barStyle}"><div style="width: ${c.ratioFin}%; background: var(--success);"></div><div style="width: ${c.ratioEnCours}%; background: var(--warning);"></div></div>`).join('');
 
             document.getElementById('flopRank').innerHTML = [...baseRanking].sort((a, b) => b.immobile - a.immobile || b.total - a.total).slice(0, 4).map(c => `
-                        <div class="perf-item">
-                            <span style="font-weight:600;">${c.name}</span>
-                            <span style="font-size: 0.75rem; color:var(--text-dim)">
-                                <b style="color:var(--danger)">${c.immobile}</b> à 0% | <b>${c.total}</b> total
-                            </span>
-                        </div>
-                        <div style="${barStyle}"><div style="width: ${c.ratioZero}%; background: var(--danger);"></div><div style="width: ${c.ratioEnCours}%; background: var(--warning);"></div><div style="width: ${c.ratioFin}%; background: var(--success);"></div></div>`).join('');
+                <div class="perf-item"><span>${c.name}</span><span style="font-size: 0.75rem; color:var(--text-dim)"><b style="color:var(--danger)">${c.immobile}</b> à 0% | <b>${c.total}</b> total</span></div>
+                <div style="${barStyle}"><div style="width: ${c.ratioZero}%; background: var(--danger);"></div></div>`).join('');
         }
 
         function renderChart(dataToChart = currentProcessedData) {
@@ -885,7 +885,6 @@
             const textColor = isLight ? '#1e293b' : '#f8fafc';
 
             if (currentView === 'progress') {
-                // --- VUE INITIALE : HISTOGRAMME PAR PROGRESSION ---
                 const ranges = { "0%": 0, "1-50%": 0, "51-99%": 0, "100%": 0 };
                 dataToChart.forEach(s => {
                     if (s.progress === 0) ranges["0%"]++;
@@ -895,119 +894,51 @@
                 });
 
                 chartInstance = new Chart(ctx, {
-                    type: 'bar', // On garde l'histo ici
+                    type: 'bar',
                     data: {
                         labels: Object.keys(ranges),
                         datasets: [{
-                            label: 'Nombre de sessions',
+                            label: 'Sessions',
                             data: Object.values(ranges),
                             backgroundColor: ['#ef4444', '#fbbf24', '#38bdf8', '#10b981'],
                             borderRadius: 4
                         }]
                     },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            x: { ticks: { color: textColor } },
-                            y: { ticks: { color: textColor, stepSize: 1 } }
-                        },
-                        plugins: {
-                            legend: { display: false }
-                        }
-                    }
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: textColor } }, y: { ticks: { color: textColor, stepSize: 1 } } } }
                 });
             } else {
-                // --- VUE PAR CODE PRODUIT (AVEC LIMITE SI BEAUCOUP DE CODES) ---
                 const codeCounts = {};
-                dataToChart.forEach(s => {
-                    codeCounts[s.code_produit] = (codeCounts[s.code_produit] || 0) + 1;
-                });
-
-                // On prend les 15 premiers pour éviter que l'affichage ne sature si vous avez 100 codes
-                const sortedCodes = Object.entries(codeCounts)
-                    .sort((a, b) => b[1] - a[1])
-                    .slice(0, 15);
-
+                dataToChart.forEach(s => { codeCounts[s.code_produit] = (codeCounts[s.code_produit] || 0) + 1; });
+                const sortedCodes = Object.entries(codeCounts).sort((a, b) => b[1] - a[1]).slice(0, 15);
                 chartInstance = new Chart(ctx, {
                     type: 'bar',
                     data: {
                         labels: sortedCodes.map(c => c[0]),
-                        datasets: [{
-                            label: 'Sessions par code',
-                            data: sortedCodes.map(c => c[1]),
-                            backgroundColor: '#38bdf8',
-                            borderRadius: 4
-                        }]
+                        datasets: [{ label: 'Sessions', data: sortedCodes.map(c => c[1]), backgroundColor: '#38bdf8', borderRadius: 4 }]
                     },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        indexAxis: 'y', // Horizontal pour mieux lire les noms de codes s'ils sont longs
-                        scales: {
-                            x: { ticks: { color: textColor, stepSize: 1 } },
-                            y: {
-                                ticks: {
-                                    color: textColor,
-                                    font: { size: 9 },
-                                    autoSkip: false // Force l'affichage de tous les codes du top 15
-                                }
-                            }
-                        },
-                        plugins: {
-                            legend: { display: false }
-                        }
-                    }
+                    options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: textColor, stepSize: 1 } }, y: { ticks: { color: textColor, font: { size: 9 } } } } }
                 });
             }
         }
 
         function exportToCSV() {
-            // 1. Sélectionne les lignes visibles uniquement
-            const rows = Array.from(document.querySelectorAll('#tableBody tr'))
-                .filter(r => r.style.display !== 'none');
-
-            // 2. En-têtes (plus propre de les définir ici)
+            const rows = Array.from(document.querySelectorAll('#tableBody tr')).filter(r => r.style.display !== 'none');
             let csv = "Code Produit;Session ID;Programme;Centre;Inscrits;Progression\n";
-
             rows.forEach(row => {
-                const cols = Array.from(row.cells);
-                const rowData = cols.map((c, index) => {
-                    let text;
-
-                    // Si c'est la colonne de progression (index 5), on prend l'attribut data
-                    if (index === 5) {
-                        text = (row.getAttribute('data-prog') || "0") + "%";
-                    } else {
-                        text = c.innerText;
-                    }
-
-                    // NETTOYAGE CRITIQUE : 
-                    // - Remplace les " par "" (standard CSV pour les guillemets)
-                    // - Remplace les ; par , (pour ne pas casser les colonnes)
-                    // - Enlève les retours à la ligne
-                    let cleanText = text.replace(/"/g, '""')
-                        .replace(/;/g, ',')
-                        .replace(/\n/g, " ")
-                        .trim();
-
-                    return `"${cleanText}"`;
+                const rowData = Array.from(row.cells).map((c, i) => {
+                    let text = (i === 5) ? (row.getAttribute('data-prog') || "0") + "%" : c.innerText;
+                    return `"${text.replace(/"/g, '""').replace(/;/g, ',').replace(/\n/g, " ").trim()}"`;
                 });
                 csv += rowData.join(";") + "\r\n";
             });
-
-            // 3. Export avec BOM pour les accents (Excel Windows)
             const blob = new Blob(["\ufeff" + csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
-            const dateStr = new Date().toLocaleDateString('fr-FR').replace(/\//g, '-');
-
             link.href = URL.createObjectURL(blob);
-            link.setAttribute("download", `LMS_Export_Sessions_${dateStr}.csv`);
-
-            document.body.appendChild(link);
+            link.setAttribute("download", `LMS_Export_Centres_${new Date().toLocaleDateString('fr-FR').replace(/\//g, '-')}.csv`);
             link.click();
-            document.body.removeChild(link);
         }
+
+        // --- INITIALISATION ---
 
         window.onload = () => {
             // Thème
@@ -1017,32 +948,17 @@
                 document.getElementById('themeIcon').className = 'fas fa-sun';
             }
 
-            // Chargement initial
+            // Chargement initial via GitHub
             fetchIndex();
-
-            // À ajouter dans window.onload après fetchIndex()
-            const now = new Date();
-            const firstDayMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
-            const lastDayMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
-
-            document.getElementById('dateStart').value = firstDayMonth;
-            document.getElementById('dateEnd').value = lastDayMonth;
 
             // Écouteurs de changements
             const controls = ['dateStart', 'dateEnd', 'centerFilter'];
             controls.forEach(id => {
                 const el = document.getElementById(id);
-                if (el) {
-                    // 'change' suffit pour les dates et select, 'input' est pour le texte
-                    el.addEventListener('change', process);
-                }
+                if (el) el.addEventListener('change', process);
             });
-
-            // Recherche textuelle
             document.getElementById('tableSearch').addEventListener('input', filterTable);
         };
-
-
     </script>
 </body>
 </html>

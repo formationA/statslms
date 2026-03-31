@@ -32,12 +32,12 @@
 
         /* --- Correction Icône Calendrier --- */
         input[type="date"]::-webkit-calendar-picker-indicator {
-            filter: invert(1); /* Rend l'icône blanche par défaut */
+            filter: invert(1);
             cursor: pointer;
         }
 
         .light-mode input[type="date"]::-webkit-calendar-picker-indicator {
-            filter: invert(0); /* Remet l'icône noire en mode clair */
+            filter: invert(0);
         }
 
         body {
@@ -161,9 +161,10 @@
         }
 
         #lastUpdate {
-            color: var(--text-dim);
+            color: var(--accent);
             display: block;
             margin-top: 5px;
+            font-weight: 500;
         }
 
         .badges-container {
@@ -294,7 +295,7 @@
                     <strong id="liveBadge">--</strong>
                 </div>
                 <div class="stat-badge">
-                    <span>Cumul Période</span>
+                    <span>Valeur Période</span>
                     <strong id="totalBadge">--</strong>
                 </div>
             </div>
@@ -304,11 +305,11 @@
             <div class="filter-group">
                 <label>Vue de données</label>
                 <select id="viewType">
-                    <option value="actifs" selected>📈 Apprenants Actifs (Quotidien)</option>
+                    <option value="actifs" selected>📈 Apprenants Actifs (Cumul)</option>
                     <option value="moyenne_hebdo">📊 Moyenne Hebdo (Apprenants)</option>
-                    <option value="ressources">🔗 Connexions Ressources</option>
-                    <option value="ouvertes">🔑 Sessions Ouvertes</option>
-                    <option value="location">📍 Répartition par centre</option>
+                    <option value="ressources">🔗 Connexions Ressources (Cumul)</option>
+                    <option value="ouvertes">🔑 Sessions Ouvertes (Moyenne)</option>
+                    <option value="location">📍 Répartition par centre (Top 20)</option>
                 </select>
             </div>
             <div class="filter-group">
@@ -330,7 +331,9 @@
     </div>
 
     <script>
-        const BASE_URL = "https://raw.githubusercontent.com/formationa/statslms/main/json_conception/";
+        const BASE_URL = "https://raw.githubusercontent.com/formationa/statslms/main/json-kpi/";
+        const INDEX_URL = BASE_URL + "index.json";
+
         let dataStore = { sessions: [], actifs: [], ressources: [], location: [], ouvertes: [] };
         let myChart = null;
         const ctx = document.getElementById('mainChart').getContext('2d');
@@ -377,9 +380,17 @@
         }
 
         const today = new Date();
-        const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
-        document.getElementById('startDate').value = firstDay.toISOString().split('T')[0];
-        document.getElementById('endDate').value = today.toISOString().split('T')[0];
+        const firstDayOfYear = new Date(today.getFullYear(), 0, 1);
+
+        const formatDate = (date) => {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        };
+
+        document.getElementById('startDate').value = formatDate(firstDayOfYear);
+        document.getElementById('endDate').value = formatDate(today);
 
         async function fetchData(url) {
             try {
@@ -390,63 +401,62 @@
         }
 
         async function init() {
-            // On pointe vers l'index plutôt que de boucler sur les dates
-            const INDEX_URL = "https://raw.githubusercontent.com/formationa/statslms/main/json_conception/index.json";
-            const BASE_URL = "https://raw.githubusercontent.com/formationa/statslms/main/json_conception/";
+            const startStr = document.getElementById('startDate').value;
+            const endStr = document.getElementById('endDate').value;
+            document.getElementById('lastUpdate').innerText = "Chargement...";
 
-            async function init() {
-                const startStr = document.getElementById('startDate').value;
-                const endStr = document.getElementById('endDate').value;
-
-                // 1. Charger l'index global généré par votre logiciel VB.NET
-                const index = await fetchData(INDEX_URL);
-                if (!index || !index.kpis) {
-                    console.error("Impossible de charger l'index ou index vide.");
-                    return;
-                }
-
-                dataStore = { sessions: [], actifs: [], ressources: [], location: [], ouvertes: [] };
-
-                // 2. Filtrer les fichiers KPI présents dans l'index selon les dates choisies
-                // On suppose que le nom du fichier contient la date (ex: kpi_journaliers_2026-03-31.json)
-                const filesToFetch = index.kpis.filter(fileName => {
-                    const fileDate = fileName.match(/\d{4}-\d{2}-\d{2}/); // Extrait la date du nom
-                    return fileDate && fileDate[0] >= startStr && fileDate[0] <= endStr;
-                });
-
-                // 3. Charger uniquement les fichiers qui existent vraiment
-                let promises = filesToFetch.map(fileName => fetchData(`${BASE_URL}${fileName}`));
-                const results = await Promise.all(promises);
-
-                let lastDataFound = null;
-
-                results.forEach(dayData => {
-                    if (dayData && dayData.date) {
-                        const dt = dayData.date;
-                        dataStore.actifs.push({ date: dt, val: dayData.apprenants_actifs });
-                        dataStore.ressources.push({ date: dt, val: dayData.resource_connections });
-                        dataStore.ouvertes.push({ date: dt, val: dayData.sessions_ouvertes });
-                        dataStore.sessions.push({ date: dt, val: dayData.apprenants_dans_sessions });
-
-                        // On garde le plus récent pour les badges (l'index est trié par date descendante en VB)
-                        if (!lastDataFound || dt > lastDataFound.date) {
-                            lastDataFound = dayData;
-                        }
-                    }
-                });
-
-                // 4. Mise à jour de l'affichage
-                if (lastDataFound) {
-                    document.getElementById('liveBadge').innerText = lastDataFound.apprenants_en_cours || 0;
-                    const d = new Date(lastDataFound.date);
-                    document.getElementById('lastUpdate').innerText = `Dernière synchronisation : ${d.toLocaleDateString('fr-FR')}`;
-                    dataStore.location = Object.entries(lastDataFound.villes || {}).map(([name, count]) => ({
-                        name: name, count: count
-                    }));
-                }
-
-                updateDashboard();
+            const index = await fetchData(INDEX_URL);
+            if (!index || !index.kpis) {
+                document.getElementById('lastUpdate').innerText = "Erreur de connexion.";
+                return;
             }
+
+            let heureSynchro = "";
+            if (index.derniere_maj) {
+                const parts = index.derniere_maj.split(' ');
+                if (parts.length === 2) {
+                    const [y, m, d] = parts[0].split('-');
+                    heureSynchro = `${d}/${m}/${y} à ${parts[1]}`;
+                } else { heureSynchro = index.derniere_maj; }
+            }
+
+            dataStore = { sessions: [], actifs: [], ressources: [], location: [], ouvertes: [] };
+
+            const filesToFetch = index.kpis.filter(fileName => {
+                const match = fileName.match(/\d{4}-\d{2}-\d{2}/);
+                if (match) {
+                    const fileDate = match[0];
+                    return fileDate >= startStr && fileDate <= endStr;
+                }
+                return false;
+            }).reverse();
+
+            const promises = filesToFetch.map(fileName => fetchData(`${BASE_URL}${fileName}`));
+            const results = await Promise.all(promises);
+
+            let lastDataFound = null;
+            results.forEach(dayData => {
+                if (dayData && dayData.date) {
+                    const dt = dayData.date;
+                    dataStore.actifs.push({ date: dt, val: dayData.apprenants_actifs || 0 });
+                    dataStore.ressources.push({ date: dt, val: dayData.resource_connections || 0 });
+                    dataStore.ouvertes.push({ date: dt, val: dayData.sessions_ouvertes || 0 });
+                    dataStore.sessions.push({ date: dt, val: dayData.apprenants_dans_sessions || 0 });
+                    if (!lastDataFound || dt > lastDataFound.date) { lastDataFound = dayData; }
+                }
+            });
+
+            if (lastDataFound) {
+                document.getElementById('liveBadge').innerText = lastDataFound.apprenants_en_cours || 0;
+                document.getElementById('lastUpdate').innerText = heureSynchro
+                    ? `Dernière synchronisation : ${heureSynchro}`
+                    : `Dernière synchronisation : ${new Date(lastDataFound.date).toLocaleDateString('fr-FR')}`;
+                dataStore.location = Object.entries(lastDataFound.villes || {}).map(([name, count]) => ({
+                    name: name, count: count
+                }));
+            }
+            updateDashboard();
+        }
 
         function updateDashboard() {
             const view = document.getElementById('viewType').value;
@@ -463,17 +473,38 @@
             let filtered = [];
             let color = '#38bdf8';
             let chartLabel = "";
-            if (view === 'actifs') { filtered = dataStore.actifs; chartLabel = "Nombre d'apprenants connectés"; }
-            else if (view === 'ressources') { filtered = dataStore.ressources; chartLabel = "Nombre de ressources lancées"; color = '#10b981'; }
-            else if (view === 'ouvertes') { filtered = dataStore.ouvertes; chartLabel = "Nombre de sessions ouvertes"; color = '#a855f7'; }
+            let useAverage = false;
+
+            if (view === 'actifs') {
+                filtered = dataStore.actifs;
+                chartLabel = "Nombre d'apprenants connectés (Cumul)";
+            }
+            else if (view === 'ressources') {
+                filtered = dataStore.ressources;
+                chartLabel = "Nombre de ressources lancées";
+                color = '#10b981';
+            }
+            else if (view === 'ouvertes') {
+                filtered = dataStore.ouvertes;
+                chartLabel = "Nombre de sessions ouvertes";
+                color = '#a855f7';
+                useAverage = true; // On garde la moyenne pour les sessions simultanées
+            }
             else if (view === 'moyenne_hebdo') {
                 const weekly = calculateWeekly(dataStore.actifs);
                 renderChart('bar', weekly.map(d => d.label), weekly.map(d => d.val), "Moyenne des apprenants connectés", '#6366f1');
                 badge.innerText = "Moyenne";
                 return;
             }
-            let total = filtered.reduce((a, b) => a + (b.val || 0), 0);
-            badge.innerText = total.toLocaleString();
+
+            if (useAverage && filtered.length > 0) {
+                let avg = filtered.reduce((a, b) => a + (b.val || 0), 0) / filtered.length;
+                badge.innerText = Math.round(avg).toLocaleString() + " (moy)";
+            } else {
+                let total = filtered.reduce((a, b) => a + (b.val || 0), 0);
+                badge.innerText = total.toLocaleString();
+            }
+
             renderChart('line', filtered.map(d => d.date), filtered.map(d => d.val), chartLabel, color);
         }
 
@@ -526,7 +557,6 @@
                 .map(k => ({ label: k, val: (weeks[k].sum / weeks[k].count).toFixed(1) }));
         }
 
-        // --- Ajout des écouteurs pour mise à jour automatique ---
         document.getElementById('viewType').addEventListener('change', updateDashboard);
         document.getElementById('startDate').addEventListener('change', init);
         document.getElementById('endDate').addEventListener('change', init);
