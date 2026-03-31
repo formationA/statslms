@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FAQ | Support Technique Premium v3.1</title>
+    <title>FAQ | Support Technique Premium</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
@@ -82,14 +82,9 @@
 
         .legend-item code {
             color: var(--blue);
-            cursor: pointer;
         }
 
-            .legend-item code:hover {
-                text-decoration: underline;
-            }
-
-        /* --- FAQ Items & Categories --- */
+        /* --- FAQ Items Styling --- */
         .faq-item {
             background: var(--card);
             backdrop-filter: var(--glass);
@@ -100,6 +95,7 @@
             border-left: 5px solid var(--muted);
         }
 
+            /* Couleurs par catégorie */
             .faq-item[data-cat="flux"] {
                 border-left-color: var(--blue);
             }
@@ -114,6 +110,11 @@
 
             .faq-item[data-cat="pedagogie"] {
                 border-left-color: var(--purple);
+            }
+
+            .faq-item:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(0,0,0,0.2);
             }
 
         .faq-question {
@@ -135,47 +136,11 @@
 
         .faq-item.active .faq-answer {
             padding: 20px;
-            max-height: 2000px;
+            max-height: 1000px;
             border-top: 1px solid var(--border);
         }
 
-        /* --- Cartes de Contenu (Styles demandés) --- */
-        .card-info, .card-warn, .card-success {
-            padding: 15px;
-            border-radius: 10px;
-            margin: 15px 0;
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-            border: 1px solid rgba(255,255,255,0.05);
-            line-height: 1.4;
-        }
-
-        .card-info {
-            background: rgba(56, 189, 248, 0.1);
-            border-left: 4px solid var(--blue);
-        }
-
-        .card-warn {
-            background: rgba(251, 146, 60, 0.1);
-            border-left: 4px solid var(--orange);
-        }
-
-        .card-success {
-            background: rgba(16, 185, 129, 0.1);
-            border-left: 4px solid var(--green);
-        }
-
-        .card-title {
-            display: block;
-            font-weight: 800;
-            text-transform: uppercase;
-            font-size: 0.7rem;
-            margin-bottom: 4px;
-            letter-spacing: 1px;
-        }
-
-        /* --- UI Elements --- */
+        /* --- Components --- */
         .cat-btn {
             padding: 10px 20px;
             border-radius: 30px;
@@ -184,39 +149,42 @@
             color: var(--white);
             cursor: pointer;
             transition: 0.3s;
-            font-weight: 500;
         }
 
             .cat-btn.active {
                 background: var(--blue);
                 color: var(--bg);
-                font-weight: 700;
+                font-weight: bold;
             }
 
         input, textarea, select {
-            background: rgba(0,0,0,0.3);
+            background: rgba(0,0,0,0.2);
             border: 1px solid var(--border);
             color: white;
             padding: 12px;
             border-radius: 8px;
             width: 100%;
+            box-sizing: border-box;
         }
 
+        /* Style Markdown à l'intérieur */
         .faq-answer table {
             width: 100%;
             border-collapse: collapse;
-            margin: 15px 0;
-            font-size: 0.9rem;
+            margin: 10px 0;
         }
 
         .faq-answer th, .faq-answer td {
             border: 1px solid var(--border);
-            padding: 10px;
+            padding: 8px;
             text-align: left;
         }
 
-        .faq-answer th {
-            background: rgba(255,255,255,0.05);
+        .faq-answer blockquote {
+            border-left: 4px solid var(--blue);
+            padding-left: 15px;
+            margin-left: 0;
+            color: var(--muted);
         }
     </style>
 </head>
@@ -224,19 +192,19 @@
 
     <nav class="navbar">
         <div style="display:flex; align-items:center;">
-            <h1 style="font-size: 1.2rem; margin: 0;"><i class="fas fa-layer-group" style="color:var(--blue); margin-right:10px;"></i> FAQ LMS Premium</h1>
+            <h1 style="font-size: 1.2rem; margin: 0;"><i class="fas fa-headset" style="margin-right:10px;"></i> Support Client v3</h1>
         </div>
         <div style="display: flex; gap: 10px;">
-            <button onclick="toggleAdmin()" class="cat-btn" title="Admin Mode"><i id="adminIcon" class="fas fa-lock"></i></button>
+            <button onclick="toggleAdmin()" class="cat-btn" id="adminBtn"><i id="adminIcon" class="fas fa-lock"></i></button>
             <button id="themeToggle" class="cat-btn"><i id="themeIcon" class="fas fa-sun"></i></button>
         </div>
     </nav>
 
     <div class="container">
         <div id="adminPanel" style="display:none;">
-            <h3 style="margin-top:0"><i class="fas fa-tools"></i> Éditeur de contenu</h3>
-            <div style="display: grid; gap: 12px;">
-                <input type="text" id="newQuestion" placeholder="Votre question...">
+            <h3 style="margin-top:0"><i class="fas fa-edit"></i> Éditeur de Contenu</h3>
+            <div style="display: grid; gap: 15px;">
+                <input type="text" id="newQuestion" placeholder="La question...">
                 <div style="display: flex; gap: 10px;">
                     <select id="newCat" style="flex: 1;">
                         <option value="flux">Flux & Ammon</option>
@@ -244,53 +212,51 @@
                         <option value="admin">Administratif</option>
                         <option value="pedagogie">Pédagogie</option>
                     </select>
-                    <input type="number" id="manualId" placeholder="ID #" style="flex: 0.2;">
+                    <input type="number" id="manualId" placeholder="ID (optionnel)" style="flex: 0.3;">
                 </div>
-                <textarea id="newAnswer" placeholder="Réponse (Markdown et HTML supportés)..." rows="6"></textarea>
+                <textarea id="newAnswer" placeholder="Réponse en Markdown..." rows="5"></textarea>
 
                 <div style="display:flex; gap:10px;">
-                    <button onclick="addFAQ()" style="flex:2; background: var(--green); border:none; padding:12px; border-radius:8px; cursor:pointer; color:white; font-weight:bold;">ENREGISTRER</button>
+                    <button onclick="addFAQ()" style="flex:2; background: var(--green); border:none; padding:12px; border-radius:8px; cursor:pointer; color:white; font-weight:bold;">PUBLIER</button>
                     <button onclick="cancelEdit()" id="cancelBtn" style="display:none; flex:1; background:var(--orange); border:none; border-radius:8px; color:white; cursor:pointer;">ANNULER</button>
                 </div>
             </div>
 
             <div class="markdown-legend">
-                <div class="legend-item" title="Cliquer pour insérer">
-                    <code onclick="insertCard('info')">[Modèle Info]</code>
-                </div>
-                <div class="legend-item" title="Cliquer pour insérer">
-                    <code onclick="insertCard('warn')">[Modèle Alerte]</code>
-                </div>
-                <div class="legend-item" title="Cliquer pour insérer">
-                    <code onclick="insertCard('success')">[Modèle Astuce]</code>
-                </div>
-                <div class="legend-item"><code>[fa:icon]</code> Icône</div>
+                <div class="legend-item"><code>**Gras**</code> → <strong>Gras</strong></div>
+                <div class="legend-item"><code>[fa:user]</code> → <i class="fas fa-user"></i> (Icône)</div>
+                <div class="legend-item"><code>> Texte</code> → Citation</div>
+                <div class="legend-item"><code>---</code> → Ligne de séparation</div>
+                <div class="legend-item"><code>< span class="highlight"></code> → Couleur</div>
             </div>
         </div>
 
-        <header style="text-align:center; margin-bottom: 40px;">
-            <h2 style="font-size: 2.2rem; margin-bottom: 20px;">Support Technique & FAQ</h2>
+        <header style="text-align:center; margin-bottom: 50px;">
+            <h2 style="font-size: 2.5rem; margin-bottom: 10px;">Comment pouvons-nous vous aider ?</h2>
             <div class="search-container" style="position:relative; max-width:600px; margin: 0 auto;">
                 <i class="fas fa-search" style="position:absolute; left:20px; top:18px; color:var(--muted)"></i>
-                <input type="text" id="faqSearch" placeholder="Rechercher une question..." style="padding-left:55px; border-radius:50px; height:55px; font-size:1.1rem; background:var(--card); border: 1px solid var(--border);">
+                <input type="text" id="faqSearch" placeholder="Rechercher un mot-clé (ex: mot de passe, flux...)" style="padding-left:50px; border-radius:50px; height:55px; font-size:1.1rem; background:var(--card);">
             </div>
         </header>
 
-        <div class="categories" style="display:flex; justify-content:center; gap:10px; margin-bottom:30px; flex-wrap:wrap;">
+        <div class="categories" id="catFilters">
             <button class="cat-btn active" data-filter="all">Tout</button>
-            <button class="cat-btn" data-filter="flux">Flux</button>
-            <button class="cat-btn" data-filter="connexion">Connexion</button>
-            <button class="cat-btn" data-filter="admin">Admin</button>
-            <button class="cat-btn" data-filter="pedagogie">Pédagogie</button>
+            <button class="cat-btn" data-filter="flux"><i class="fas fa-sync"></i> Flux</button>
+            <button class="cat-btn" data-filter="connexion"><i class="fas fa-key"></i> Connexion</button>
+            <button class="cat-btn" data-filter="admin"><i class="fas fa-file-invoice"></i> Admin</button>
+            <button class="cat-btn" data-filter="pedagogie"><i class="fas fa-graduation-cap"></i> Pédagogie</button>
         </div>
 
         <div id="faqContainer"></div>
     </div>
 
     <script>
-        // Configuration Marked.js
+        // Configuration de Marked pour supporter les icônes personnalisées [fa:icon]
         const renderer = new marked.Renderer();
-        renderer.text = (text) => text.replace(/\[fa:([a-z0-9-]+)\]/g, '<i class="fas fa-$1"></i>');
+        const originalTextRenderer = renderer.text.bind(renderer);
+        renderer.text = (text) => {
+            return text.replace(/\[fa:([a-z0-9-]+)\]/g, '<i class="fas fa-$1"></i>');
+        };
         marked.setOptions({ renderer: renderer, breaks: true });
 
         const JSON_PATH = 'faq.json';
@@ -303,8 +269,18 @@
                 faqData = await response.json();
                 renderFAQ(faqData);
             } catch (e) {
-                document.getElementById('faqContainer').innerHTML = "<p style='text-align:center;color:var(--orange)'>Fichier faq.json introuvable.</p>";
+                document.getElementById('faqContainer').innerHTML = "<p>Erreur de chargement JSON.</p>";
             }
+        }
+
+        function getCatIcon(cat) {
+            const icons = {
+                'flux': 'fa-sync',
+                'connexion': 'fa-key',
+                'admin': 'fa-file-invoice',
+                'pedagogie': 'fa-graduation-cap'
+            };
+            return icons[cat] || 'fa-question-circle';
         }
 
         function renderFAQ(data) {
@@ -313,12 +289,13 @@
                     <div class="faq-item" data-cat="${item.cat}">
                         <div class="faq-question" onclick="this.parentElement.classList.toggle('active')">
                             <span>
-                                <span style="color:var(--blue); font-weight:bold; margin-right:10px; opacity:0.6;">#${item.id}</span>
+                                <i class="fas ${getCatIcon(item.cat)}" style="margin-right:15px; opacity:0.5; width:20px"></i>
+                                <span style="opacity:0.5; font-size:0.8rem; margin-right:5px">#${item.id}</span>
                                 ${item.question}
                             </span>
                             <div style="display:flex; gap:15px; align-items:center;">
-                                ${isAdminMode ? `<i class="fas fa-edit" onclick="event.stopPropagation(); editFAQ(${index})" style="color:var(--blue); cursor:pointer;"></i>` : ''}
-                                ${isAdminMode ? `<i class="fas fa-trash" onclick="event.stopPropagation(); deleteFAQ(${index})" style="color:var(--orange); cursor:pointer;"></i>` : ''}
+                                ${isAdminMode ? `<i class="fas fa-edit" onclick="event.stopPropagation(); editFAQ(${index})" style="color:var(--blue)"></i>` : ''}
+                                ${isAdminMode ? `<i class="fas fa-trash" onclick="event.stopPropagation(); deleteFAQ(${index})" style="color:var(--orange)"></i>` : ''}
                                 <i class="fas fa-chevron-down" style="font-size:0.8rem; opacity:0.5"></i>
                             </div>
                         </div>
@@ -327,20 +304,9 @@
                 `).join('');
         }
 
-        // --- FONCTIONS ADMIN & COPIE ---
-        function insertCard(type) {
-            const textarea = document.getElementById('newAnswer');
-            const models = {
-                info: '<div class="card-info"><i class="fas fa-info-circle"></i><div><span class="card-title">Information</span>Votre texte ici...</div></div>',
-                warn: '<div class="card-warn"><i class="fas fa-exclamation-triangle"></i><div><span class="card-title">Important</span>Texte de vigilance ici...</div></div>',
-                success: '<div class="card-success"><i class="fas fa-check-circle"></i><div><span class="card-title">Astuce</span>Conseil pratique ici...</div></div>'
-            };
-            textarea.value += models[type];
-            textarea.focus();
-        }
-
+        // --- FONCTIONS ADMIN ---
         function toggleAdmin() {
-            if (prompt("Mot de passe :") === "1969") {
+            if (prompt("Code Admin :") === "1969") {
                 isAdminMode = !isAdminMode;
                 document.getElementById('adminPanel').style.display = isAdminMode ? 'block' : 'none';
                 document.getElementById('adminIcon').className = isAdminMode ? 'fas fa-lock-open' : 'fas fa-lock';
@@ -374,7 +340,7 @@
             const c = document.getElementById('newCat').value;
             const mId = document.getElementById('manualId').value;
 
-            if (!q || !a) return alert("Champs vides !");
+            if (!q || !a) return alert("Remplissez tout !");
 
             const newItem = {
                 id: mId ? parseInt(mId) : (faqData.length > 0 ? Math.max(...faqData.map(i => i.id)) + 1 : 1),
@@ -392,7 +358,7 @@
         }
 
         function deleteFAQ(index) {
-            if (confirm("Confirmer la suppression ?")) {
+            if (confirm("Supprimer ?")) {
                 faqData.splice(index, 1);
                 saveToGithub();
             }
@@ -400,25 +366,23 @@
 
         async function saveToGithub() {
             renderFAQ(faqData);
-            const token = prompt("GitHub Token pour validation :");
+            const token = prompt("GitHub Token :");
             if (!token) return;
 
             const url = `https://api.github.com/repos/formationA/statslms/contents/faq.json`;
-            try {
-                const get = await fetch(url, { headers: { 'Authorization': `token ${token}` } });
-                const meta = await get.json();
+            const get = await fetch(url, { headers: { 'Authorization': `token ${token}` } });
+            const meta = await get.json();
 
-                const put = await fetch(url, {
-                    method: 'PUT',
-                    headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        message: "Mise à jour FAQ - Cartes v3",
-                        content: btoa(unescape(encodeURIComponent(JSON.stringify(faqData, null, 2)))),
-                        sha: meta.sha
-                    })
-                });
-                if (put.ok) alert("✅ Synchronisation réussie !");
-            } catch (e) { alert("❌ Erreur GitHub."); }
+            const put = await fetch(url, {
+                method: 'PUT',
+                headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    message: "Update FAQ",
+                    content: btoa(unescape(encodeURIComponent(JSON.stringify(faqData, null, 2)))),
+                    sha: meta.sha
+                })
+            });
+            if (put.ok) alert("Sauvegardé !");
         }
 
         // --- FILTRES & RECHERCHE ---
