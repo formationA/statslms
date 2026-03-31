@@ -220,6 +220,43 @@
             border-radius: 4px;
             margin-left: 10px;
         }
+
+        /* Styles pour les tags dans les questions corrigés */
+        .tag-valide, .tag-fictif {
+            display: inline-block; /* Garde le badge entier sur une ligne */
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-left: 8px;
+            font-weight: 700;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            vertical-align: middle;
+        }
+
+        .tag-valide {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+        }
+
+        .tag-fictif {
+            background: rgba(251, 146, 60, 0.2);
+            color: #fb923c;
+        }
+
+        /* Mode clair */
+        [data-theme="light"] .tag-valide {
+            background: #dcfce7;
+            color: #15803d;
+            border-color: #bbf7d0;
+        }
+
+        [data-theme="light"] .tag-fictif {
+            background: #ffedd5;
+            color: #c2410c;
+            border-color: #fed7aa;
+        }
+
+
     </style>
 </head>
 <body>
