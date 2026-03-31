@@ -389,59 +389,74 @@
                 const box = document.getElementById('rulesBox');
                 let html = "";
 
-                // 1. En-tête (Titre, Sous-titre, Version)
+                // 1. En-tête
                 html += `<h1 style="text-align:center; color:#0055A4; margin-bottom:5px;">${data.titre_general}</h1>`;
                 html += `<p style="text-align:center; font-weight:bold; margin-top:0;">${data.sous_titre}</p>`;
-                html += `<p style="text-align:right; font-size:0.8rem; color:#64748b;">${data.code_document} - ${data.version}</p>`;
+                html += `<p style="text-align:center; font-size:0.9rem; margin-bottom:20px;">${data.preambule}</p>`;
 
-                // 2. Préambule général
-                html += `<div style="background:#f8fafc; padding:15px; border-radius:8px; border-left:4px solid #0055A4; margin-bottom:20px;">
-                    ${data.preambule}
-                 </div>`;
-
-                // 3. Boucle sur les sections
+                // 2. Boucle sur les Sections
                 data.sections.forEach(section => {
-                    html += `<h2 style="background:#2d3663; color:white; padding:10px; border-radius:4px; margin-top:30px;">
+                    html += `<h2 style="background:#2d3663; color:white; padding:12px; border-radius:4px; margin-top:40px;">
                         Section ${section.id} : ${section.titre}
                      </h2>`;
 
-                    // Introduction et Objectifs (si présents)
-                    if (section.contenu_introductif) {
-                        html += `<p><strong>${section.contenu_introductif}</strong></p>`;
-                    }
-                    if (section.objectifs) {
-                        html += `<ul>${section.objectifs.map(obj => `<li>${obj}</li>`).join('')}</ul>`;
-                    }
+                    if (section.contenu_introductif) html += `<p><strong>${section.contenu_introductif}</strong></p>`;
+                    if (section.objectifs) html += `<ul>${section.objectifs.map(o => `<li>${o}</li>`).join('')}</ul>`;
+                    if (section.champ_application) html += `<p style="background:#f1f5f9; padding:10px; border-left:4px solid #38bdf8;">${section.champ_application}</p>`;
 
-                    // Champ d'application
-                    if (section.champ_application) {
-                        html += `<p style="font-style:italic; color:#475569;">${section.champ_application}</p>`;
-                    }
-
-                    // Articles de la section
+                    // 3. Boucle sur les Articles
                     if (section.articles) {
                         section.articles.forEach(art => {
-                            html += `<h3 style="color:#0055A4; border-bottom:1px solid #e2e8f0; padding-bottom:5px;">
-                                Article ${art.num} : ${art.titre}
-                             </h3>`;
-                            html += `<p>${art.texte}</p>`;
+                            html += `<div style="margin-top:25px; border-bottom: 1px solid #eee; padding-bottom:15px;">`;
+                            html += `<h3 style="color:#0055A4;">Article ${art.num} : ${art.titre}</h3>`;
+                            if (art.texte) html += `<p>${art.texte}</p>`;
+
+                            // --- Gestion des différents types de listes ---
+
+                            // Points classiques
+                            if (art.points) html += `<ul>${art.points.map(p => `<li>${p}</li>`).join('')}</ul>`;
+
+                            // Sanctions spécifiques
+                            if (art.sanctions) {
+                                html += `<div style="color:#b91c1c; font-weight:600; margin-top:10px;">🔴 Sanctions :</div>`;
+                                html += `<ul>${art.sanctions.map(s => `<li>${s}</li>`).join('')}</ul>`;
+                            }
+
+                            // Cas d'ouverture (vestiaires)
+                            if (art.cas_ouverture) {
+                                html += `<strong>Cas autorisant l'ouverture :</strong>`;
+                                html += `<ul>${art.cas_ouverture.map(c => `<li>${c}</li>`).join('')}</ul>`;
+                            }
+
+                            // --- Gestion des Sous-Articles (ex: Article 7) ---
+                            if (art.sous_articles) {
+                                art.sous_articles.forEach(sub => {
+                                    html += `<div style="margin-left:20px; border-left:2px solid #e2e8f0; padding-left:15px; margin-top:15px;">`;
+                                    html += `<h4 style="color:#1e293b; margin-bottom:5px;">${sub.id} ${sub.titre}</h4>`;
+                                    html += `<p>${sub.texte}</p>`;
+                                    if (sub.points) html += `<ul>${sub.points.map(p => `<li>${p}</li>`).join('')}</ul>`;
+                                    if (sub.extension_direction) {
+                                        html += `<em>Extensions de la direction :</em>`;
+                                        html += `<ul>${sub.extension_direction.map(e => `<li>${e}</li>`).join('')}</ul>`;
+                                    }
+                                    html += `</div>`;
+                                });
+                            }
+
+                            html += `</div>`;
                         });
                     }
                 });
 
                 html += `<p style="text-align:center; margin-top:60px; color: #94a3b8;">*** Fin du document ***</p>`;
-
                 box.innerHTML = html;
 
             } catch (err) {
                 console.error(err);
-                document.getElementById('rulesBox').innerHTML = `
-            <div style="color:#ef4444; text-align:center; padding:20px;">
-                <i class="fas fa-exclamation-triangle fa-2x"></i><br>
-                <strong>Erreur de chargement</strong><br>
-                Le navigateur bloque l'accès au fichier JSON en mode local.<br>
-                <small>Utilisez un serveur local (Live Server) ou hébergez les fichiers.</small>
-            </div>`;
+                document.getElementById('rulesBox').innerHTML = `<div style="color:red; text-align:center; padding:50px;">
+            <strong>Erreur critique :</strong> Impossible de lire le fichier JSON.<br>
+            Vérifiez qu'il est bien nommé <code>reglement.json</code> et qu'il ne manque aucune virgule.
+        </div>`;
             }
         }
 
