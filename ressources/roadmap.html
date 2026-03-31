@@ -44,14 +44,16 @@
 
         .container {
             width: 95%;
-            max-width: 1200px;
+            max-width: 1600px; /* Largeur augmentée */
             padding: 40px 20px;
+            box-sizing: border-box; /* Assure que le padding n'augmente pas la taille */
         }
 
         /* Barre de recherche */
         .search-container {
             position: relative;
             margin-bottom: 30px;
+            width: 100%; /* S'aligne sur le container */
         }
 
         #searchInput {
@@ -64,6 +66,7 @@
             font-size: 1rem;
             outline: none;
             transition: var(--transition);
+            box-sizing: border-box;
         }
 
             #searchInput:focus {
@@ -85,6 +88,7 @@
             border-radius: 12px;
             border: 1px solid rgba(255, 255, 255, 0.05);
             overflow: hidden;
+            width: 100%; /* S'aligne sur le container */
         }
 
         table {
@@ -147,7 +151,7 @@
             border-radius: 6px;
             cursor: pointer;
             transition: var(--transition);
-            display: none; /* Caché par défaut */
+            display: none;
         }
 
             .btn-admin:hover {
@@ -238,18 +242,17 @@
         function renderTable(dataArray) {
             const tbody = document.getElementById('tableBody');
             tbody.innerHTML = '';
-            // On affiche du plus récent (fin de liste) au plus ancien
             const displayData = [...dataArray].reverse();
 
             displayData.forEach((item, index) => {
                 const realIndex = dataArray.length - 1 - index;
                 const row = `
-                        <tr data-index="${realIndex}">
-                            <td><span class="badge-ui" contenteditable="${isAdmin}">${item.ui}</span></td>
-                            <td contenteditable="${isAdmin}">${item.task}</td>
-                            <td class="date-col hide-mobile" contenteditable="${isAdmin}">${item.preprod}</td>
-                            <td class="date-col prod-ready" contenteditable="${isAdmin}">${item.prod}</td>
-                        </tr>`;
+                            <tr data-index="${realIndex}">
+                                <td><span class="badge-ui" contenteditable="${isAdmin}">${item.ui}</span></td>
+                                <td contenteditable="${isAdmin}">${item.task}</td>
+                                <td class="date-col hide-mobile" contenteditable="${isAdmin}">${item.preprod}</td>
+                                <td class="date-col prod-ready" contenteditable="${isAdmin}">${item.prod}</td>
+                            </tr>`;
                 tbody.innerHTML += row;
             });
         }
@@ -292,8 +295,6 @@
         async function saveChanges() {
             const rows = document.querySelectorAll('#tableBody tr');
             const updatedData = [];
-
-            // On reconstruit le tableau dans le bon sens (chronologique)
             rows.forEach(row => {
                 const cells = row.querySelectorAll('td');
                 updatedData.unshift({
@@ -310,10 +311,9 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(updatedData, null, 2)
                 });
-
                 if (response.ok) {
                     alert("✅ Enregistré sur le serveur !");
-                    allData = updatedData; // Mise à jour de la mémoire locale
+                    allData = updatedData;
                 } else {
                     alert("❌ Erreur serveur.");
                 }
