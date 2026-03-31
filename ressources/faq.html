@@ -291,7 +291,16 @@
                     <option value="admin">Administratif</option>
                     <option value="pedagogie">Pédagogie</option>
                 </select>
-                <textarea id="newAnswer" placeholder="Réponse (Markdown ou HTML)" rows="3"></textarea>
+
+                <div style="display: flex; gap: 5px; margin-bottom: 5px; flex-wrap: wrap;">
+                    <button type="button" onclick="insertTag('ul')" title="Liste" style="padding: 5px 10px; cursor:pointer;"><i class="fas fa-list"></i></button>
+                    <button type="button" onclick="insertTag('li')" title="Élément de liste" style="padding: 5px 10px; cursor:pointer;"><i class="fas fa-minus"></i></button>
+                    <button type="button" onclick="insertTag('span', 'highlight')" title="Surligner" style="padding: 5px 10px; cursor:pointer; color: var(--blue);"><i class="fas fa-highlighter"></i></button>
+                    <button type="button" onclick="insertTag('span', 'warning')" title="Alerte Orange" style="padding: 5px 10px; cursor:pointer; color: var(--orange);"><i class="fas fa-exclamation-triangle"></i></button>
+                    <button type="button" onclick="insertTag('b')" title="Gras" style="padding: 5px 10px; cursor:pointer;"><i class="fas fa-bold"></i></button>
+                </div>
+                <textarea id="newAnswer" placeholder="Réponse (Markdown ou HTML)" rows="8"></textarea>
+
                 <div style="display:flex; gap:10px;">
                     <button onclick="addFAQ()" style="flex:2; background: var(--green); color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold;">Enregistrer</button>
                     <button onclick="cancelEdit()" id="cancelBtn" style="flex:1; display:none; background: var(--muted); color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer;">Annuler</button>
@@ -401,6 +410,34 @@
             document.getElementById('newAnswer').value = '';
             document.getElementById('adminPanel').dataset.currentId = "";
             document.getElementById('cancelBtn').style.display = 'none';
+        }
+
+        function insertTag(tag, className = '') {
+            const area = document.getElementById('newAnswer');
+            const start = area.selectionStart;
+            const end = area.selectionEnd;
+            const fullText = area.value;
+            const selectedText = fullText.substring(start, end);
+
+            let openTag = `<${tag}${className ? ' class="' + className + '"' : ''}>`;
+            let closeTag = `</${tag}>`;
+
+            // Gestion spécifique des listes pour un code propre
+            if (tag === 'ul') {
+                openTag = `<ul style="padding-left: 20px; margin: 10px 0;">\n  `;
+                closeTag = `\n</ul>`;
+            } else if (tag === 'li') {
+                openTag = `  <li>`;
+                closeTag = `</li>`;
+            }
+
+            const replacement = openTag + selectedText + closeTag;
+            area.value = fullText.substring(0, start) + replacement + fullText.substring(end);
+
+            // Repositionne le curseur
+            area.focus();
+            const newCursorPos = start + openTag.length + selectedText.length + closeTag.length;
+            area.setSelectionRange(newCursorPos, newCursorPos);
         }
 
         function addFAQ() {
