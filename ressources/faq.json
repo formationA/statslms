@@ -105,7 +105,7 @@
     "id": 18,
     "cat": "pedagogie",
     "question": "Quand l'enquête de satisfaction est-elle accessible ?",
-    "answer": "L'enquête se déclenche automatiquement le <span class=\"highlight\">dernier jour de la formation</span> (si la progression est > 0%).<br><br><ul style=\"padding-left: 20px; margin: 10px 0;\"><li><span class=\"highlight\">Le dernier jour :</span> L'apprenant y accède directement <span class=\"highlight\">depuis sa session</span> de formation sur le LMS.</li><li><span class=\"warning\">Via les relances :</span> Si l'enquête n'est pas remplie, un mail est envoyé 2 jours, puis 1 semaine après. Ce mail contient un <span class=\"highlight\">lien direct</span> permettant de répondre sans avoir besoin de retourner sur la session.</li></ul>"
+    "answer": "L'enquête se déclenche automatiquement le <span class=\"highlight\">dernier jour de la formation</span> (si la progression est > 0%).<br><br><ul style=\"padding-left: 20px; margin: 10px 0;\"><li><span class=\"highlight\">Le dernier jour :</span> L'apprenant y accède directement <span class=\"highlight\">depuis sa session</span> sur le LMS.</li><li><span class=\"highlight\">Action formateur :</span> L'enquête peut aussi être déclenchée manuellement par le formateur depuis son interface (<span class=\"highlight\">Session > Paramètres</span>).</li><li><span class=\"warning\">Via les relances :</span> Si l'enquête n'est pas remplie, des mails de relance avec un <span class=\"highlight\">lien direct</span> sont envoyés après 2 jours, puis 1 semaine.</li></ul>"
   },
   {
     "id": 19,
