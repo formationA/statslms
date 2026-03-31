@@ -344,25 +344,26 @@
             const sortedData = [...data].sort((a, b) => a.id - b.id);
 
             container.innerHTML = sortedData.map((item, index) => {
-                // La ligne "const icons = ..." peut être supprimée car elle ne sert plus
                 return `
-            <div class="faq-item" data-cat="${item.cat}" data-id="${item.id}">
-                <div class="faq-question" onclick="this.parentElement.classList.toggle('active')" tabindex="0" onkeydown="handleKey(event, this)">
-                    <span>
-                        <span style="color:var(--blue); margin-right:8px; font-size:0.9rem; opacity:0.7;">#${item.id}</span>
-                        ${item.question}
-                    </span>
-                    <div style="display:flex; align-items:center;">
-                        ${isAdminMode ? `
-                            <i class="fas fa-edit" onclick="event.stopPropagation(); editFAQ(${index})" title="Modifier" style="color:var(--blue); margin-right:15px; cursor:pointer;"></i>
-                            <i class="fas fa-trash" onclick="event.stopPropagation(); deleteFAQ(${index})" title="Supprimer" style="color:var(--orange); margin-right:15px; cursor:pointer;"></i>
-                        ` : ''}
-                        <i class="fas fa-chevron-down" style="font-size:0.8rem; color:var(--muted)"></i>
-                    </div>
-                </div>
-                <div class="faq-answer">${marked.parse(item.answer)}</div>
+    <div class="faq-item" data-cat="${item.cat}" data-id="${item.id}">
+        <div class="faq-question" onclick="this.parentElement.classList.toggle('active')" tabindex="0" onkeydown="handleKey(event, this)">
+            <span>
+                <span style="color:var(--blue); margin-right:8px; font-size:0.9rem; opacity:0.7;">#${item.id}</span>
+                ${item.question}
+            </span>
+            <div style="display:flex; align-items:center;">
+                <i class="fas fa-copy" onclick="event.stopPropagation(); copyFAQ(this)" title="Copier la réponse" style="margin-right:15px; cursor:pointer; opacity:0.6;"></i>
+                
+                ${isAdminMode ? `
+                    <i class="fas fa-edit" onclick="event.stopPropagation(); editFAQ(${index})" title="Modifier" style="color:var(--blue); margin-right:15px; cursor:pointer;"></i>
+                    <i class="fas fa-trash" onclick="event.stopPropagation(); deleteFAQ(${index})" title="Supprimer" style="color:var(--orange); margin-right:15px; cursor:pointer;"></i>
+                ` : ''}
+                <i class="fas fa-chevron-down" style="font-size:0.8rem; color:var(--muted)"></i>
             </div>
-        `;
+        </div>
+        <div class="faq-answer">${marked.parse(item.answer)}</div>
+    </div>
+`;
             }).join('');
         }
 
@@ -449,6 +450,57 @@
                 if (updateRes.ok) alert("✅ Sauvegarde réussie !");
             } catch (e) { alert("❌ Erreur sauvegarde."); }
         }
+
+
+        async function copyFAQ(btn, index) {
+            const item = btn.closest('.faq-item');
+            const question = item.querySelector('.faq-question').cloneNode(true);
+            const answer = item.querySelector('.faq-answer').cloneNode(true);
+
+            // Nettoyage du clone pour ne garder que le texte et les tags
+            const controls = question.querySelector('div[style*="display:flex"]');
+            if (controls) controls.remove();
+
+            // Création du bloc HTML à copier
+            const container = document.createElement('div');
+            container.style.fontFamily = 'Arial, sans-serif';
+
+            // Style de la question pour le copier-coller
+            question.style.fontWeight = 'bold';
+            question.style.color = '#38bdf8';
+            question.style.fontSize = '1.1rem';
+            question.style.marginBottom = '10px';
+            question.style.display = 'block';
+
+            // Style de la réponse
+            answer.style.display = 'block';
+            answer.style.maxHeight = 'none';
+            answer.style.padding = '10px';
+            answer.style.color = '#333';
+
+            container.appendChild(question);
+            container.appendChild(answer);
+
+            try {
+                const blob = new Blob([container.innerHTML], { type: 'text/html' });
+                const text = new Blob([container.innerText], { type: 'text/plain' });
+                await navigator.clipboard.write([
+                    new ClipboardItem({ 'text/html': blob, 'text/plain': text })
+                ]);
+
+                // Petit feedback visuel sur le bouton
+                const icon = btn.querySelector('i');
+                icon.className = 'fas fa-check';
+                btn.style.color = 'var(--green)';
+                setTimeout(() => {
+                    icon.className = 'fas fa-copy';
+                    btn.style.color = '';
+                }, 2000);
+            } catch (err) {
+                alert("Erreur lors de la copie");
+            }
+        }
+
 
         const searchInput = document.getElementById('faqSearch');
         const clearBtn = document.getElementById('clearSearch');
