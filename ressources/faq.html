@@ -204,6 +204,43 @@
             background: rgba(255,255,255,0.1);
             margin-right: 10px;
         }
+
+        /* Style pour les tags à l'intérieur des questions */
+        .tag-valide, .tag-fictif {
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            border-radius: 12px;
+            margin-left: 8px;
+            font-weight: 600;
+            vertical-align: middle;
+            text-transform: none; /* Pour garder les minuscules du JSON */
+        }
+
+        /* Cas e-mail valide (Vert) */
+        .tag-valide {
+            background: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        /* Cas e-mail fictif (Orange/Ambre) */
+        .tag-fictif {
+            background: rgba(251, 146, 60, 0.15);
+            color: #fb923c;
+            border: 1px solid rgba(251, 146, 60, 0.3);
+        }
+
+        /* Ajustements pour le mode clair */
+        [data-theme="light"] .tag-valide {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        [data-theme="light"] .tag-fictif {
+            background: #ffedd5;
+            color: #9a3412;
+        }
+
     </style>
 </head>
 <body>
