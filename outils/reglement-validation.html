@@ -6,7 +6,6 @@
     <title>Règlement Intérieur - AFTRAL</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-   
     <style>
         :root {
             --nav-bg: #0f172a;
@@ -555,85 +554,28 @@
         }
 
         function generateSCORM() {
-            console.log("Lancement de la génération SCORM...");
+            const zip = new JSZip();
 
-            // 1. Vérification de la bibliothèque JSZip
-            if (typeof JSZip === 'undefined') {
-                alert("Erreur : La bibliothèque JSZip n'est pas chargée dans le <head> de votre page.");
-                return;
-            }
+            // 1. On récupère le contenu actuel de la box (celui généré par le JSON)
+            const contenuFixe = document.getElementById('rulesBox').innerHTML;
 
-            try {
-                const zip = new JSZip();
+            // 2. On clone le document pour ne pas modifier la page actuelle
+            let docClone = document.documentElement.cloneNode(true);
 
-                // 2. Récupération du contenu édité dans la box
-                const rulesBox = document.getElementById('rulesBox');
-                const contenuFixe = rulesBox ? rulesBox.innerHTML : "Contenu non trouvé";
+            // 3. On remplace le contenu de la box par le texte fixe dans le clone
+            // Cela évite que le SCORM cherche le fichier JSON au lancement
+            docClone.querySelector('#rulesBox').innerHTML = contenuFixe;
 
-                // 3. Clonage du document HTML complet
-                // On clone le documentElement (la balise <html> et tout son contenu)
-                let docClone = document.documentElement.cloneNode(true);
+            // 4. On désactive l'appel à chargerReglement() dans le clone pour éviter les erreurs
+            let scriptClone = docClone.querySelector('script');
+            let propreHtml = docClone.outerHTML;
 
-                // 4. Injection du contenu édité dans le clone
-                const cloneBox = docClone.querySelector('#rulesBox');
-                if (cloneBox) {
-                    cloneBox.innerHTML = contenuFixe;
-                    // On s'assure que le contenu n'est plus éditable dans le SCORM final
-                    cloneBox.setAttribute('contenteditable', 'false');
-                }
+            // On retire l'appel automatique au chargement du JSON dans le ZIP
+            propreHtml = propreHtml.replace('chargerReglement();', '// contenu déjà chargé');
+            propreHtml = propreHtml.replace('<body', '<body class="scorm-mode"');
 
-                // 5. Création et injection du style "Export" pour réduire les marges
-                // Note : On utilise 'document' pour créer l'élément, puis on l'ajoute au clone
-                const styleScorm = document.createElement('style');
-                styleScorm.innerHTML = `
-            /* Masquer la barre de navigation dans le LMS */
-            .navbar { display: none !important; }
-            
-            /* Ajuster le conteneur pour prendre toute la largeur */
-            .main-container { 
-                padding: 10px !important; 
-                display: block !important; 
-                max-width: 100% !important; 
-                width: 100% !important;
-            }
-            
-            /* Réduire les marges de la carte du document */
-            .document-card { 
-                max-width: 100% !important; 
-                width: 100% !important; 
-                padding: 15px 20px !important; 
-                margin: 0 !important; 
-                border: none !important; 
-                box-shadow: none !important; 
-                border-radius: 0 !important;
-            }
-
-            /* Optimiser l'espace de la zone de texte */
-            .content-scroll { 
-                padding: 15px !important; 
-                height: auto !important; 
-                border: 1px solid #e2e8f0 !important; 
-                background: #ffffff !important;
-            }
-        `;
-
-                // On insère le style dans le <head> du clone
-                const cloneHead = docClone.querySelector('head');
-                if (cloneHead) {
-                    cloneHead.appendChild(styleScorm);
-                }
-
-                // 6. Conversion du clone en texte HTML et nettoyage
-                let propreHtml = docClone.outerHTML;
-
-                // On neutralise l'appel au chargement JSON car le texte est maintenant "en dur"
-                propreHtml = propreHtml.replace('chargerReglement();', '// Contenu déjà injecté');
-
-                // On ajoute une classe au body pour d'éventuels styles CSS spécifiques
-                propreHtml = propreHtml.replace('<body', '<body class="scorm-mode"');
-
-                // 7. Création du Manifest SCORM 1.2 obligatoire
-                const manifest = `<?xml version="1.0" encoding="UTF-8"?>
+            // 5. Création du Manifest SCORM 1.2
+            const manifest = `<?xml version="1.0" encoding="UTF-8"?>
 <manifest identifier="RI_AFTRAL" version="1.0" xmlns="http://www.imsproject.org/xsd/imscp_rootv1p1p2">
     <metadata>
         <schema>ADL SCORM</schema>
@@ -641,7 +583,7 @@
     </metadata>
     <organizations default="org">
         <organization identifier="org">
-            <title>Règlement Intérieur</title>
+            <title>Règlement Intérieur AFTRAL</title>
             <item identifier="item1" identifierref="res1">
                 <title>Signature du Règlement</title>
             </item>
@@ -652,32 +594,19 @@
     </resources>
 </manifest>`;
 
-                // 8. Assemblage du fichier ZIP
-                zip.file("index.html", propreHtml);
-                zip.file("imsmanifest.xml", manifest);
+            // 6. Ajout des fichiers au ZIP
+            zip.file("index.html", propreHtml);
+            zip.file("imsmanifest.xml", manifest);
 
-                // 9. Génération et téléchargement automatique
-                zip.generateAsync({ type: "blob" }).then(function (content) {
-                    const a = document.createElement("a");
-                    a.href = URL.createObjectURL(content);
-                    a.download = "SCORM_Reglement_Aftral.zip";
-                    a.click();
-
-                    // Si votre fonction de modal existe, on l'appelle
-                    if (typeof showModal === "function") {
-                        showModal("Export Réussi", "Le package SCORM avec marges réduites est prêt.");
-                    } else {
-                        alert("SCORM généré avec succès !");
-                    }
-                });
-
-            } catch (error) {
-                console.error("Erreur critique lors de la génération SCORM :", error);
-                alert("Désolé, une erreur est survenue : " + error.message);
-            }
+            // 7. Génération et téléchargement
+            zip.generateAsync({ type: "blob" }).then(function (content) {
+                const a = document.createElement("a");
+                a.href = URL.createObjectURL(content);
+                a.download = "SCORM_RI_Final.zip";
+                a.click();
+                showModal("SCORM Généré", "L'archive contient maintenant le texte complet du règlement.");
+            });
         }
-
-
     </script>
 </body>
 </html>
