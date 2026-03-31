@@ -130,48 +130,6 @@
             width: fit-content;
             margin-bottom: 10px;
         }
-
-        /* --- STYLES MODALE --- */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.85);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal-content {
-            width: 90%;
-            max-width: 1000px;
-            height: 80vh;
-            background: #000;
-            position: relative;
-            border-radius: 12px;
-            overflow: hidden;
-            border: 1px solid var(--blue);
-        }
-
-        .close-btn {
-            position: absolute;
-            top: 15px;
-            right: 20px;
-            color: white;
-            font-size: 30px;
-            cursor: pointer;
-            z-index: 1001;
-            text-shadow: 0 0 10px rgba(0,0,0,0.5);
-        }
-
-        iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
     </style>
 </head>
 <body>
@@ -191,13 +149,6 @@
 
         <div class="tuto-grid" id="tutoContainer">
             <p style="text-align: center; grid-column: 1/-1;">Chargement des tutoriels...</p>
-        </div>
-    </div>
-
-    <div id="videoModal" class="modal-overlay" onclick="closeModal()">
-        <div class="modal-content" onclick="event.stopPropagation()">
-            <span class="close-btn" onclick="closeModal()">&times;</span>
-            <iframe id="videoFrame" src=""></iframe>
         </div>
     </div>
 
@@ -221,8 +172,8 @@
                                     <div class="tuto-title">${tuto.title}</div>
                                     <div class="tuto-desc">${tuto.desc}</div>
                                 </div>
-                                <button onclick="openModal('${tuto.url}')" class="btn-launch">
-                                    Voir le tutoriel <i class="fas fa-play-circle"></i>
+                                <button onclick="launchVideo('${tuto.url}')" class="btn-launch">
+                                    Voir le tutoriel <i class="fas fa-external-link-alt"></i>
                                 </button>
                             </div>
                         `;
@@ -235,25 +186,14 @@
             }
         }
 
-        function openModal(url) {
-            const modal = document.getElementById('videoModal');
-            const iframe = document.getElementById('videoFrame');
+        // Fonction pour ouvrir une fenêtre surgissante propre
+        function launchVideo(url) {
+            const w = 1100;
+            const h = 750;
+            const left = (screen.width / 2) - (w / 2);
+            const top = (screen.height / 2) - (h / 2);
 
-            // On affiche la modale
-            modal.style.display = 'flex';
-            // On charge l'URL
-            iframe.src = url;
-            // On empêche le scroll de la page de fond
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeModal() {
-            const modal = document.getElementById('videoModal');
-            const iframe = document.getElementById('videoFrame');
-
-            modal.style.display = 'none';
-            iframe.src = ''; // On vide l'iframe pour stopper la vidéo
-            document.body.style.overflow = 'auto';
+            window.open(url, 'LMS_Tuto', `width=${w}, height=${h}, top=${top}, left=${left}, scrollbars=yes, resizable=yes`);
         }
 
         window.onload = loadTutos;
