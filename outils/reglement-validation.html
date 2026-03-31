@@ -563,11 +563,35 @@
             let docClone = document.documentElement.cloneNode(true);
 
             // 3. On remplace le contenu de la box par le texte fixe dans le clone
-            // Cela évite que le SCORM cherche le fichier JSON au lancement
             docClone.querySelector('#rulesBox').innerHTML = contenuFixe;
 
-            // 4. On désactive l'appel à chargerReglement() dans le clone pour éviter les erreurs
-            let scriptClone = docClone.querySelector('script');
+            // --- AJOUT : RÉDUCTION DES MARGES POUR L'EXPORT ---
+            const styleScorm = docClone.createElement('style');
+            styleScorm.innerHTML = `
+        /* On élargit le conteneur principal */
+        .main-container { 
+            padding: 5px !important; 
+            max-width: 100% !important; 
+            width: 100% !important; 
+        }
+        /* On réduit les marges internes de la carte */
+        .document-card { 
+            padding: 15px !important; 
+            margin: 0 !important; 
+            border-radius: 0 !important; 
+            width: 100% !important;
+            box-shadow: none !important;
+        }
+        /* On réduit les marges du texte */
+        .content-scroll { 
+            padding-left: 10px !important; 
+            padding-right: 10px !important; 
+        }
+    `;
+            docClone.head.appendChild(styleScorm);
+            // ------------------------------------------------
+
+            // 4. On désactive l'appel à chargerReglement() dans le clone
             let propreHtml = docClone.outerHTML;
 
             // On retire l'appel automatique au chargement du JSON dans le ZIP
@@ -604,7 +628,7 @@
                 a.href = URL.createObjectURL(content);
                 a.download = "SCORM_RI_Final.zip";
                 a.click();
-                showModal("SCORM Généré", "L'archive contient maintenant le texte complet du règlement.");
+                showModal("SCORM Généré", "L'archive a été générée avec des marges optimisées pour le LMS.");
             });
         }
     </script>
