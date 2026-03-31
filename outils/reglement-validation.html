@@ -323,17 +323,23 @@
 
     <div class="main-container">
         <div class="document-card">
-            <header>
-                <div class="logo-text" id="mainTitle">Chargement...</div>
-                <h2 id="subTitle" style="color: #334155; border:none; margin: 10px 0; font-size: 1.2rem;">
-                    Veuillez patienter...
+            <header style="text-align: center; border-bottom: 2px solid #e2e8f0; padding-bottom: 20px; margin-bottom: 20px;">
+                <div class="logo-text" style="font-size: 1.4rem; font-weight: 800; color: #0055A4; line-height: 1.3; margin-bottom: 10px; text-transform: uppercase;">
+                    RÈGLEMENT INTÉRIEUR GÉNÉRAL DES APPRENANTS
+                </div>
+
+                <h2 style="color: #334155; border: none; margin: 5px 0; font-size: 1.1rem; font-weight: 600;">
+                    Organisme de formation et Centre de Formation d'Apprentis (CFA)
                 </h2>
-                <small style="color: #94a3b8;">(Contenu éditable en cliquant dans le texte)</small>
+
+                <small style="color: #94a3b8; display: block; margin-top: 10px;">
+                    (Contenu éditable en cliquant dans le texte)
+                </small>
             </header>
 
             <div class="content-scroll" id="rulesBox" contenteditable="true">
                 <p style="text-align:center; padding:20px; color:#64748b;">
-                    <i class="fas fa-spinner fa-spin"></i> Chargement du règlement en cours...
+                    <i class="fas fa-spinner fa-spin"></i> Chargement des articles...
                 </p>
             </div>
 
@@ -350,7 +356,6 @@
                     </label>
                     <button id="btnSubmit" disabled>Valider et Signer</button>
                 </div>
-
                 <div id="msgSuccess" class="hidden success-msg">
                     <i class="fas fa-check-circle"></i> Signature enregistrée avec succès.
                     <div id="timestamp" style="font-size: 0.8rem; font-weight: normal; margin-top: 5px; color: #64748b;"></div>
@@ -358,7 +363,6 @@
             </div>
         </div>
     </div>
-
     <div class="modal-overlay" id="modalOverlay">
         <div class="modal-content">
             <div class="modal-icon-wrapper"><i class="fas fa-check" id="modalIcon"></i></div>
