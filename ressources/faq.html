@@ -452,52 +452,43 @@
         }
 
 
-        async function copyFAQ(btn, index) {
+        async function copyFAQ(btn) {
             const item = btn.closest('.faq-item');
-            const question = item.querySelector('.faq-question').cloneNode(true);
-            const answer = item.querySelector('.faq-answer').cloneNode(true);
+            const questionEl = item.querySelector('.faq-question span').cloneNode(true);
+            const answerEl = item.querySelector('.faq-answer').cloneNode(true);
 
-            // Nettoyage du clone pour ne garder que le texte et les tags
-            const controls = question.querySelector('div[style*="display:flex"]');
-            if (controls) controls.remove();
+            // On retire le numéro (#ID) de la question pour la copie
+            const idSpan = questionEl.querySelector('span');
+            if (idSpan) idSpan.remove();
 
-            // Création du bloc HTML à copier
-            const container = document.createElement('div');
-            container.style.fontFamily = 'Arial, sans-serif';
-
-            // Style de la question pour le copier-coller
-            question.style.fontWeight = 'bold';
-            question.style.color = '#38bdf8';
-            question.style.fontSize = '1.1rem';
-            question.style.marginBottom = '10px';
-            question.style.display = 'block';
-
-            // Style de la réponse
-            answer.style.display = 'block';
-            answer.style.maxHeight = 'none';
-            answer.style.padding = '10px';
-            answer.style.color = '#333';
-
-            container.appendChild(question);
-            container.appendChild(answer);
+            // Préparation du bloc HTML pour le presse-papier
+            const richContent = `
+        <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+            <p style="color: #38bdf8; font-weight: bold; font-size: 1.1em; margin-bottom: 10px;">
+                ${questionEl.innerHTML.trim()}
+            </p>
+            <div style="color: #333;">
+                ${answerEl.innerHTML}
+            </div>
+        </div>
+    `;
 
             try {
-                const blob = new Blob([container.innerHTML], { type: 'text/html' });
-                const text = new Blob([container.innerText], { type: 'text/plain' });
-                await navigator.clipboard.write([
-                    new ClipboardItem({ 'text/html': blob, 'text/plain': text })
-                ]);
+                // Utilisation de l'API Clipboard pour envoyer du HTML
+                const blob = new Blob([richContent], { type: 'text/html' });
+                const data = [new ClipboardItem({ 'text/html': blob, 'text/plain': item.innerText })];
 
-                // Petit feedback visuel sur le bouton
-                const icon = btn.querySelector('i');
-                icon.className = 'fas fa-check';
+                await navigator.clipboard.write(data);
+
+                // Feedback visuel
+                btn.className = 'fas fa-check';
                 btn.style.color = 'var(--green)';
                 setTimeout(() => {
-                    icon.className = 'fas fa-copy';
+                    btn.className = 'fas fa-copy';
                     btn.style.color = '';
                 }, 2000);
             } catch (err) {
-                alert("Erreur lors de la copie");
+                console.error('Erreur de copie :', err);
             }
         }
 
