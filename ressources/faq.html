@@ -7,7 +7,6 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
-        /* --- VOS STYLES ORIGINAUX CONSERVÉS --- */
         :root {
             --bg: #0f172a;
             --card: #1e293b;
@@ -177,19 +176,6 @@
             line-height: 1.6;
         }
 
-            .faq-answer ul {
-                margin: 10px 0;
-                padding-left: 25px;
-            }
-
-            .faq-answer li {
-                margin-bottom: 8px;
-            }
-
-            .faq-answer p {
-                margin-bottom: 10px;
-            }
-
         .faq-item.active .faq-answer {
             padding: 20px;
             max-height: 2000px;
@@ -210,37 +196,13 @@
             font-weight: 600;
         }
 
-        .tag-valide, .tag-fictif {
-            display: inline-block;
-            padding: 2px 8px;
+        .cat-tag {
+            font-size: 0.7rem;
+            padding: 2px 6px;
             border-radius: 4px;
-            font-size: 0.8rem;
-            margin-left: 8px;
-            font-weight: 700;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            vertical-align: middle;
-        }
-
-        .tag-valide {
-            background: rgba(16, 185, 129, 0.2);
-            color: #10b981;
-        }
-
-        .tag-fictif {
-            background: rgba(251, 146, 60, 0.2);
-            color: #fb923c;
-        }
-
-        [data-theme="light"] .tag-valide {
-            background: #dcfce7;
-            color: #15803d;
-            border-color: #bbf7d0;
-        }
-
-        [data-theme="light"] .tag-fictif {
-            background: #ffedd5;
-            color: #c2410c;
-            border-color: #fed7aa;
+            text-transform: uppercase;
+            background: rgba(255,255,255,0.1);
+            margin-right: 10px;
         }
     </style>
 </head>
@@ -302,6 +264,7 @@
         const JSON_PATH = 'faq.json';
         let faqData = [];
         let isAdminMode = false;
+        let editIndex = -1;
 
         async function loadFAQ() {
             const container = document.getElementById('faqContainer');
@@ -317,26 +280,32 @@
 
         function renderFAQ(data) {
             const container = document.getElementById('faqContainer');
-            container.innerHTML = data.map((item, index) => `
-                    <div class="faq-item" data-cat="${item.cat}" data-id="${item.id || ''}">
-                        <div class="faq-question" tabindex="0" onkeydown="handleKey(event, this)">
-                            <span>
-                                <span style="color:var(--blue); margin-right:8px; font-size:0.9rem; opacity:0.7;">#${item.id || index + 1}</span>
-                                ${item.question}
-                            </span>
-                            <div style="display:flex; align-items:center;">
-                                ${isAdminMode ? `<i class="fas fa-edit" onclick="event.stopPropagation(); editFAQ(${index})" title="Modifier" style="color:var(--blue); margin-right:15px; cursor:pointer;"></i>` : ''}
-                                ${isAdminMode ? `<i class="fas fa-trash" onclick="event.stopPropagation(); deleteFAQ(${index})" title="Supprimer" style="color:var(--orange); margin-right:15px; cursor:pointer;"></i>` : ''}
-                                <i class="fas fa-chevron-down" style="font-size:0.8rem; color:var(--muted)"></i>
-                            </div>
-                        </div>
-                        <div class="faq-answer">${marked.parse(item.answer)}</div>
-                    </div>
-                `).join('');
+            const sortedData = [...data].sort((a, b) => a.id - b.id);
 
-            document.querySelectorAll('.faq-question').forEach(q => {
-                q.onclick = () => q.parentElement.classList.toggle('active');
-            });
+            container.innerHTML = sortedData.map((item, index) => {
+                const icons = { flux: 'sync', connexion: 'user-lock', admin: 'shield-alt', pedagogie: 'graduation-cap' };
+                const icon = icons[item.cat] || 'question-circle';
+
+                return `
+                        <div class="faq-item" data-cat="${item.cat}" data-id="${item.id}">
+                            <div class="faq-question" onclick="this.parentElement.classList.toggle('active')" tabindex="0" onkeydown="handleKey(event, this)">
+                                <span>
+                                    <i class="fas fa-${icon}" style="margin-right:10px; opacity:0.5; font-size:0.8rem;"></i>
+                                    <span style="color:var(--blue); margin-right:8px; font-size:0.9rem; opacity:0.7;">#${item.id}</span>
+                                    ${item.question}
+                                </span>
+                                <div style="display:flex; align-items:center;">
+                                    ${isAdminMode ? `
+                                        <i class="fas fa-edit" onclick="event.stopPropagation(); editFAQ(${index})" title="Modifier" style="color:var(--blue); margin-right:15px; cursor:pointer;"></i>
+                                        <i class="fas fa-trash" onclick="event.stopPropagation(); deleteFAQ(${index})" title="Supprimer" style="color:var(--orange); margin-right:15px; cursor:pointer;"></i>
+                                    ` : ''}
+                                    <i class="fas fa-chevron-down" style="font-size:0.8rem; color:var(--muted)"></i>
+                                </div>
+                            </div>
+                            <div class="faq-answer">${marked.parse(item.answer)}</div>
+                        </div>
+                    `;
+            }).join('');
         }
 
         function handleKey(e, element) {
@@ -353,12 +322,8 @@
                 document.getElementById('adminPanel').style.display = isAdminMode ? 'block' : 'none';
                 document.getElementById('adminIcon').className = isAdminMode ? 'fas fa-lock-open' : 'fas fa-lock';
                 renderFAQ(faqData);
-            } else {
-                alert("Accès refusé");
-            }
+            } else { alert("Accès refusé"); }
         }
-
-        let editIndex = -1;
 
         function editFAQ(index) {
             editIndex = index;
@@ -387,16 +352,12 @@
             const existingId = panel.dataset.currentId;
 
             if (q && a) {
-                let finalId;
                 if (existingId && existingId !== "") {
-                    finalId = parseInt(existingId);
-                    faqData[editIndex] = { id: finalId, question: q, answer: a, cat: c };
+                    faqData[editIndex] = { id: parseInt(existingId), question: q, answer: a, cat: c };
                 } else {
                     const maxId = faqData.reduce((max, item) => (item.id > max ? item.id : max), 0);
-                    finalId = maxId + 1;
-                    faqData.push({ id: finalId, question: q, answer: a, cat: c });
+                    faqData.push({ id: maxId + 1, question: q, answer: a, cat: c });
                 }
-                faqData.sort((a, b) => a.id - b.id);
                 cancelEdit();
                 saveLocal();
             }
@@ -411,18 +372,13 @@
 
         async function saveLocal() {
             renderFAQ(faqData);
-            const tempToken = prompt("Entrez votre GitHub Token pour confirmer la sauvegarde :");
+            const tempToken = prompt("GitHub Token :");
             if (!tempToken) return;
 
-            const REPO_OWNER = 'formationA';
-            const REPO_NAME = 'statslms';
-            const FILE_PATH = 'faq.json';
-
+            const url = `https://api.github.com/repos/formationA/statslms/contents/faq.json`;
             try {
-                const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
                 const getRes = await fetch(url, { headers: { 'Authorization': `token ${tempToken}` } });
                 const fileMetadata = await getRes.json();
-
                 const updateRes = await fetch(url, {
                     method: 'PUT',
                     headers: { 'Authorization': `token ${tempToken}`, 'Content-Type': 'application/json' },
