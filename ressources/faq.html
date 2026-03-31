@@ -3,119 +3,154 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FAQ | Support Technique Premium</title>
+    <title>FAQ | Centre d'Aide LMS</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
+        /* --- VOS STYLES ORIGINAUX CONSERVÉS --- */
         :root {
             --bg: #0f172a;
-            --card: rgba(30, 41, 59, 0.7);
+            --card: #1e293b;
             --blue: #38bdf8;
             --green: #10b981;
             --orange: #fb923c;
-            --purple: #a78bfa;
             --white: #f8fafc;
             --muted: #94a3b8;
             --border: rgba(255, 255, 255, 0.1);
-            --glass: blur(12px);
         }
 
         [data-theme="light"] {
-            --bg: #f1f5f9;
-            --card: rgba(255, 255, 255, 0.8);
+            --bg: #f8fafc;
+            --card: #ffffff;
             --white: #1e293b;
             --muted: #64748b;
-            --border: rgba(0, 0, 0, 0.1);
+            --border: #e2e8f0;
         }
 
         body {
             margin: 0;
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            background: radial-gradient(circle at top right, #1e293b, var(--bg));
-            background-attachment: fixed;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
             color: var(--white);
-            transition: all 0.3s;
+            transition: background-color 0.3s;
         }
 
-        /* --- Navbar & Layout --- */
         .navbar {
             padding: 1rem 2rem;
-            background: rgba(15, 23, 42, 0.8);
-            backdrop-filter: var(--glass);
-            border-bottom: 1px solid var(--border);
+            background: #1e293b;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
+            color: #f8fafc;
         }
 
+            .navbar h1 {
+                color: #f8fafc !important;
+            }
+
         .container {
-            max-width: 900px;
+            max-width: 800px;
             margin: 40px auto;
             padding: 0 20px;
         }
 
-        /* --- Admin Panel & Legend --- */
-        #adminPanel {
-            background: var(--card);
-            backdrop-filter: var(--glass);
-            border: 2px solid var(--blue);
-            border-radius: 16px;
-            padding: 25px;
-            margin-bottom: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        header {
+            text-align: center;
+            margin-bottom: 40px;
         }
 
-        .markdown-legend {
-            background: rgba(0,0,0,0.2);
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 15px;
-            font-size: 0.85rem;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            header h1 {
+                color: var(--blue);
+                margin-bottom: 10px;
+            }
+
+        .categories {
+            display: flex;
             gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .cat-btn {
+            padding: 8px 18px;
+            border-radius: 20px;
             border: 1px solid var(--border);
+            background: var(--card);
+            color: var(--white);
+            cursor: pointer;
+            font-weight: 500;
+            transition: 0.2s;
         }
 
-        .legend-item code {
-            color: var(--blue);
+            .cat-btn.active {
+                background: var(--blue);
+                color: #0f172a;
+                border-color: var(--blue);
+            }
+
+        .theme-toggle {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #ffffff !important;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.8rem;
         }
 
-        /* --- FAQ Items Styling --- */
+        .search-container {
+            position: relative;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+        }
+
+            .search-container i.fa-search {
+                position: absolute;
+                left: 15px;
+                color: var(--muted);
+            }
+
+        #faqSearch {
+            width: 100%;
+            padding: 15px 110px 15px 45px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--white);
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+            #faqSearch:focus {
+                border-color: var(--blue);
+                box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
+            }
+
+        #clearSearch {
+            position: absolute;
+            right: 10px;
+            background: var(--blue);
+            border: none;
+            color: #0f172a;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: none;
+        }
+
         .faq-item {
             background: var(--card);
-            backdrop-filter: var(--glass);
-            border-radius: 12px;
+            border-radius: 8px;
             margin-bottom: 15px;
             border: 1px solid var(--border);
-            transition: transform 0.2s, box-shadow 0.2s;
-            border-left: 5px solid var(--muted);
+            overflow: hidden;
         }
-
-            /* Couleurs par catégorie */
-            .faq-item[data-cat="flux"] {
-                border-left-color: var(--blue);
-            }
-
-            .faq-item[data-cat="connexion"] {
-                border-left-color: var(--green);
-            }
-
-            .faq-item[data-cat="admin"] {
-                border-left-color: var(--orange);
-            }
-
-            .faq-item[data-cat="pedagogie"] {
-                border-left-color: var(--purple);
-            }
-
-            .faq-item:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            }
 
         .faq-question {
             padding: 20px;
@@ -124,67 +159,88 @@
             justify-content: space-between;
             align-items: center;
             font-weight: 600;
+            transition: background 0.3s;
+            outline: none;
         }
+
+            .faq-question:hover, .faq-question:focus {
+                background: rgba(255,255,255,0.05);
+            }
 
         .faq-answer {
             padding: 0 20px;
             max-height: 0;
             overflow: hidden;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            background: rgba(0,0,0,0.05);
+            transition: all 0.3s ease-out;
+            color: var(--muted);
+            background: rgba(0,0,0,0.1);
+            line-height: 1.6;
         }
+
+            .faq-answer ul {
+                margin: 10px 0;
+                padding-left: 25px;
+            }
+
+            .faq-answer li {
+                margin-bottom: 8px;
+            }
+
+            .faq-answer p {
+                margin-bottom: 10px;
+            }
 
         .faq-item.active .faq-answer {
             padding: 20px;
-            max-height: 1000px;
+            max-height: 2000px;
             border-top: 1px solid var(--border);
         }
 
-        /* --- Components --- */
-        .cat-btn {
-            padding: 10px 20px;
-            border-radius: 30px;
-            border: 1px solid var(--border);
-            background: var(--card);
-            color: var(--white);
-            cursor: pointer;
-            transition: 0.3s;
+        .faq-item.active .fa-chevron-down {
+            transform: rotate(180deg);
         }
 
-            .cat-btn.active {
-                background: var(--blue);
-                color: var(--bg);
-                font-weight: bold;
-            }
-
-        input, textarea, select {
-            background: rgba(0,0,0,0.2);
-            border: 1px solid var(--border);
-            color: white;
-            padding: 12px;
-            border-radius: 8px;
-            width: 100%;
-            box-sizing: border-box;
+        .highlight {
+            color: var(--blue);
+            font-weight: 600;
         }
 
-        /* Style Markdown à l'intérieur */
-        .faq-answer table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 10px 0;
+        .warning {
+            color: var(--orange);
+            font-weight: 600;
         }
 
-        .faq-answer th, .faq-answer td {
-            border: 1px solid var(--border);
-            padding: 8px;
-            text-align: left;
+        .tag-valide, .tag-fictif {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-left: 8px;
+            font-weight: 700;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            vertical-align: middle;
         }
 
-        .faq-answer blockquote {
-            border-left: 4px solid var(--blue);
-            padding-left: 15px;
-            margin-left: 0;
-            color: var(--muted);
+        .tag-valide {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+        }
+
+        .tag-fictif {
+            background: rgba(251, 146, 60, 0.2);
+            color: #fb923c;
+        }
+
+        [data-theme="light"] .tag-valide {
+            background: #dcfce7;
+            color: #15803d;
+            border-color: #bbf7d0;
+        }
+
+        [data-theme="light"] .tag-fictif {
+            background: #ffedd5;
+            color: #c2410c;
+            border-color: #fed7aa;
         }
     </style>
 </head>
@@ -192,136 +248,125 @@
 
     <nav class="navbar">
         <div style="display:flex; align-items:center;">
-            <h1 style="font-size: 1.2rem; margin: 0;"><i class="fas fa-headset" style="margin-right:10px;"></i> Support Client v3</h1>
+            <a href="../ressources-hub.html" style="color:var(--blue); text-decoration:none; margin-right:20px;"><i class="fas fa-chevron-left"></i> Retour</a>
+            <h1 style="font-size: 1.1rem; margin: 0;">FAQ & Support Technique</h1>
         </div>
         <div style="display: flex; gap: 10px;">
-            <button onclick="toggleAdmin()" class="cat-btn" id="adminBtn"><i id="adminIcon" class="fas fa-lock"></i></button>
-            <button id="themeToggle" class="cat-btn"><i id="themeIcon" class="fas fa-sun"></i></button>
+            <button onclick="toggleAdmin()" class="theme-toggle" id="adminBtn"><i id="adminIcon" class="fas fa-lock"></i> Admin</button>
+            <button id="themeToggle" class="theme-toggle"><i id="themeIcon" class="fas fa-sun"></i> Mode</button>
         </div>
     </nav>
 
     <div class="container">
-        <div id="adminPanel" style="display:none;">
-            <h3 style="margin-top:0"><i class="fas fa-edit"></i> Éditeur de Contenu</h3>
-            <div style="display: grid; gap: 15px;">
-                <input type="text" id="newQuestion" placeholder="La question...">
-                <div style="display: flex; gap: 10px;">
-                    <select id="newCat" style="flex: 1;">
-                        <option value="flux">Flux & Ammon</option>
-                        <option value="connexion">Connexion</option>
-                        <option value="admin">Administratif</option>
-                        <option value="pedagogie">Pédagogie</option>
-                    </select>
-                    <input type="number" id="manualId" placeholder="ID (optionnel)" style="flex: 0.3;">
-                </div>
-                <textarea id="newAnswer" placeholder="Réponse en Markdown..." rows="5"></textarea>
-
+        <div id="adminPanel" style="display:none; margin-bottom: 30px; padding: 20px; border: 1px dashed var(--blue); border-radius: 12px; background: rgba(0,0,0,0.2);" data-current-id="">
+            <h3 style="color: var(--blue); margin-top: 0;">🛠 Gestion des questions</h3>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <input type="text" id="newQuestion" placeholder="Question">
+                <select id="newCat">
+                    <option value="flux">Flux & Ammon</option>
+                    <option value="connexion">Connexion</option>
+                    <option value="admin">Administratif</option>
+                    <option value="pedagogie">Pédagogie</option>
+                </select>
+                <textarea id="newAnswer" placeholder="Réponse (Markdown ou HTML)" rows="3"></textarea>
                 <div style="display:flex; gap:10px;">
-                    <button onclick="addFAQ()" style="flex:2; background: var(--green); border:none; padding:12px; border-radius:8px; cursor:pointer; color:white; font-weight:bold;">PUBLIER</button>
-                    <button onclick="cancelEdit()" id="cancelBtn" style="display:none; flex:1; background:var(--orange); border:none; border-radius:8px; color:white; cursor:pointer;">ANNULER</button>
+                    <button onclick="addFAQ()" style="flex:2; background: var(--green); color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold;">Enregistrer</button>
+                    <button onclick="cancelEdit()" id="cancelBtn" style="flex:1; display:none; background: var(--muted); color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer;">Annuler</button>
                 </div>
-            </div>
-
-            <div class="markdown-legend">
-                <div class="legend-item"><code>**Gras**</code> → <strong>Gras</strong></div>
-                <div class="legend-item"><code>[fa:user]</code> → <i class="fas fa-user"></i> (Icône)</div>
-                <div class="legend-item"><code>> Texte</code> → Citation</div>
-                <div class="legend-item"><code>---</code> → Ligne de séparation</div>
-                <div class="legend-item"><code>< span class="highlight"></code> → Couleur</div>
             </div>
         </div>
 
-        <header style="text-align:center; margin-bottom: 50px;">
-            <h2 style="font-size: 2.5rem; margin-bottom: 10px;">Comment pouvons-nous vous aider ?</h2>
-            <div class="search-container" style="position:relative; max-width:600px; margin: 0 auto;">
-                <i class="fas fa-search" style="position:absolute; left:20px; top:18px; color:var(--muted)"></i>
-                <input type="text" id="faqSearch" placeholder="Rechercher un mot-clé (ex: mot de passe, flux...)" style="padding-left:50px; border-radius:50px; height:55px; font-size:1.1rem; background:var(--card);">
-            </div>
+        <header>
+            <h1>Comment pouvons-nous vous aider ?</h1>
+            <p style="color:var(--muted)">Réponses rapides aux questions sur le flux Ammon et le LMS.</p>
         </header>
 
-        <div class="categories" id="catFilters">
-            <button class="cat-btn active" data-filter="all">Tout</button>
-            <button class="cat-btn" data-filter="flux"><i class="fas fa-sync"></i> Flux</button>
-            <button class="cat-btn" data-filter="connexion"><i class="fas fa-key"></i> Connexion</button>
-            <button class="cat-btn" data-filter="admin"><i class="fas fa-file-invoice"></i> Admin</button>
-            <button class="cat-btn" data-filter="pedagogie"><i class="fas fa-graduation-cap"></i> Pédagogie</button>
+        <div class="search-container">
+            <i class="fas fa-search"></i>
+            <input type="text" id="faqSearch" placeholder="Rechercher une question...">
+            <button id="clearSearch">Tout afficher</button>
         </div>
 
-        <div id="faqContainer"></div>
+        <div class="categories">
+            <button class="cat-btn active" data-filter="all">Toutes les questions</button>
+            <button class="cat-btn" data-filter="flux">Flux & Ammon</button>
+            <button class="cat-btn" data-filter="connexion">Connexion</button>
+            <button class="cat-btn" data-filter="admin">Administratif</button>
+            <button class="cat-btn" data-filter="pedagogie">Pédagogie</button>
+        </div>
+
+        <div class="faq-list" id="faqContainer"></div>
     </div>
 
     <script>
-        // Configuration de Marked pour supporter les icônes personnalisées [fa:icon]
-        const renderer = new marked.Renderer();
-        const originalTextRenderer = renderer.text.bind(renderer);
-        renderer.text = (text) => {
-            return text.replace(/\[fa:([a-z0-9-]+)\]/g, '<i class="fas fa-$1"></i>');
-        };
-        marked.setOptions({ renderer: renderer, breaks: true });
-
         const JSON_PATH = 'faq.json';
         let faqData = [];
         let isAdminMode = false;
 
         async function loadFAQ() {
+            const container = document.getElementById('faqContainer');
             try {
                 const response = await fetch(JSON_PATH);
+                if (!response.ok) throw new Error('Fichier JSON introuvable');
                 faqData = await response.json();
                 renderFAQ(faqData);
-            } catch (e) {
-                document.getElementById('faqContainer').innerHTML = "<p>Erreur de chargement JSON.</p>";
+            } catch (error) {
+                container.innerHTML = `<p style="text-align:center; color:var(--orange);">Erreur : Impossible de charger les questions.</p>`;
             }
-        }
-
-        function getCatIcon(cat) {
-            const icons = {
-                'flux': 'fa-sync',
-                'connexion': 'fa-key',
-                'admin': 'fa-file-invoice',
-                'pedagogie': 'fa-graduation-cap'
-            };
-            return icons[cat] || 'fa-question-circle';
         }
 
         function renderFAQ(data) {
             const container = document.getElementById('faqContainer');
             container.innerHTML = data.map((item, index) => `
-                    <div class="faq-item" data-cat="${item.cat}">
-                        <div class="faq-question" onclick="this.parentElement.classList.toggle('active')">
+                    <div class="faq-item" data-cat="${item.cat}" data-id="${item.id || ''}">
+                        <div class="faq-question" tabindex="0" onkeydown="handleKey(event, this)">
                             <span>
-                                <i class="fas ${getCatIcon(item.cat)}" style="margin-right:15px; opacity:0.5; width:20px"></i>
-                                <span style="opacity:0.5; font-size:0.8rem; margin-right:5px">#${item.id}</span>
+                                <span style="color:var(--blue); margin-right:8px; font-size:0.9rem; opacity:0.7;">#${item.id || index + 1}</span>
                                 ${item.question}
                             </span>
-                            <div style="display:flex; gap:15px; align-items:center;">
-                                ${isAdminMode ? `<i class="fas fa-edit" onclick="event.stopPropagation(); editFAQ(${index})" style="color:var(--blue)"></i>` : ''}
-                                ${isAdminMode ? `<i class="fas fa-trash" onclick="event.stopPropagation(); deleteFAQ(${index})" style="color:var(--orange)"></i>` : ''}
-                                <i class="fas fa-chevron-down" style="font-size:0.8rem; opacity:0.5"></i>
+                            <div style="display:flex; align-items:center;">
+                                ${isAdminMode ? `<i class="fas fa-edit" onclick="event.stopPropagation(); editFAQ(${index})" title="Modifier" style="color:var(--blue); margin-right:15px; cursor:pointer;"></i>` : ''}
+                                ${isAdminMode ? `<i class="fas fa-trash" onclick="event.stopPropagation(); deleteFAQ(${index})" title="Supprimer" style="color:var(--orange); margin-right:15px; cursor:pointer;"></i>` : ''}
+                                <i class="fas fa-chevron-down" style="font-size:0.8rem; color:var(--muted)"></i>
                             </div>
                         </div>
                         <div class="faq-answer">${marked.parse(item.answer)}</div>
                     </div>
                 `).join('');
+
+            document.querySelectorAll('.faq-question').forEach(q => {
+                q.onclick = () => q.parentElement.classList.toggle('active');
+            });
         }
 
-        // --- FONCTIONS ADMIN ---
+        function handleKey(e, element) {
+            if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                element.parentElement.classList.toggle('active');
+            }
+        }
+
         function toggleAdmin() {
-            if (prompt("Code Admin :") === "1969") {
+            const pass = prompt("Mot de passe admin :");
+            if (pass === "1969") {
                 isAdminMode = !isAdminMode;
                 document.getElementById('adminPanel').style.display = isAdminMode ? 'block' : 'none';
                 document.getElementById('adminIcon').className = isAdminMode ? 'fas fa-lock-open' : 'fas fa-lock';
                 renderFAQ(faqData);
+            } else {
+                alert("Accès refusé");
             }
         }
 
         let editIndex = -1;
+
         function editFAQ(index) {
             editIndex = index;
             const item = faqData[index];
             document.getElementById('newQuestion').value = item.question;
             document.getElementById('newAnswer').value = item.answer;
             document.getElementById('newCat').value = item.cat;
-            document.getElementById('manualId').value = item.id;
+            document.getElementById('adminPanel').dataset.currentId = item.id || '';
             document.getElementById('cancelBtn').style.display = 'block';
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
@@ -330,7 +375,7 @@
             editIndex = -1;
             document.getElementById('newQuestion').value = '';
             document.getElementById('newAnswer').value = '';
-            document.getElementById('manualId').value = '';
+            document.getElementById('adminPanel').dataset.currentId = "";
             document.getElementById('cancelBtn').style.display = 'none';
         }
 
@@ -338,73 +383,91 @@
             const q = document.getElementById('newQuestion').value;
             const a = document.getElementById('newAnswer').value;
             const c = document.getElementById('newCat').value;
-            const mId = document.getElementById('manualId').value;
+            const panel = document.getElementById('adminPanel');
+            const existingId = panel.dataset.currentId;
 
-            if (!q || !a) return alert("Remplissez tout !");
-
-            const newItem = {
-                id: mId ? parseInt(mId) : (faqData.length > 0 ? Math.max(...faqData.map(i => i.id)) + 1 : 1),
-                cat: c,
-                question: q,
-                answer: a
-            };
-
-            if (editIndex > -1) faqData[editIndex] = newItem;
-            else faqData.push(newItem);
-
-            faqData.sort((x, y) => x.id - y.id);
-            saveToGithub();
-            cancelEdit();
-        }
-
-        function deleteFAQ(index) {
-            if (confirm("Supprimer ?")) {
-                faqData.splice(index, 1);
-                saveToGithub();
+            if (q && a) {
+                let finalId;
+                if (existingId && existingId !== "") {
+                    finalId = parseInt(existingId);
+                    faqData[editIndex] = { id: finalId, question: q, answer: a, cat: c };
+                } else {
+                    const maxId = faqData.reduce((max, item) => (item.id > max ? item.id : max), 0);
+                    finalId = maxId + 1;
+                    faqData.push({ id: finalId, question: q, answer: a, cat: c });
+                }
+                faqData.sort((a, b) => a.id - b.id);
+                cancelEdit();
+                saveLocal();
             }
         }
 
-        async function saveToGithub() {
-            renderFAQ(faqData);
-            const token = prompt("GitHub Token :");
-            if (!token) return;
-
-            const url = `https://api.github.com/repos/formationA/statslms/contents/faq.json`;
-            const get = await fetch(url, { headers: { 'Authorization': `token ${token}` } });
-            const meta = await get.json();
-
-            const put = await fetch(url, {
-                method: 'PUT',
-                headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    message: "Update FAQ",
-                    content: btoa(unescape(encodeURIComponent(JSON.stringify(faqData, null, 2)))),
-                    sha: meta.sha
-                })
-            });
-            if (put.ok) alert("Sauvegardé !");
+        function deleteFAQ(index) {
+            if (confirm("Supprimer cette question ?")) {
+                faqData.splice(index, 1);
+                saveLocal();
+            }
         }
 
-        // --- FILTRES & RECHERCHE ---
-        document.getElementById('faqSearch').oninput = function () {
-            const val = this.value.toLowerCase();
-            const filtered = faqData.filter(i => i.question.toLowerCase().includes(val) || i.answer.toLowerCase().includes(val));
-            renderFAQ(filtered);
-        };
+        async function saveLocal() {
+            renderFAQ(faqData);
+            const tempToken = prompt("Entrez votre GitHub Token pour confirmer la sauvegarde :");
+            if (!tempToken) return;
 
-        document.querySelectorAll('.cat-btn[data-filter]').forEach(btn => {
+            const REPO_OWNER = 'formationA';
+            const REPO_NAME = 'statslms';
+            const FILE_PATH = 'faq.json';
+
+            try {
+                const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
+                const getRes = await fetch(url, { headers: { 'Authorization': `token ${tempToken}` } });
+                const fileMetadata = await getRes.json();
+
+                const updateRes = await fetch(url, {
+                    method: 'PUT',
+                    headers: { 'Authorization': `token ${tempToken}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: "Mise à jour FAQ",
+                        content: btoa(unescape(encodeURIComponent(JSON.stringify(faqData, null, 2)))),
+                        sha: fileMetadata.sha
+                    })
+                });
+                if (updateRes.ok) alert("✅ Sauvegarde réussie !");
+            } catch (e) { alert("❌ Erreur sauvegarde."); }
+        }
+
+        const searchInput = document.getElementById('faqSearch');
+        const clearBtn = document.getElementById('clearSearch');
+
+        function filterFAQ() {
+            const searchText = searchInput.value.toLowerCase();
+            const activeCat = document.querySelector('.cat-btn.active').dataset.filter;
+            const items = document.querySelectorAll('.faq-item');
+            clearBtn.style.display = searchText.length > 0 ? 'block' : 'none';
+
+            items.forEach(item => {
+                const text = item.innerText.toLowerCase();
+                const matchesSearch = text.includes(searchText);
+                const matchesCat = (activeCat === 'all' || item.dataset.cat === activeCat);
+                item.style.display = (matchesSearch && matchesCat) ? "block" : "none";
+            });
+        }
+
+        searchInput.oninput = filterFAQ;
+        document.querySelectorAll('.cat-btn').forEach(btn => {
             btn.onclick = () => {
                 document.querySelector('.cat-btn.active').classList.remove('active');
                 btn.classList.add('active');
-                const filter = btn.dataset.filter;
-                renderFAQ(filter === 'all' ? faqData : faqData.filter(i => i.cat === filter));
+                filterFAQ();
             };
         });
 
+        clearBtn.onclick = () => { searchInput.value = ''; filterFAQ(); };
+
         document.getElementById('themeToggle').onclick = () => {
-            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-            document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
-            document.getElementById('themeIcon').className = isDark ? 'fas fa-moon' : 'fas fa-sun';
+            const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', theme);
+            document.getElementById('themeIcon').className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
         };
 
         loadFAQ();
