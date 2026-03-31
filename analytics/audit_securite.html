@@ -24,7 +24,7 @@
             color: var(--text-main);
         }
 
-        /* Navbar */
+        /* Navbar - Mise à jour pour passer devant */
         .navbar {
             width: 100%;
             display: flex;
@@ -32,10 +32,10 @@
             padding: 15px 30px;
             background: rgba(30, 41, 59, 0.95);
             backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            position: sticky;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: fixed; /* Changé de sticky à fixed pour une superposition parfaite */
             top: 0;
-            z-index: 100;
+            z-index: 10000; /* Plus haut que le lock-screen */
             box-sizing: border-box;
         }
 
@@ -43,7 +43,7 @@
             width: 95%;
             max-width: 1400px;
             margin: 0 auto;
-            padding: 30px 20px;
+            padding: 100px 20px 30px 20px; /* Ajout de 100px en haut pour passer sous la navbar */
         }
 
         /* Stats */
@@ -150,7 +150,7 @@
             color: var(--blue);
         }
 
-        /* Style de l'écran de verrouillage */
+        /* Écran de verrouillage - Reste en dessous de la navbar */
         #lock-screen {
             position: fixed;
             top: 0;
@@ -198,24 +198,24 @@
 </head>
 <body>
 
-    <div id="lock-screen">
-        <div class="lock-box">
-            <i class="fas fa-user-shield fa-3x" style="color: var(--blue); margin-bottom: 15px;"></i>
-            <h2>Accès Restreint</h2>
-            <p style="color: var(--text-dim)">Veuillez entrer le mot de passe d'audit</p>
-            <input type="password" id="passInput" placeholder="Mot de passe...">
-            <br>
-            <button onclick="checkPassword()">Déverrouiller</button>
-            <p id="lock-error" style="color: var(--danger); font-size: 0.8rem; margin-top: 10px; display: none;">Mot de passe incorrect</p>
-        </div>
-    </div>
-
     <nav class="navbar">
         <a href="../analytics-hub.html" style="color:var(--blue); text-decoration:none; margin-right:20px;">
             <i class="fas fa-chevron-left"></i> Retour
         </a>
         <h1 style="font-size: 1.1rem; margin: 0;">Audit Massive Data (query_result.json)</h1>
     </nav>
+
+    <div id="lock-screen">
+        <div class="lock-box">
+            <i class="fas fa-user-shield fa-3x" style="color: var(--blue); margin-bottom: 15px;"></i>
+            <h2>Accès Restreint</h2>
+            <p style="color: var(--text-dim)">Veuillez entrer le mot de passe d'audit</p>
+            <input type="password" id="passInput" placeholder="Mot de passe..." autofocus>
+            <br>
+            <button onclick="checkPassword()">Déverrouiller</button>
+            <p id="lock-error" style="color: var(--danger); font-size: 0.8rem; margin-top: 10px; display: none;">Mot de passe incorrect</p>
+        </div>
+    </div>
 
     <div class="container">
         <div class="summary-grid">
@@ -268,16 +268,16 @@
             const html = chunk.map(user => {
                 const hasPlain = user["Plain Password"] && user["Plain Password"].length > 0;
                 return `
-                            <tr>
-                                <td><strong>${user.Firstname || ''} ${user.Lastname || ''}</strong></td>
-                                <td><small>${user.Email || ''}<br><span style="color:var(--text-dim)">${user.ID || ''}</span></small></td>
-                                <td>${user.Role || ''}</td>
-                                <td><span class="risk-badge ${hasPlain ? 'risk-high' : (user.Role === 'ADMINISTRATEUR' ? 'risk-med' : 'risk-low')}">
-                                    ${hasPlain ? 'CRITIQUE' : (user.Role === 'ADMINISTRATEUR' ? 'ELEVÉ' : 'BAS')}
-                                </span></td>
-                                <td>${user["Last Activity"] || '-'}</td>
-                                <td title="${user["Plain Password"] || ''}">${hasPlain ? '<i class="fas fa-eye" style="color:var(--danger)"></i> EXPOSÉ' : '<i class="fas fa-lock" style="color:var(--success)"></i>'}</td>
-                            </tr>`;
+                                <tr>
+                                    <td><strong>${user.Firstname || ''} ${user.Lastname || ''}</strong></td>
+                                    <td><small>${user.Email || ''}<br><span style="color:var(--text-dim)">${user.ID || ''}</span></small></td>
+                                    <td>${user.Role || ''}</td>
+                                    <td><span class="risk-badge ${hasPlain ? 'risk-high' : (user.Role === 'ADMINISTRATEUR' ? 'risk-med' : 'risk-low')}">
+                                        ${hasPlain ? 'CRITIQUE' : (user.Role === 'ADMINISTRATEUR' ? 'ELEVÉ' : 'BAS')}
+                                    </span></td>
+                                    <td>${user["Last Activity"] || '-'}</td>
+                                    <td title="${user["Plain Password"] || ''}">${hasPlain ? '<i class="fas fa-eye" style="color:var(--danger)"></i> EXPOSÉ' : '<i class="fas fa-lock" style="color:var(--success)"></i>'}</td>
+                                </tr>`;
             }).join('');
 
             tbody.insertAdjacentHTML('beforeend', html);
@@ -357,10 +357,10 @@
                 document.getElementById('countAdmins').innerText = adminCount;
 
                 const roleHtml = Object.entries(roles).map(([role, count]) => `
-                            <span class="risk-badge" style="background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.2); color: var(--blue);">
-                                ${role}: <strong>${count}</strong>
-                            </span>
-                        `).join('');
+                                <span class="risk-badge" style="background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.2); color: var(--blue);">
+                                    ${role}: <strong>${count}</strong>
+                                </span>
+                            `).join('');
                 document.getElementById('roleDistribution').innerHTML = roleHtml;
 
                 loadingDiv.style.display = 'none';
