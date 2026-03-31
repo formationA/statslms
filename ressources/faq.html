@@ -283,28 +283,25 @@
             const sortedData = [...data].sort((a, b) => a.id - b.id);
 
             container.innerHTML = sortedData.map((item, index) => {
-                const icons = { flux: 'sync', connexion: 'user-lock', admin: 'shield-alt', pedagogie: 'graduation-cap' };
-                const icon = icons[item.cat] || 'question-circle';
-
+                // La ligne "const icons = ..." peut être supprimée car elle ne sert plus
                 return `
-                        <div class="faq-item" data-cat="${item.cat}" data-id="${item.id}">
-                            <div class="faq-question" onclick="this.parentElement.classList.toggle('active')" tabindex="0" onkeydown="handleKey(event, this)">
-                                <span>
-                                    <i class="fas fa-${icon}" style="margin-right:10px; opacity:0.5; font-size:0.8rem;"></i>
-                                    <span style="color:var(--blue); margin-right:8px; font-size:0.9rem; opacity:0.7;">#${item.id}</span>
-                                    ${item.question}
-                                </span>
-                                <div style="display:flex; align-items:center;">
-                                    ${isAdminMode ? `
-                                        <i class="fas fa-edit" onclick="event.stopPropagation(); editFAQ(${index})" title="Modifier" style="color:var(--blue); margin-right:15px; cursor:pointer;"></i>
-                                        <i class="fas fa-trash" onclick="event.stopPropagation(); deleteFAQ(${index})" title="Supprimer" style="color:var(--orange); margin-right:15px; cursor:pointer;"></i>
-                                    ` : ''}
-                                    <i class="fas fa-chevron-down" style="font-size:0.8rem; color:var(--muted)"></i>
-                                </div>
-                            </div>
-                            <div class="faq-answer">${marked.parse(item.answer)}</div>
-                        </div>
-                    `;
+            <div class="faq-item" data-cat="${item.cat}" data-id="${item.id}">
+                <div class="faq-question" onclick="this.parentElement.classList.toggle('active')" tabindex="0" onkeydown="handleKey(event, this)">
+                    <span>
+                        <span style="color:var(--blue); margin-right:8px; font-size:0.9rem; opacity:0.7;">#${item.id}</span>
+                        ${item.question}
+                    </span>
+                    <div style="display:flex; align-items:center;">
+                        ${isAdminMode ? `
+                            <i class="fas fa-edit" onclick="event.stopPropagation(); editFAQ(${index})" title="Modifier" style="color:var(--blue); margin-right:15px; cursor:pointer;"></i>
+                            <i class="fas fa-trash" onclick="event.stopPropagation(); deleteFAQ(${index})" title="Supprimer" style="color:var(--orange); margin-right:15px; cursor:pointer;"></i>
+                        ` : ''}
+                        <i class="fas fa-chevron-down" style="font-size:0.8rem; color:var(--muted)"></i>
+                    </div>
+                </div>
+                <div class="faq-answer">${marked.parse(item.answer)}</div>
+            </div>
+        `;
             }).join('');
         }
 
