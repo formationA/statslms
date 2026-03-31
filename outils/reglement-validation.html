@@ -6,6 +6,7 @@
     <title>Règlement Intérieur - AFTRAL</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+   
     <style>
         :root {
             --nav-bg: #0f172a;
@@ -554,72 +555,64 @@
         }
 
         function generateSCORM() {
-            const zip = new JSZip();
+            console.log("Tentative de génération SCORM...");
 
-            // 1. Récupération du contenu
-            const contenuFixe = document.getElementById('rulesBox').innerHTML;
+            // Vérifier si JSZip est bien chargé
+            if (typeof JSZip === 'undefined') {
+                alert("Erreur : La bibliothèque JSZip n'est pas chargée. Ajoutez-la dans le <head>.");
+                return;
+            }
 
-            // 2. Clone du document
-            let docClone = document.documentElement.cloneNode(true);
+            try {
+                const zip = new JSZip();
+                const rulesBox = document.getElementById('rulesBox');
+                const contenuFixe = rulesBox ? rulesBox.innerHTML : "";
 
-            // 3. Injection du texte
-            docClone.querySelector('#rulesBox').innerHTML = contenuFixe;
+                // Clone et injection
+                let docClone = document.documentElement.cloneNode(true);
+                const cloneBox = docClone.querySelector('#rulesBox');
+                if (cloneBox) cloneBox.innerHTML = contenuFixe;
 
-            // --- OPTIMISATION DES MARGES POUR L'EXPORT ---
-            // On injecte un style qui écrase tes variables et tes classes
-            const styleScorm = docClone.createElement('style');
-            styleScorm.innerHTML = `
-        /* On annule le centrage forcé et les larges marges */
-        .main-container { 
-            padding: 10px !important; 
-            display: block !important; 
-        }
-        
-        .document-card { 
-            max-width: 100% !important; /* Utilise toute la largeur */
-            width: auto !important;
-            padding: 15px 20px !important; /* Marges internes réduites (haut/bas gauche/droite) */
-            margin: 0 !important;
-            border: none !important;
-            box-shadow: none !important;
-        }
+                // Injection du style pour les marges
+                const styleScorm = docClone.createElement('style');
+                styleScorm.innerHTML = `
+            .navbar { display: none !important; }
+            .main-container { padding: 10px !important; display: block !important; max-width: 100% !important; }
+            .document-card { max-width: 100% !important; width: 100% !important; padding: 15px 20px !important; margin: 0 !important; border: none !important; box-shadow: none !important; }
+            .content-scroll { padding: 15px !important; height: auto !important; border: 1px solid #e2e8f0 !important; }
+        `;
+                docClone.head.appendChild(styleScorm);
 
-        .content-scroll {
-            padding: 15px !important; /* Réduit l'espace interne de la zone de texte */
-            height: auto !important; /* Optionnel : permet au texte de s'adapter en hauteur */
-            border: 1px solid #e2e8f0 !important;
-        }
+                let propreHtml = docClone.outerHTML;
+                propreHtml = propreHtml.replace('chargerReglement();', '// chargé');
+                propreHtml = propreHtml.replace('<body', '<body class="scorm-mode"');
 
-        /* On cache la barre de navigation dans le SCORM */
-        .navbar { display: none !important; }
-    `;
-            docClone.head.appendChild(styleScorm);
-
-            // 4. Préparation du HTML final
-            let propreHtml = docClone.outerHTML;
-            propreHtml = propreHtml.replace('chargerReglement();', '// contenu déjà chargé');
-            propreHtml = propreHtml.replace('<body', '<body class="scorm-mode"');
-
-            // 5. Manifest SCORM
-            const manifest = `<?xml version="1.0" encoding="UTF-8"?>
+                // Manifest
+                const manifest = `<?xml version="1.0" encoding="UTF-8"?>
 <manifest identifier="RI_AFTRAL" version="1.0" xmlns="http://www.imsproject.org/xsd/imscp_rootv1p1p2">
     <metadata><schema>ADL SCORM</schema><schemaversion>1.2</schemaversion></metadata>
     <organizations default="org"><organization identifier="org"><title>Règlement Intérieur</title><item identifier="item1" identifierref="res1"><title>Signature</title></item></organization></organizations>
     <resources><resource identifier="res1" adlcp:scormtype="sco" href="index.html"></resource></resources>
 </manifest>`;
 
-            // 6. Finalisation du ZIP
-            zip.file("index.html", propreHtml);
-            zip.file("imsmanifest.xml", manifest);
+                zip.file("index.html", propreHtml);
+                zip.file("imsmanifest.xml", manifest);
 
-            zip.generateAsync({ type: "blob" }).then(function (content) {
-                const a = document.createElement("a");
-                a.href = URL.createObjectURL(content);
-                a.download = "SCORM_RI_Final.zip";
-                a.click();
-                showModal("SCORM Généré", "L'archive a été générée avec des marges optimisées.");
-            });
+                zip.generateAsync({ type: "blob" }).then(function (content) {
+                    const a = document.createElement("a");
+                    a.href = URL.createObjectURL(content);
+                    a.download = "SCORM_Règlement_Aftral.zip";
+                    a.click();
+                    alert("SCORM généré avec succès !");
+                });
+
+            } catch (e) {
+                console.error(e);
+                alert("Erreur lors de la création : " + e.message);
+            }
         }
+
+
     </script>
 </body>
 </html>
