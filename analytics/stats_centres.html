@@ -1,0 +1,1048 @@
+﻿
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LMS Advanced Tracker - Deep Ocean Edition</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Box-sizing global */
+        * {
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* Mode Sombre (Défaut) */
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
+            --accent: #38bdf8;
+            --accent-hover: #7dd3fc;
+            --danger: #ef4444;
+            --warning: #fbbf24;
+            --success: #10b981;
+            --transition: all 0.3s ease;
+            --border-color: rgba(255, 255, 255, 0.05);
+            --nav-text: #f8fafc;
+        }
+
+        .light-mode {
+            --bg-color: #f1f5f9;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-dim: #64748b;
+            --accent: #0284c7;
+            --accent-hover: #0369a1;
+            --border-color: rgba(0, 0, 0, 0.1);
+            --nav-text: #1e293b;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            transition: all 0.3s ease;
+        }
+
+        /* --- Navbar Harmonisée --- */
+        .navbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 30px;
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            min-height: 50px;
+        }
+
+        .light-mode .navbar {
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .nav-back-link {
+            color: var(--accent);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+            .nav-back-link:hover {
+                color: var(--accent-hover);
+                transform: translateX(-3px);
+            }
+
+        .nav-brand-title {
+            font-size: 1.1rem;
+            margin: 0;
+            color: var(--nav-text);
+            border-left: 1px solid rgba(148, 163, 184, 0.3);
+            padding-left: 20px;
+            font-weight: 500;
+        }
+
+        .nav-brand-subtitle {
+            color: var(--accent);
+            font-weight: normal;
+            margin-left: 10px;
+            font-size: 0.8rem;
+        }
+
+        /* --- Contenu & Cartes --- */
+        .container {
+            width: 95%;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        .header-flex {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .badges-container {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .stat-badge {
+            background: var(--card-bg);
+            padding: 12px 18px;
+            border-radius: 14px;
+            border: 1px solid var(--border-color);
+            min-width: 130px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+          
+        /* Style pour le grand chiffre */
+        .stat-value {
+            font-size: 1.6rem;
+            font-weight: 800;
+            line-height: 1;
+            margin-bottom: 4px;
+        }
+
+        /* Style pour le petit texte en dessous */
+        .stat-label {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 700;
+            color: var(--text-dim);
+        }
+
+        .badge-border-red {
+            border-bottom: 3px solid var(--danger);
+        }
+
+        .badge-border-yellow {
+            border-bottom: 3px solid var(--warning);
+        }
+
+        .badge-border-green {
+            border-bottom: 3px solid var(--success);
+        }
+
+        .top-row {
+            display: grid;
+            grid-template-columns: 280px 1fr 280px;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 18px;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-title {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            color: var(--text-dim);
+            font-weight: 700;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .status-filters {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .filter-pill {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            border: 1px solid var(--border-color);
+            background: rgba(15, 23, 42, 0.2);
+            color: var(--text-dim);
+            transition: var(--transition);
+        }
+
+        .light-mode .filter-pill {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        .filter-pill.active {
+            background: var(--accent);
+            color: #0f172a;
+            border-color: var(--accent);
+            font-weight: bold;
+        }
+
+        .filter-group {
+            margin-bottom: 10px;
+        }
+
+        label {
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            display: block;
+            margin-bottom: 3px;
+        }
+
+        select, input {
+            width: 100%;
+            background: #0f172a;
+            border: 1px solid #334155;
+            color: white;
+            padding: 8px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+        }
+
+            /* Coloration de l'icône de calendrier pour qu'elle soit visible */
+            input[type="date"]::-webkit-calendar-picker-indicator {
+                filter: invert(1); /* Inverse les couleurs pour qu'elle devienne blanche */
+                cursor: pointer;
+            }
+
+        .light-mode select, .light-mode input {
+            background: #ffffff;
+            color: #1e293b;
+            border: 1px solid #cbd5e1;
+        }
+
+        .search-container {
+            position: relative;
+            flex: 0 1 300px;
+            min-width: 200px;
+            max-width: 300px;
+            margin-left: auto;
+        }
+
+            .search-container i {
+                position: absolute;
+                left: 12px;
+                top: 50%;
+                transform: translateY(-50%);
+                color: var(--accent);
+                font-size: 0.8rem;
+            }
+
+            .search-container input {
+                padding-left: 35px !important;
+                border-color: var(--accent);
+                background: rgba(56, 189, 248, 0.05);
+            }
+
+        .btn-refresh, .btn-export {
+            width: 100%;
+            border: none;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 5px;
+            transition: var(--transition);
+        }
+
+        .btn-refresh {
+            background: var(--accent);
+            color: #0f172a;
+        }
+
+        .btn-export {
+            background: transparent;
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            margin-top: 10px;
+        }
+
+            .btn-export:hover {
+                background: var(--accent);
+                color: #0f172a;
+            }
+
+        .table-container {
+            overflow-x: auto;
+            max-height: 600px;
+            margin-top: 15px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            min-width: 900px;
+        }
+
+        th {
+            text-align: left;
+            padding: 12px;
+            color: var(--text-dim);
+            border-bottom: 2px solid #334155;
+            font-size: 0.7rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+            th:hover {
+                color: var(--accent);
+            }
+
+        .light-mode th {
+            border-bottom: 2px solid #cbd5e1;
+        }
+
+        td {
+            padding: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .progress-mini {
+            height: 6px;
+            background: #334155;
+            border-radius: 3px;
+            overflow: hidden;
+            flex: 1;
+            margin-right: 8px;
+        }
+
+        .light-mode .progress-mini {
+            background: #e2e8f0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            transition: width 0.5s;
+        }
+
+        .tag-code {
+            background: rgba(56, 189, 248, 0.1);
+            color: var(--accent);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-weight: bold;
+            font-size: 0.75rem;
+        }
+
+        .row-overdue {
+            border-left: 4px solid var(--danger) !important;
+            background: rgba(239, 68, 68, 0.03);
+        }
+
+        .tab-controls {
+            display: flex;
+            background: #0f172a;
+            padding: 3px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .light-mode .tab-controls {
+            background: #e2e8f0;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 6px;
+            border: none;
+            background: transparent;
+            color: var(--text-dim);
+            font-size: 0.7rem;
+            cursor: pointer;
+            border-radius: 6px;
+        }
+
+            .tab-btn.active {
+                background: var(--card-bg);
+                color: var(--accent);
+            }
+
+        .rank-section {
+            display: none;
+        }
+
+            .rank-section.active {
+                display: block;
+            }
+
+        .perf-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body class="dark-mode">
+    <nav class="navbar">
+        <div class="nav-left">
+            <a href="../analytics-hub.html" class="nav-back-link">
+                <i class="fas fa-chevron-left"></i> Retour
+            </a>
+            <h1 class="nav-brand-title">IT PÉDAGOGIE <span class="nav-brand-subtitle"> Suivi des Sessions</span>
+            </h1>
+        </div>
+
+        <div class="nav-right">
+            <span id="syncStatus" style="font-size: 0.8rem; color: var(--text-dim); margin-right: 15px;">
+                <i class="fas fa-check-circle"></i> Synchronisé
+            </span>
+            <div class="theme-toggle" onclick="toggleTheme()" style="cursor: pointer; color: var(--accent); font-size: 1.1rem;">
+                <i id="themeIcon" class="fas fa-moon"></i>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="header-flex">
+            <div>
+                <h2 style="margin:0; font-size: 2.2rem;">Analyse des Sessions</h2>
+                <small id="lastUpdate" style="color:var(--text-dim)">Sélectionnez vos critères</small>
+            </div>
+            <div class="badges-container">
+                <div class="stat-badge badge-border-red" id="kpiZero"></div>
+                <div class="stat-badge badge-border-yellow" id="kpiPending"></div>
+                <div class="stat-badge badge-border-green" id="kpiDone"></div>
+                <div class="stat-badge" style="background: rgba(56, 189, 248, 0.1);" id="kpiApprenants"></div>
+                <div class="stat-badge"><span>Gain (Δ)</span><br><strong id="kpiDelta">0</strong></div>
+            </div>
+        </div>
+
+        <div class="top-row">
+            <div class="card">
+                <div class="card-title">Configuration</div>
+                <div class="filter-group">
+                    <label>Période</label>
+                    <input type="date" id="dateStart" style="margin-bottom: 5px;">
+                    <input type="date" id="dateEnd">
+                </div>
+                <div class="filter-group">
+                    <label>Centre global</label>
+                    <select id="centerFilter"><option value="ALL">Tous les centres</option></select>
+                </div>
+                <button class="btn-refresh" onclick="location.reload()"><i class="fas fa-undo"></i> Réinitialiser</button>
+              
+            </div>
+
+            <div class="card">
+                <div class="tab-controls">
+                    <button class="tab-btn active" onclick="switchRank('top')">🏆 Top Centres</button>
+                    <button class="tab-btn" onclick="switchRank('flop')">📉 En vigilance</button>
+                </div>
+                <div id="topSection" class="rank-section active"><div id="topRank"></div></div>
+                <div id="flopSection" class="rank-section"><div id="flopRank"></div></div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">
+                    Répartition Sessions
+                    <button onclick="toggleChartType()" style="background:none; border:1px solid var(--accent); color:var(--accent); font-size:0.6rem; cursor:pointer; border-radius:4px; padding:2px 5px;">
+                        <i class="fas fa-exchange-alt"></i> Alterner Vue
+                    </button>
+                </div>
+                <div style="flex:1; min-height: 200px;"><canvas id="mainChart"></canvas></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Détail des Sessions </div>
+            <div style="display: flex; gap: 20px; flex-wrap: wrap; align-items: center;">
+                <div class="status-filters" id="progressFilters">
+                    <div class="filter-pill active" onclick="setProgFilter('ALL', this)">Tous</div>
+                    <div class="filter-pill" onclick="setProgFilter('ZERO', this)">Non commencé</div>
+                    <div class="filter-pill" onclick="setProgFilter('PROGRESS', this)">En cours</div>
+                    <div class="filter-pill" onclick="setProgFilter('DONE', this)">Terminés</div>
+                </div>
+                <div style="width: 1px; height: 25px; background: var(--border-color);"></div>
+                <div class="status-filters" id="timeFilters">
+                    <div class="filter-pill active" onclick="setTimeFilter('ALL', this)">Toutes dates</div>
+                    <div class="filter-pill" onclick="setTimeFilter('OVERDUE', this)" style="border-color: var(--danger); color: var(--danger);">⚠️ En retard</div>
+                    <div class="filter-pill" onclick="setTimeFilter('ONTIME', this)" style="border-color: var(--success); color: var(--success);">✅ À l'heure</div>
+                </div>
+                <div class="search-container">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="tableSearch" placeholder="Rechercher session, code..." onkeyup="filterTable()">
+                </div>
+                <button onclick="exportToCSV()" class="btn-export" style="margin: 0; width: auto; padding: 8px 15px; font-size: 0.8rem;">
+                    <i class="fas fa-file-download"></i> Export csv
+                </button>
+            </div>
+
+            <div class="table-container">
+                <table id="sessionTable">
+                    <thead>
+                        <tr>
+                            <th onclick="sortTable(0)">Code <i class="fas fa-sort"></i></th>
+                            <th onclick="sortTable(1)">Session <i class="fas fa-sort"></i></th>
+                            <th onclick="sortTable(2)">Programme <i class="fas fa-sort"></i></th>
+                            <th onclick="sortTable(3)">Centre <i class="fas fa-sort"></i></th>
+                            <th onclick="sortTable(4)">Inscrits <i class="fas fa-sort"></i></th>
+                            <th onclick="sortTable(5)">Progression <i class="fas fa-sort"></i></th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const BASE_URL = "https://formationa.github.io/statslms/json_conception/";
+        let rawData = [];
+        let currentProcessedData = [];
+        let chartInstance = null;
+        let sortDirections = [true, true, true, true, true, true];
+        let currentProgFilter = 'ALL';
+        let currentTimeFilter = 'ALL';
+
+        let currentView = 'progress'; // Variable globale pour suivre la vue actuelle
+
+        function toggleChartType() {
+            currentView = (currentView === 'progress') ? 'code' : 'progress';
+            renderChart(currentProcessedData);
+        }
+
+        function toggleTheme() {
+            const body = document.body;
+            const icon = document.getElementById('themeIcon');
+            body.classList.toggle('light-mode');
+            const isLight = body.classList.contains('light-mode');
+            icon.className = isLight ? 'fas fa-sun' : 'fas fa-moon';
+            localStorage.setItem('theme', isLight ? 'light' : 'dark');
+            if (currentProcessedData.length > 0) renderChart(currentProcessedData);
+        }
+
+        function switchRank(type) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.rank-section').forEach(sec => sec.classList.remove('active'));
+            if (type === 'top') {
+                document.querySelector('.tab-btn:nth-child(1)').classList.add('active');
+                document.getElementById('topSection').classList.add('active');
+            } else {
+                document.querySelector('.tab-btn:nth-child(2)').classList.add('active');
+                document.getElementById('flopSection').classList.add('active');
+            }
+        }
+
+        function updateDynamicKPIs() {
+            const rows = Array.from(document.getElementById('tableBody').querySelectorAll('tr'));
+            const visibleRows = rows.filter(row => row.style.display !== "none");
+
+            let filteredDataForSync = [];
+            let counts = {
+                zeroSess: 0, zeroApp: 0,
+                pendingSess: 0, pendingApp: 0,
+                doneSess: 0, doneApp: 0,
+                overdueSess: 0, overdueApp: 0,
+                totalApp: 0
+            };
+
+            visibleRows.forEach(row => {
+                const inscrits = parseInt(row.cells[4].innerText) || 0;
+                const prog = parseFloat(row.getAttribute('data-prog')) || 0;
+                const isOverdue = row.getAttribute('data-overdue') === 'true';
+                const centre = row.cells[3].innerText;
+
+                filteredDataForSync.push({ progress: prog, centre: centre });
+
+                counts.totalApp += inscrits;
+
+                // Calcul par statut
+                if (prog === 0) { counts.zeroSess++; counts.zeroApp += inscrits; }
+                else if (prog >= 100) { counts.doneSess++; counts.doneApp += inscrits; }
+                else { counts.pendingSess++; counts.pendingApp += inscrits; }
+
+                // Calcul des retards
+                if (isOverdue) { counts.overdueSess++; counts.overdueApp += inscrits; }
+            });
+
+            // NOUVEAU RENDER : Titre > Apprenants (Gros) > Sessions (Petit)
+            const renderBadgeContent = (sess, app, label, colorAccent) => `
+        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 5px 0; text-align: center;">
+            <div style="font-size: 0.6rem; color: var(--text-dim); text-transform: uppercase; font-weight: 800; letter-spacing: 1px; margin-bottom: 8px;">
+                ${label}
+            </div>
+            <div style="line-height: 1;">
+                <strong style="font-size: 1.8rem; color: ${colorAccent || 'var(--accent)'}; letter-spacing: -1px;">
+                    ${app.toLocaleString()}
+                </strong>
+                <span style="font-size: 0.65rem; color: var(--text-dim); font-weight: 700; margin-left: 2px;">APP.</span>
+            </div>
+            <div style="margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--border-color); width: 80%;">
+                <span style="font-size: 0.75rem; color: var(--text-main); font-weight: 700;">
+                    ${sess} <small style="font-size: 0.6rem; color: var(--text-dim); text-transform: uppercase;">Sessions</small>
+                </span>
+            </div>
+        </div>`;
+
+            // Mise à jour des 5 vignettes
+            document.getElementById('kpiApprenants').innerHTML = renderBadgeContent(visibleRows.length, counts.totalApp, "GLOBAL", "var(--text-main)");
+            document.getElementById('kpiZero').innerHTML = renderBadgeContent(counts.zeroSess, counts.zeroApp, "À DÉBUTER", "var(--danger)");
+            document.getElementById('kpiPending').innerHTML = renderBadgeContent(counts.pendingSess, counts.pendingApp, "EN COURS", "var(--warning)");
+            document.getElementById('kpiDone').innerHTML = renderBadgeContent(counts.doneSess, counts.doneApp, "TERMINÉS", "var(--success)");
+
+            // Ajout d'une 5ème vignette (assurez-vous d'avoir un ID 'kpiOverdue' dans votre HTML)
+            const overdueElement = document.getElementById('kpiOverdue');
+            if (overdueElement) {
+                overdueElement.innerHTML = renderBadgeContent(counts.overdueSess, counts.overdueApp, "EN RETARD", "#f472b6");
+            }
+
+            renderChart(filteredDataForSync);
+            updateCentresRanking(filteredDataForSync);
+        }
+
+        function setProgFilter(status, el) {
+            currentProgFilter = status;
+            document.querySelectorAll('#progressFilters .filter-pill').forEach(p => p.classList.remove('active'));
+            el.classList.add('active');
+            filterTable();
+        }
+
+        function setTimeFilter(status, el) {
+            currentTimeFilter = status;
+            document.querySelectorAll('#timeFilters .filter-pill').forEach(p => p.classList.remove('active'));
+            el.classList.add('active');
+            filterTable();
+        }
+
+        function filterTable() {
+            const searchInput = document.getElementById('tableSearch').value.toLowerCase();
+            const searchTerms = searchInput.split(',').map(term => term.trim()).filter(term => term !== "");
+            const rows = document.getElementById('tableBody').getElementsByTagName('tr');
+
+            for (let row of rows) {
+                const text = row.textContent.toLowerCase();
+                const prog = parseFloat(row.getAttribute('data-prog'));
+                const isOverdue = row.getAttribute('data-overdue') === 'true';
+                let matchProg = (currentProgFilter === 'ALL') || (currentProgFilter === 'ZERO' && prog === 0) || (currentProgFilter === 'PROGRESS' && prog > 0 && prog < 100) || (currentProgFilter === 'DONE' && prog >= 100);
+                let matchTime = (currentTimeFilter === 'ALL') || (currentTimeFilter === 'OVERDUE' && isOverdue) || (currentTimeFilter === 'ONTIME' && !isOverdue);
+                let matchSearch = (searchTerms.length === 0) || searchTerms.some(term => text.includes(term));
+                row.style.display = (matchProg && matchTime && matchSearch) ? "" : "none";
+            }
+            updateDynamicKPIs();
+        }
+
+        async function fetchIndex() {
+            const syncStatus = document.getElementById('syncStatus');
+            syncStatus.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Synchronisation...';
+
+            try {
+                const response = await fetch(BASE_URL + 'index.json?nocache=' + Date.now());
+                const files = await response.json();
+                let promises = files.map(f => fetch(BASE_URL + f).then(r => r.json().then(data => ({
+                    date: f.match(/\d{4}-\d{2}-\d{2}/)[0],
+                    data
+                }))));
+
+                rawData = await Promise.all(promises);
+                rawData.sort((a, b) => a.date.localeCompare(b.date));
+
+                if (rawData.length > 0) {
+                    // On remplit les champs sans déclencher 'change' pour éviter les boucles au départ
+                    document.getElementById('dateStart').value = rawData[0].date;
+                    document.getElementById('dateEnd').value = rawData[rawData.length - 1].date;
+
+                    populateCenters();
+                    process(); // Premier calcul
+                }
+                syncStatus.innerHTML = '<i class="fas fa-check-circle"></i> Synchronisé';
+            } catch (e) {
+                console.error(e);
+                syncStatus.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Erreur';
+            }
+        }
+
+        function populateCenters() {
+            const centers = new Set();
+            rawData.forEach(day => day.data.forEach(s => centers.add(s.centre)));
+            const select = document.getElementById('centerFilter');
+            select.innerHTML = '<option value="ALL">Tous les centres</option>';
+            Array.from(centers).sort().forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = opt.innerText = c;
+                select.appendChild(opt);
+            });
+        }
+
+        function process() {
+            const start = document.getElementById('dateStart').value;
+            const end = document.getElementById('dateEnd').value;
+            const center = document.getElementById('centerFilter').value;
+
+            if (!rawData || rawData.length === 0) return;
+
+            // 1. On prend toujours le dernier fichier JSON pour avoir l'avancement le plus récent
+            const lastDay = rawData[rawData.length - 1];
+
+            // 2. On cherche un point de comparaison historique (le premier fichier ou celui à dateStart)
+            const firstDay = rawData.find(d => d.date >= start) || rawData[0];
+            const startMap = {};
+            firstDay.data.forEach(s => startMap[s.session_id] = parseFloat(s.avancement_moyen) || 0);
+
+            let totalGain = 0;
+            let countGain = 0;
+            currentProcessedData = [];
+            const todayStr = new Date().toISOString().split('T')[0];
+
+            lastDay.data.forEach(s => {
+                // --- FILTRE 1 : CENTRE ---
+                if (center !== "ALL" && s.centre !== center) return;
+
+                // --- FILTRE 2 : PÉRIODE (basé sur les dates de la session dans le JSON) ---
+                // On vérifie si la session existe durant la plage sélectionnée par l'utilisateur
+                const sessDebut = s.date_debut || "1900-01-01";
+                const sessFin = s.date_fin || "2099-12-31";
+
+                const isVisibleInPeriod = (sessDebut <= end && sessFin >= start);
+                if (!isVisibleInPeriod) return;
+
+                // --- CALCULS ---
+                const progressFinal = parseFloat(s.avancement_moyen) || 0;
+                const progressInitial = startMap[s.session_id] !== undefined ? startMap[s.session_id] : 0;
+                const gainSurPeriode = progressFinal - progressInitial;
+
+                totalGain += gainSurPeriode;
+                countGain++;
+
+                const isOverdue = (s.date_fin && s.date_fin < todayStr && progressFinal < 100);
+
+                currentProcessedData.push({
+                    ...s,
+                    progress: progressFinal,
+                    gain: gainSurPeriode,
+                    isOverdue: isOverdue
+                });
+            });
+
+            // Mise à jour de l'interface
+            const avgGain = countGain > 0 ? (totalGain / countGain).toFixed(1) : 0;
+            document.getElementById('kpiDelta').innerText = `+${avgGain}%`;
+
+            const options = { day: 'numeric', month: 'long', year: 'numeric' };
+            document.getElementById('lastUpdate').innerText = `Sessions du ${new Date(start).toLocaleDateString('fr-FR', options)} au ${new Date(end).toLocaleDateString('fr-FR', options)}`;
+
+            renderTable(currentProcessedData);
+            filterTable();
+        }
+
+        function renderTable(data) {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = data.map(s => {
+                // Préparation des dates pour le mouse over de la ligne
+                const dDebut = s.date_debut ? new Date(s.date_debut).toLocaleDateString('fr-FR') : '-';
+                const dFin = s.date_fin ? new Date(s.date_fin).toLocaleDateString('fr-FR') : '-';
+                const tooltipDate = `Formation du ${dDebut} au ${dFin}`;
+
+                // Légende spécifique pour le gain (apparaît au survol du texte vert)
+                const tooltipGain = `Progression réalisée sur la période sélectionnée`;
+
+                return `
+    <tr class="${s.isOverdue ? 'row-overdue' : ''}" data-prog="${s.progress}" data-overdue="${s.isOverdue}" title="${tooltipDate}">
+        <td><span class="tag-code">${s.code_produit}</span></td>
+        <td style="font-family: monospace; font-size: 0.75rem;">${s.session_id}</td>
+        <td style="font-weight:600; font-size: 0.8rem;">
+            ${s.libelle} 
+            ${s.isOverdue ? '<i class="fas fa-clock" style="color:var(--danger); margin-left:5px;"></i>' : ''}
+        </td>
+        <td style="color:var(--text-dim); font-size: 0.8rem;">${s.centre}</td>
+        <td><strong>${s.inscrits}</strong></td>
+        <td>
+            <div style="display:flex; align-items:center; gap:8px;">
+                <div class="progress-mini" style="flex:1;">
+                    <div class="progress-fill" style="width:${s.progress}%; background:${s.progress >= 100 ? 'var(--success)' : (s.progress === 0 ? 'var(--danger)' : 'var(--warning)')}"></div>
+                </div>
+                <div style="display:flex; flex-direction:column; line-height:1;">
+                    <span style="font-size:0.75rem; font-weight:bold;">${s.progress.toFixed(0)}%</span>
+                    
+                    <span 
+                        title="${tooltipGain}" 
+                        style="font-size:0.65rem; cursor:help; color:${s.gain > 0 ? 'var(--success)' : 'var(--text-dim)'};">
+                        ${s.gain > 0 ? '+' + s.gain.toFixed(1) + '%' : ''}
+                    </span>
+                </div>
+            </div>
+        </td>
+    </tr>`;
+            }).join('');
+        }
+
+        function sortTable(columnIndex) {
+            const keys = ['code_produit', 'session_id', 'libelle', 'centre', 'inscrits', 'progress'];
+            const key = keys[columnIndex];
+            const dir = sortDirections[columnIndex] ? 1 : -1;
+
+            const headers = document.querySelectorAll('th i');
+            headers.forEach(h => h.className = 'fas fa-sort');
+            headers[columnIndex].className = dir === 1 ? 'fas fa-sort-up' : 'fas fa-sort-down';
+
+            currentProcessedData.sort((a, b) => {
+                let valA = a[key], valB = b[key];
+                if (key === 'inscrits' || key === 'progress') return (valA - valB) * dir;
+                return String(valA).localeCompare(String(valB)) * dir;
+            });
+            sortDirections[columnIndex] = !sortDirections[columnIndex];
+            renderTable(currentProcessedData);
+            filterTable();
+        }
+
+        function updateCentresRanking(dataToRank = currentProcessedData) {
+            const statsParCentre = {};
+            dataToRank.forEach(s => {
+                const nomCentre = s.centre || "Inconnu";
+                if (!statsParCentre[nomCentre]) statsParCentre[nomCentre] = { terminees: 0, enCours: 0, nonCommencees: 0, total: 0 };
+                statsParCentre[nomCentre].total += 1;
+                if (s.progress >= 100) statsParCentre[nomCentre].terminees += 1;
+                else if (s.progress > 0) statsParCentre[nomCentre].enCours += 1;
+                else statsParCentre[nomCentre].nonCommencees += 1;
+            });
+            const baseRanking = Object.keys(statsParCentre).map(nom => {
+                const d = statsParCentre[nom];
+                return { name: nom, total: d.total, finished: d.terminees, enCours: d.enCours, immobile: d.nonCommencees, actives: d.terminees + d.enCours, ratioFin: (d.terminees / d.total) * 100, ratioEnCours: (d.enCours / d.total) * 100, ratioZero: (d.nonCommencees / d.total) * 100 };
+            });
+            const barStyle = "height: 8px; display: flex; background: rgba(128,128,128,0.1); border-radius: 10px; overflow: hidden; margin-bottom: 15px;";
+
+            document.getElementById('topRank').innerHTML = [...baseRanking].sort((a, b) => b.actives - a.actives || b.total - a.total).slice(0, 4).map(c => `
+                        <div class="perf-item">
+                            <span style="font-weight:600; color:var(--accent);">${c.name}</span>
+                            <span style="font-size: 0.75rem; color:var(--text-dim)">
+                                <b style="color:var(--success)">${c.finished}</b> finis | <b style="color:var(--warning)">${c.enCours}</b> en cours | <b>${c.total}</b> total
+                            </span>
+                        </div>
+                        <div style="${barStyle}"><div style="width: ${c.ratioFin}%; background: var(--success);"></div><div style="width: ${c.ratioEnCours}%; background: var(--warning);"></div><div style="width: ${c.ratioZero}%; background: var(--danger); opacity: 0.3;"></div></div>`).join('');
+
+            document.getElementById('flopRank').innerHTML = [...baseRanking].sort((a, b) => b.immobile - a.immobile || b.total - a.total).slice(0, 4).map(c => `
+                        <div class="perf-item">
+                            <span style="font-weight:600;">${c.name}</span>
+                            <span style="font-size: 0.75rem; color:var(--text-dim)">
+                                <b style="color:var(--danger)">${c.immobile}</b> à 0% | <b>${c.total}</b> total
+                            </span>
+                        </div>
+                        <div style="${barStyle}"><div style="width: ${c.ratioZero}%; background: var(--danger);"></div><div style="width: ${c.ratioEnCours}%; background: var(--warning);"></div><div style="width: ${c.ratioFin}%; background: var(--success);"></div></div>`).join('');
+        }
+
+        function renderChart(dataToChart = currentProcessedData) {
+            if (chartInstance) chartInstance.destroy();
+            const ctx = document.getElementById('mainChart').getContext('2d');
+            const isLight = document.body.classList.contains('light-mode');
+            const textColor = isLight ? '#1e293b' : '#f8fafc';
+
+            if (currentView === 'progress') {
+                // --- VUE INITIALE : HISTOGRAMME PAR PROGRESSION ---
+                const ranges = { "0%": 0, "1-50%": 0, "51-99%": 0, "100%": 0 };
+                dataToChart.forEach(s => {
+                    if (s.progress === 0) ranges["0%"]++;
+                    else if (s.progress < 50) ranges["1-50%"]++;
+                    else if (s.progress < 100) ranges["51-99%"]++;
+                    else ranges["100%"]++;
+                });
+
+                chartInstance = new Chart(ctx, {
+                    type: 'bar', // On garde l'histo ici
+                    data: {
+                        labels: Object.keys(ranges),
+                        datasets: [{
+                            label: 'Nombre de sessions',
+                            data: Object.values(ranges),
+                            backgroundColor: ['#ef4444', '#fbbf24', '#38bdf8', '#10b981'],
+                            borderRadius: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: { ticks: { color: textColor } },
+                            y: { ticks: { color: textColor, stepSize: 1 } }
+                        },
+                        plugins: {
+                            legend: { display: false }
+                        }
+                    }
+                });
+            } else {
+                // --- VUE PAR CODE PRODUIT (AVEC LIMITE SI BEAUCOUP DE CODES) ---
+                const codeCounts = {};
+                dataToChart.forEach(s => {
+                    codeCounts[s.code_produit] = (codeCounts[s.code_produit] || 0) + 1;
+                });
+
+                // On prend les 15 premiers pour éviter que l'affichage ne sature si vous avez 100 codes
+                const sortedCodes = Object.entries(codeCounts)
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 15);
+
+                chartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: sortedCodes.map(c => c[0]),
+                        datasets: [{
+                            label: 'Sessions par code',
+                            data: sortedCodes.map(c => c[1]),
+                            backgroundColor: '#38bdf8',
+                            borderRadius: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        indexAxis: 'y', // Horizontal pour mieux lire les noms de codes s'ils sont longs
+                        scales: {
+                            x: { ticks: { color: textColor, stepSize: 1 } },
+                            y: {
+                                ticks: {
+                                    color: textColor,
+                                    font: { size: 9 },
+                                    autoSkip: false // Force l'affichage de tous les codes du top 15
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: { display: false }
+                        }
+                    }
+                });
+            }
+        }
+
+        function exportToCSV() {
+            // 1. Sélectionne les lignes visibles uniquement
+            const rows = Array.from(document.querySelectorAll('#tableBody tr'))
+                .filter(r => r.style.display !== 'none');
+
+            // 2. En-têtes (plus propre de les définir ici)
+            let csv = "Code Produit;Session ID;Programme;Centre;Inscrits;Progression\n";
+
+            rows.forEach(row => {
+                const cols = Array.from(row.cells);
+                const rowData = cols.map((c, index) => {
+                    let text;
+
+                    // Si c'est la colonne de progression (index 5), on prend l'attribut data
+                    if (index === 5) {
+                        text = (row.getAttribute('data-prog') || "0") + "%";
+                    } else {
+                        text = c.innerText;
+                    }
+
+                    // NETTOYAGE CRITIQUE : 
+                    // - Remplace les " par "" (standard CSV pour les guillemets)
+                    // - Remplace les ; par , (pour ne pas casser les colonnes)
+                    // - Enlève les retours à la ligne
+                    let cleanText = text.replace(/"/g, '""')
+                        .replace(/;/g, ',')
+                        .replace(/\n/g, " ")
+                        .trim();
+
+                    return `"${cleanText}"`;
+                });
+                csv += rowData.join(";") + "\r\n";
+            });
+
+            // 3. Export avec BOM pour les accents (Excel Windows)
+            const blob = new Blob(["\ufeff" + csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            const dateStr = new Date().toLocaleDateString('fr-FR').replace(/\//g, '-');
+
+            link.href = URL.createObjectURL(blob);
+            link.setAttribute("download", `LMS_Export_Sessions_${dateStr}.csv`);
+
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        window.onload = () => {
+            // Thème
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'light') {
+                document.body.classList.add('light-mode');
+                document.getElementById('themeIcon').className = 'fas fa-sun';
+            }
+
+            // Chargement initial
+            fetchIndex();
+
+            // À ajouter dans window.onload après fetchIndex()
+            const now = new Date();
+            const firstDayMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+            const lastDayMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
+
+            document.getElementById('dateStart').value = firstDayMonth;
+            document.getElementById('dateEnd').value = lastDayMonth;
+
+            // Écouteurs de changements
+            const controls = ['dateStart', 'dateEnd', 'centerFilter'];
+            controls.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    // 'change' suffit pour les dates et select, 'input' est pour le texte
+                    el.addEventListener('change', process);
+                }
+            });
+
+            // Recherche textuelle
+            document.getElementById('tableSearch').addEventListener('input', filterTable);
+        };
+
+
+    </script>
+</body>
+</html>

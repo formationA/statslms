@@ -1,0 +1,537 @@
+﻿<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KPI Apprenants - LMS Control Center</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
+            --accent: #38bdf8;
+            --accent-hover: #7dd3fc;
+            --nav-bg: rgba(30, 41, 59, 0.8);
+            --transition: all 0.3s ease;
+            --nav-text: #ffffff;
+        }
+
+        .light-mode {
+            --bg-color: #f1f5f9;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-dim: #64748b;
+            --accent: #0284c7;
+            --accent-hover: #0369a1;
+            --nav-bg: rgba(255, 255, 255, 0.9);
+            --nav-text: #1e293b;
+        }
+
+        /* --- Correction Icône Calendrier --- */
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(1); /* Rend l'icône blanche par défaut */
+            cursor: pointer;
+        }
+
+        .light-mode input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(0); /* Remet l'icône noire en mode clair */
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            transition: all 0.3s ease;
+        }
+
+        /* --- Navbar --- */
+        .navbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 30px;
+            background: var(--nav-bg);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .nav-back-link {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+            font-size: 0.9rem;
+        }
+
+            .nav-back-link:hover {
+                transform: translateX(-5px);
+                color: var(--accent-hover);
+            }
+
+        .nav-brand-title {
+            font-size: 1.1rem;
+            margin: 0;
+            color: var(--nav-text);
+            border-left: 1px solid rgba(148, 163, 184, 0.3);
+            padding-left: 20px;
+            font-weight: 500;
+        }
+
+        .nav-brand-subtitle {
+            color: var(--accent);
+            font-weight: normal;
+            margin-left: 10px;
+            font-size: 0.8rem;
+        }
+
+        .btn-copy {
+            background: transparent;
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            padding: 6px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+            .btn-copy:hover {
+                background: var(--accent);
+                color: white;
+                transform: scale(1.05);
+            }
+
+        .theme-toggle {
+            cursor: pointer;
+            color: var(--accent);
+            font-size: 1.2rem;
+            padding: 5px;
+            transition: var(--transition);
+        }
+
+            .theme-toggle:hover {
+                color: var(--accent-hover);
+                transform: scale(1.1);
+            }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .header-flex {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 2rem;
+        }
+
+        #lastUpdate {
+            color: var(--text-dim);
+            display: block;
+            margin-top: 5px;
+        }
+
+        .badges-container {
+            display: flex;
+            gap: 10px;
+        }
+
+        .stat-badge {
+            background: var(--card-bg);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 10px 20px;
+            border-radius: 12px;
+            text-align: center;
+            min-width: 140px;
+        }
+
+            .stat-badge span {
+                display: block;
+                font-size: 0.75rem;
+                color: var(--text-dim);
+                text-transform: uppercase;
+                margin-bottom: 4px;
+            }
+
+            .stat-badge strong {
+                font-size: 1.2rem;
+                color: var(--accent);
+            }
+
+        .badge-live {
+            border-color: #ef4444;
+        }
+
+            .badge-live strong {
+                color: #ef4444;
+            }
+
+        .filter-bar {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 16px;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 25px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        label {
+            font-size: 0.85rem;
+            color: var(--text-dim);
+            font-weight: 600;
+        }
+
+        select, input {
+            background: var(--bg-color);
+            border: 1px solid #334155;
+            color: var(--text-main);
+            padding: 10px;
+            border-radius: 8px;
+            outline: none;
+        }
+
+        .btn-refresh {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            align-self: flex-end;
+            transition: var(--transition);
+        }
+
+            .btn-refresh:hover {
+                background: var(--accent-hover);
+            }
+
+        .chart-container {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.05);
+            height: 500px;
+            position: relative;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-left">
+            <a href="../analytics-hub.html" class="nav-back-link">
+                <i class="fas fa-chevron-left"></i> Retour
+            </a>
+            <h1 class="nav-brand-title">
+                IT PÉDAGOGIE <span class="nav-brand-subtitle">KPI Apprenants</span>
+            </h1>
+        </div>
+
+        <div class="nav-right">
+            <button class="btn-copy" onclick="copyDashboard()" title="Copier le rapport">
+                <i class="fas fa-copy"></i>
+            </button>
+            <div class="theme-toggle" onclick="toggleTheme()">
+                <i id="themeIcon" class="fas fa-moon"></i>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="header-flex">
+            <div>
+                <h1>Statistiques Détaillées</h1>
+                <small id="lastUpdate">Initialisation des données...</small>
+            </div>
+            <div class="badges-container">
+                <div class="stat-badge badge-live">
+                    <span>Apprenant en cours</span>
+                    <strong id="liveBadge">--</strong>
+                </div>
+                <div class="stat-badge">
+                    <span>Cumul Période</span>
+                    <strong id="totalBadge">--</strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="filter-bar">
+            <div class="filter-group">
+                <label>Vue de données</label>
+                <select id="viewType">
+                    <option value="actifs" selected>📈 Apprenants Actifs (Quotidien)</option>
+                    <option value="moyenne_hebdo">📊 Moyenne Hebdo (Apprenants)</option>
+                    <option value="ressources">🔗 Connexions Ressources</option>
+                    <option value="ouvertes">🔑 Sessions Ouvertes</option>
+                    <option value="location">📍 Répartition par centre</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Date de début</label>
+                <input type="date" id="startDate">
+            </div>
+            <div class="filter-group">
+                <label>Date de fin</label>
+                <input type="date" id="endDate">
+            </div>
+            <button class="btn-refresh" onclick="init()">
+                <i class="fas fa-sync-alt"></i> Actualiser
+            </button>
+        </div>
+
+        <div class="chart-container">
+            <canvas id="mainChart"></canvas>
+        </div>
+    </div>
+
+    <script>
+        const BASE_URL = "https://raw.githubusercontent.com/formationa/statslms/main/json_conception/";
+        let dataStore = { sessions: [], actifs: [], ressources: [], location: [], ouvertes: [] };
+        let myChart = null;
+        const ctx = document.getElementById('mainChart').getContext('2d');
+
+        function toggleTheme() {
+            const body = document.body;
+            const icon = document.getElementById('themeIcon');
+            body.classList.toggle('light-mode');
+            if (body.classList.contains('light-mode')) {
+                icon.classList.replace('fa-moon', 'fa-sun');
+            } else {
+                icon.classList.replace('fa-sun', 'fa-moon');
+            }
+            if (myChart) updateDashboard();
+        }
+
+        async function copyDashboard() {
+            try {
+                const viewLabel = document.getElementById('viewType').options[document.getElementById('viewType').selectedIndex].text;
+                const totalValue = document.getElementById('totalBadge').innerText;
+                const dateStart = document.getElementById('startDate').value;
+                const dateEnd = document.getElementById('endDate').value;
+
+                const reportText = `Rapport IT PÉDAGOGIE - KPI Apprenants\n` +
+                    `-----------------------------------\n` +
+                    `Vue : ${viewLabel}\n` +
+                    `Période : du ${dateStart} au ${dateEnd}\n` +
+                    `Valeur : ${totalValue}\n`;
+
+                const canvas = document.getElementById('mainChart');
+                canvas.toBlob(async (blob) => {
+                    const data = [new ClipboardItem({
+                        "text/plain": new Blob([reportText], { type: "text/plain" }),
+                        "image/png": blob
+                    })];
+                    await navigator.clipboard.write(data);
+
+                    const btn = document.querySelector('.btn-copy');
+                    const originalIcon = btn.innerHTML;
+                    btn.innerHTML = '<i class="fas fa-check"></i>';
+                    setTimeout(() => btn.innerHTML = originalIcon, 2000);
+                });
+            } catch (err) { alert("Erreur lors de la copie."); }
+        }
+
+        const today = new Date();
+        const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+        document.getElementById('startDate').value = firstDay.toISOString().split('T')[0];
+        document.getElementById('endDate').value = today.toISOString().split('T')[0];
+
+        async function fetchData(url) {
+            try {
+                const response = await fetch(url + '?v=' + Date.now());
+                if (!response.ok) return null;
+                return await response.json();
+            } catch (e) { return null; }
+        }
+
+        async function init() {
+            // On pointe vers l'index plutôt que de boucler sur les dates
+            const INDEX_URL = "https://raw.githubusercontent.com/formationa/statslms/main/json_conception/index.json";
+            const BASE_URL = "https://raw.githubusercontent.com/formationa/statslms/main/json_conception/";
+
+            async function init() {
+                const startStr = document.getElementById('startDate').value;
+                const endStr = document.getElementById('endDate').value;
+
+                // 1. Charger l'index global généré par votre logiciel VB.NET
+                const index = await fetchData(INDEX_URL);
+                if (!index || !index.kpis) {
+                    console.error("Impossible de charger l'index ou index vide.");
+                    return;
+                }
+
+                dataStore = { sessions: [], actifs: [], ressources: [], location: [], ouvertes: [] };
+
+                // 2. Filtrer les fichiers KPI présents dans l'index selon les dates choisies
+                // On suppose que le nom du fichier contient la date (ex: kpi_journaliers_2026-03-31.json)
+                const filesToFetch = index.kpis.filter(fileName => {
+                    const fileDate = fileName.match(/\d{4}-\d{2}-\d{2}/); // Extrait la date du nom
+                    return fileDate && fileDate[0] >= startStr && fileDate[0] <= endStr;
+                });
+
+                // 3. Charger uniquement les fichiers qui existent vraiment
+                let promises = filesToFetch.map(fileName => fetchData(`${BASE_URL}${fileName}`));
+                const results = await Promise.all(promises);
+
+                let lastDataFound = null;
+
+                results.forEach(dayData => {
+                    if (dayData && dayData.date) {
+                        const dt = dayData.date;
+                        dataStore.actifs.push({ date: dt, val: dayData.apprenants_actifs });
+                        dataStore.ressources.push({ date: dt, val: dayData.resource_connections });
+                        dataStore.ouvertes.push({ date: dt, val: dayData.sessions_ouvertes });
+                        dataStore.sessions.push({ date: dt, val: dayData.apprenants_dans_sessions });
+
+                        // On garde le plus récent pour les badges (l'index est trié par date descendante en VB)
+                        if (!lastDataFound || dt > lastDataFound.date) {
+                            lastDataFound = dayData;
+                        }
+                    }
+                });
+
+                // 4. Mise à jour de l'affichage
+                if (lastDataFound) {
+                    document.getElementById('liveBadge').innerText = lastDataFound.apprenants_en_cours || 0;
+                    const d = new Date(lastDataFound.date);
+                    document.getElementById('lastUpdate').innerText = `Dernière synchronisation : ${d.toLocaleDateString('fr-FR')}`;
+                    dataStore.location = Object.entries(lastDataFound.villes || {}).map(([name, count]) => ({
+                        name: name, count: count
+                    }));
+                }
+
+                updateDashboard();
+            }
+
+        function updateDashboard() {
+            const view = document.getElementById('viewType').value;
+            const badge = document.getElementById('totalBadge');
+            if (myChart) myChart.destroy();
+
+            if (view === 'location') {
+                const topVilles = [...dataStore.location].sort((a, b) => b.count - a.count).slice(0, 20);
+                renderChart('bar', topVilles.map(d => d.name), topVilles.map(d => d.count), ' Sessions par centre', '#38bdf8');
+                badge.innerText = "Top 20";
+                return;
+            }
+
+            let filtered = [];
+            let color = '#38bdf8';
+            let chartLabel = "";
+            if (view === 'actifs') { filtered = dataStore.actifs; chartLabel = "Nombre d'apprenants connectés"; }
+            else if (view === 'ressources') { filtered = dataStore.ressources; chartLabel = "Nombre de ressources lancées"; color = '#10b981'; }
+            else if (view === 'ouvertes') { filtered = dataStore.ouvertes; chartLabel = "Nombre de sessions ouvertes"; color = '#a855f7'; }
+            else if (view === 'moyenne_hebdo') {
+                const weekly = calculateWeekly(dataStore.actifs);
+                renderChart('bar', weekly.map(d => d.label), weekly.map(d => d.val), "Moyenne des apprenants connectés", '#6366f1');
+                badge.innerText = "Moyenne";
+                return;
+            }
+            let total = filtered.reduce((a, b) => a + (b.val || 0), 0);
+            badge.innerText = total.toLocaleString();
+            renderChart('line', filtered.map(d => d.date), filtered.map(d => d.val), chartLabel, color);
+        }
+
+        function renderChart(type, labels, data, label, color) {
+            const isLight = document.body.classList.contains('light-mode');
+            const textColor = isLight ? '#1e293b' : '#94a3b8';
+            const gridColor = isLight ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.05)';
+            Chart.defaults.color = textColor;
+            Chart.defaults.borderColor = gridColor;
+            myChart = new Chart(ctx, {
+                type: type,
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: label,
+                        data: data,
+                        borderColor: color,
+                        backgroundColor: color + '22',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { labels: { color: textColor } } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: gridColor } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+
+        function calculateWeekly(data) {
+            const weeks = {};
+            data.forEach(item => {
+                const d = new Date(item.date);
+                const year = d.getFullYear();
+                const tempDate = new Date(d.valueOf());
+                tempDate.setDate(tempDate.getDate() + 4 - (tempDate.getDay() || 7));
+                const week = Math.ceil((((tempDate - new Date(year, 0, 1)) / 86400000) + 1) / 7);
+                const label = `S${week}-${year}`;
+                if (!weeks[label]) weeks[label] = { sum: 0, count: 0, sortKey: d.getTime() };
+                weeks[label].sum += item.val;
+                weeks[label].count += 1;
+            });
+            return Object.keys(weeks).sort((a, b) => weeks[a].sortKey - weeks[b].sortKey)
+                .map(k => ({ label: k, val: (weeks[k].sum / weeks[k].count).toFixed(1) }));
+        }
+
+        // --- Ajout des écouteurs pour mise à jour automatique ---
+        document.getElementById('viewType').addEventListener('change', updateDashboard);
+        document.getElementById('startDate').addEventListener('change', init);
+        document.getElementById('endDate').addEventListener('change', init);
+
+        init();
+    </script>
+</body>
+</html>

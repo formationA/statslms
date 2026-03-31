@@ -1,0 +1,177 @@
+﻿<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guides & Tutos | LMS</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0f172a;
+            --card: #1e293b;
+            --blue: #38bdf8;
+            --green: #10b981;
+            --white: #f8fafc;
+            --muted: #94a3b8;
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        [data-theme="light"] {
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --white: #1e293b;
+            --muted: #64748b;
+            --border: #e2e8f0;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--white);
+            transition: 0.3s;
+        }
+
+        .navbar {
+            padding: 1rem 2rem;
+            background: #1e293b;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+            header h1 {
+                color: var(--blue);
+            }
+
+        /* Grille de tutoriels */
+        .tuto-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .tuto-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+            .tuto-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+                border-color: var(--blue);
+            }
+
+        .tuto-icon {
+            font-size: 2rem;
+            color: var(--blue);
+            margin-bottom: 15px;
+        }
+
+        .tuto-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .tuto-desc {
+            color: var(--muted);
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        .btn-launch {
+            background: var(--blue);
+            color: #0f172a;
+            text-decoration: none;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+            .btn-launch:hover {
+                opacity: 0.9;
+            }
+
+        .tag {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            background: rgba(56, 189, 248, 0.1);
+            color: var(--blue);
+            padding: 4px 8px;
+            border-radius: 4px;
+            width: fit-content;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div style="display:flex; align-items:center;">
+            <a href="index.html" style="color:var(--blue); text-decoration:none; margin-right:20px;"><i class="fas fa-chevron-left"></i> Retour</a>
+            <h1 style="font-size: 1.1rem; margin: 0; color: #f8fafc;">Espace Tutoriels</h1>
+        </div>
+    </nav>
+
+    <div class="container">
+        <header>
+            <h1>Guides d'utilisation</h1>
+            <p style="color:var(--muted)">Sélectionnez un guide pour apprendre à maîtriser le LMS.</p>
+        </header>
+
+        <div class="tuto-grid">
+
+            <div class="tuto-card">
+                <div>
+                    <div class="tag">Flux Ammon</div>
+                    <i class="fas fa-sync tuto-icon"></i>
+                    <div class="tuto-title">Gérer les inscriptions</div>
+                    <div class="tuto-desc">Apprenez comment synchroniser vos données entre Ammon et le LMS sans erreur.</div>
+                </div>
+                <a href="https://lms-aftral.com/tutoriels-detail?id=696e2f3c5a08d143b52885a1" target="_blank" class="btn-launch">
+                    Lancer le tuto <i class="fas fa-external-link-alt"></i>
+                </a>
+            </div>
+
+            <div class="tuto-card">
+                <div>
+                    <div class="tag">Pédagogie</div>
+                    <i class="fas fa-graduation-cap tuto-icon"></i>
+                    <div class="tuto-title">Suivi des apprenants</div>
+                    <div class="tuto-desc">Consulter les scores, les temps passés et les enquêtes de satisfaction.</div>
+                </div>
+                <a href="https://lms-aftral.com/tutoriels-detail?id=AUTRE_ID" target="_blank" class="btn-launch">
+                    Lancer le tuto <i class="fas fa-external-link-alt"></i>
+                </a>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+</html>

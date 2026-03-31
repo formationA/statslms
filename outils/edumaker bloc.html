@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>EduMaker Absolute - Ultra Creator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: { primary: '#6366f1', darkBg: '#0f172a', darkCard: '#1e293b' },
+                    borderRadius: { '4xl': '2rem' }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        @keyframes subtleScale {
+            from {
+                transform: scale(0.98);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .animate-block {
+            animation: subtleScale 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+        }
+
+        .dark .glass {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+        }
+
+        .sortable-ghost {
+            opacity: 0.1;
+            background: #6366f1;
+            border-radius: 2rem;
+        }
+
+        .custom-scroll::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 10px;
+        }
+
+        .rich-editor img {
+            max-width: 100%;
+            border-radius: 1rem;
+            margin: 10px 0;
+        }
+
+        .rich-editor:focus {
+            outline: none;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-darkBg text-slate-900 dark:text-slate-100 transition-colors duration-500 overflow-hidden font-sans">
+
+    <nav class="h-20 glass border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-6 md:px-10 z-[100] relative">
+        <div class="flex items-center gap-4">
+            <button onclick="toggleSidebar()" class="md:hidden p-3 bg-slate-100 dark:bg-slate-800 rounded-full text-slate-600 dark:text-slate-300">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-indigo-500/30">
+                    <i class="fas fa-bolt text-lg"></i>
+                </div>
+                <span class="text-xl font-black tracking-tight hidden sm:block uppercase">EduMaker <span class="text-indigo-600">ABSOLUTE</span></span>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-3 md:gap-6">
+            <div class="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-full border dark:border-slate-700">
+                <button onclick="setDarkMode(false)" class="w-9 h-9 flex items-center justify-center rounded-full transition dark:text-slate-500 bg-white dark:bg-transparent shadow-sm dark:shadow-none"><i class="fas fa-sun text-sm"></i></button>
+                <button onclick="setDarkMode(true)" class="w-9 h-9 flex items-center justify-center rounded-full transition text-slate-400 dark:text-white dark:bg-indigo-600 shadow-none dark:shadow-md"><i class="fas fa-moon text-sm"></i></button>
+            </div>
+            <button onclick="togglePreview()" class="px-5 py-2.5 font-bold text-slate-700 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-700 rounded-full transition flex items-center gap-2 border border-transparent hover:border-slate-200 dark:hover:border-slate-600">
+                <i class="fas fa-play"></i> <span class="hidden sm:inline">Aperçu</span>
+            </button>
+            <div class="flex gap-2">
+                <input type="file" id="importJSON" class="hidden" accept=".json" onchange="importJSON(this)">
+                <button onclick="document.getElementById('importJSON').click()" class="bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-white px-4 py-2.5 rounded-full font-bold transition hover:scale-105">IMPORT</button>
+                <button onclick="exportJSON()" class="bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-white px-4 py-2.5 rounded-full font-bold transition hover:scale-105">JSON</button>
+                <button onclick="exportStandaloneHTML()" class="bg-indigo-600 text-white px-6 py-2.5 rounded-full font-bold shadow-xl hover:scale-105 active:scale-95 transition-all flex items-center gap-2">
+                    <i class="fas fa-file-code"></i> <span>Exporter HTML</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="flex h-[calc(100vh-80px)] relative">
+        <aside id="sidebar" class="fixed md:relative w-80 h-full bg-white dark:bg-darkCard border-r border-slate-200 dark:border-slate-800 p-8 z-[90] -translate-x-full md:translate-x-0 overflow-y-auto custom-scroll transition-transform shadow-2xl md:shadow-none">
+            <div class="mb-10">
+                <h3 class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-4">Bibliothèque de blocs</h3>
+                <div class="grid grid-cols-1 gap-2">
+                    <button onclick="addBlock('text')" class="flex items-center gap-4 p-3.5 hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded-2xl transition group border border-transparent hover:border-slate-100 dark:hover:border-slate-700">
+                        <span class="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/30 text-blue-600 flex items-center justify-center"><i class="fas fa-paragraph"></i></span>
+                        <span class="text-sm font-bold">Texte Riche</span>
+                    </button>
+                    <button onclick="addBlock('image')" class="flex items-center gap-4 p-3.5 hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded-2xl transition group border border-transparent hover:border-slate-100 dark:hover:border-slate-700">
+                        <span class="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 flex items-center justify-center"><i class="fas fa-image"></i></span>
+                        <span class="text-sm font-bold">Image</span>
+                    </button>
+                    <button onclick="addBlock('accordion')" class="flex items-center gap-4 p-3.5 hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded-2xl transition group border border-transparent hover:border-slate-100 dark:hover:border-slate-700">
+                        <span class="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-900/30 text-purple-600 flex items-center justify-center"><i class="fas fa-chevron-down"></i></span>
+                        <span class="text-sm font-bold">Accordéon</span>
+                    </button>
+                    <button onclick="addBlock('video')" class="flex items-center gap-4 p-3.5 hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded-2xl transition group border border-transparent hover:border-slate-100 dark:hover:border-slate-700">
+                        <span class="w-10 h-10 rounded-xl bg-red-100 dark:bg-red-900/30 text-red-600 flex items-center justify-center"><i class="fas fa-play-circle"></i></span>
+                        <span class="text-sm font-bold">Vidéo</span>
+                    </button>
+                    <button onclick="addBlock('quiz')" class="flex items-center gap-4 p-3.5 hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded-2xl transition group border border-transparent hover:border-slate-100 dark:hover:border-slate-700">
+                        <span class="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/30 text-amber-600 flex items-center justify-center"><i class="fas fa-question-circle"></i></span>
+                        <span class="text-sm font-bold">Quiz</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="border-t border-slate-100 dark:border-slate-800 pt-8">
+                <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Configuration</h3>
+                <label class="text-[10px] font-bold text-slate-400 block mb-2 uppercase">Options globales</label>
+                <div class="flex items-center justify-between mb-4 bg-slate-50 dark:bg-slate-800 p-3 rounded-xl">
+                    <span class="text-[10px] font-bold">Réponses à la fin</span>
+                    <input type="checkbox" id="showCorrections" checked class="w-5 h-5 accent-indigo-600">
+                </div>
+                <label class="text-[10px] font-bold text-slate-400 block mb-2">TITRE DU COURS</label>
+                <input type="text" id="courseTitle" value="Nouveau Module" class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl p-4 text-sm focus:ring-2 ring-indigo-500 mb-4 font-bold">
+                <label class="text-[10px] font-bold text-slate-400 block mb-2">COULEUR D'ACCENT</label>
+                <input type="color" id="themeColor" value="#6366f1" class="w-full h-12 rounded-2xl cursor-pointer bg-transparent border-none">
+            </div>
+        </aside>
+
+        <main class="flex-1 overflow-y-auto bg-slate-50 dark:bg-darkBg p-6 md:p-14 custom-scroll">
+            <div id="editor-list" class="max-w-4xl mx-auto space-y-6 pb-20"></div>
+        </main>
+    </div>
+
+    <div id="previewModal" class="fixed inset-0 bg-white dark:bg-darkBg z-[200] hidden flex flex-col">
+        <header class="h-20 flex items-center justify-between px-8 border-b dark:border-slate-800 glass">
+            <div class="flex items-center gap-4">
+                <span id="slideCounter" class="bg-indigo-600 text-white text-[10px] font-black px-2 py-1 rounded"></span>
+                <h4 id="previewTitleDisplay" class="font-bold text-sm opacity-60 uppercase tracking-widest"></h4>
+            </div>
+            <button onclick="togglePreview()" class="bg-slate-900 dark:bg-white dark:text-slate-900 text-white px-8 py-2 rounded-full font-black text-xs uppercase tracking-tighter">Quitter</button>
+        </header>
+
+        <div class="flex-1 flex items-center justify-center p-6 md:p-12 overflow-hidden">
+            <div id="slideContainer" class="w-full max-w-4xl h-full overflow-y-auto custom-scroll"></div>
+        </div>
+
+        <footer class="h-24 flex items-center justify-between px-10 border-t dark:border-slate-800 glass">
+            <div class="flex-1 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden mr-10">
+                <div id="progressFill" class="h-full bg-indigo-600 transition-all duration-500"></div>
+            </div>
+            <div class="flex gap-4">
+                <button id="prevBtn" onclick="prevSlide()" class="w-14 h-14 flex items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-indigo-500 hover:text-white transition shadow-sm"><i class="fas fa-chevron-left"></i></button>
+                <button id="nextBtn" onclick="nextSlide()" class="w-14 h-14 flex items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-indigo-500 hover:text-white transition shadow-sm"><i class="fas fa-chevron-right"></i></button>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        let blocks = [
+            { id: 1, type: 'text', content: "Bienvenue dans votre <b>module interactif</b>." }
+        ];
+        let currentSlide = 0;
+        let userAnswers = {};
+
+        function setDarkMode(v) { document.documentElement.classList.toggle('dark', v); }
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('-translate-x-full'); }
+
+        function formatDoc(cmd, val = null) { document.execCommand(cmd, false, val); }
+        function insertImg() { const url = prompt("URL de l'image:"); if (url) formatDoc('insertImage', url); }
+
+        function render() {
+            const editorList = document.getElementById('editor-list');
+            editorList.innerHTML = '';
+            blocks.forEach(block => {
+                const card = document.createElement('div');
+                card.className = "bg-white dark:bg-darkCard p-8 rounded-4xl shadow-sm border dark:border-slate-800 animate-block relative group";
+                card.dataset.id = block.id;
+
+                let ui = "";
+                if (block.type === 'text') {
+                    ui = `<div class="mb-4 flex gap-2 border-b dark:border-slate-700 pb-2 overflow-x-auto"><button onclick="formatDoc('bold')" class="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg"><i class="fas fa-bold"></i></button><button onclick="formatDoc('italic')" class="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg"><i class="fas fa-italic"></i></button><button onclick="formatDoc('justifyLeft')" class="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg"><i class="fas fa-align-left"></i></button><button onclick="formatDoc('justifyCenter')" class="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg"><i class="fas fa-align-center"></i></button><button onclick="formatDoc('justifyRight')" class="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg"><i class="fas fa-align-right"></i></button><button onclick="insertImg()" class="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg"><i class="fas fa-image"></i></button></div><div contenteditable="true" oninput="update(${block.id}, null, this.innerHTML)" class="rich-editor w-full min-h-[150px] p-2 text-xl dark:text-slate-200">${block.content}</div>`;
+                }
+                else if (block.type === 'image') ui = `<input type="text" value="${block.content.url}" oninput="update(${block.id}, 'url', this.value)" class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl p-4 text-xs font-mono mb-2" placeholder="URL de l'image"><input type="text" value="${block.content.caption}" oninput="update(${block.id}, 'caption', this.value)" class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl p-4 text-sm" placeholder="Légende">`;
+                else if (block.type === 'accordion') ui = `<input type="text" value="${block.content.title}" oninput="update(${block.id}, 'title', this.value)" class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl p-4 font-bold mb-2" placeholder="Titre de l'accordéon"><textarea oninput="update(${block.id}, 'text', this.value)" class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl p-4 text-sm h-24" placeholder="Contenu de l'accordéon">${block.content.text}</textarea>`;
+                else if (block.type === 'video') ui = `<input type="text" value="${block.content}" oninput="update(${block.id}, null, this.value)" class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl p-4 text-xs font-mono" placeholder="URL Embed Vidéo (Youtube/Vimeo)">`;
+                else if (block.type === 'quiz') {
+                    ui = `<div class="space-y-4"><div class="flex gap-4"><input type="text" value="${block.content.q}" oninput="update(${block.id}, 'q', this.value)" class="flex-1 bg-slate-100 dark:bg-slate-900 border-none rounded-2xl p-4 font-black"><button onclick="toggleQuizMode(${block.id})" class="text-[10px] font-black px-4 py-2 rounded-full border dark:border-slate-700">${block.content.isMultiple ? 'MULTIPLE' : 'UNIQUE'}</button></div><div class="grid gap-2" id="opts-${block.id}">${block.content.opts.map((o, i) => `<div class="flex items-center gap-2"><input type="${block.content.isMultiple ? 'checkbox' : 'radio'}" name="q_${block.id}" ${block.content.correct.includes(i) ? 'checked' : ''} onchange="handleCorrectChange(${block.id}, ${i}, this.checked)" class="w-5 h-5 accent-indigo-600"><input type="text" value="${o}" oninput="updateOption(${block.id}, ${i}, this.value)" class="flex-1 bg-slate-50 dark:bg-slate-800 border-none rounded-xl p-3 text-sm"><button onclick="removeOption(${block.id}, ${i})" class="text-slate-400 hover:text-red-500 p-2"><i class="fas fa-trash-alt"></i></button></div>`).join('')}</div><button onclick="addOption(${block.id})" class="text-[10px] font-black text-indigo-500 uppercase tracking-widest mt-2 hover:underline"><i class="fas fa-plus mr-1"></i> Ajouter une option</button></div>`;
+                }
+
+                card.innerHTML = `<div class="flex justify-between mb-4 items-center"><div class="flex items-center gap-2"><div class="drag-handle cursor-grab text-slate-300 px-2"><i class="fas fa-grip-lines"></i></div><span class="text-[10px] font-black uppercase text-indigo-500/50">${block.type}</span></div><button onclick="removeBlock(${block.id})" class="text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 w-8 h-8 rounded-full transition"><i class="fas fa-times"></i></button></div>${ui}`;
+                editorList.appendChild(card);
+            });
+        }
+
+        function addBlock(type) {
+            const id = Date.now();
+            let content;
+            if (type === 'text') content = "Nouvel élément de texte...";
+            else if (type === 'quiz') content = { q: "Question?", opts: ["Option A", "Option B"], correct: [0], isMultiple: false };
+            else if (type === 'image') content = { url: "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&w=800", caption: "Une bibliothèque inspirante" };
+            else if (type === 'accordion') content = { title: "Cliquez pour voir", text: "Voici le contenu caché de l'accordéon." };
+            else if (type === 'video') content = "https://www.youtube.com/embed/dQw4w9WgXcQ";
+
+            blocks.push({ id, type, content }); render();
+        }
+
+        function removeBlock(id) { blocks = blocks.filter(b => b.id !== id); render(); }
+        function update(id, f, v) { const b = blocks.find(x => x.id === id); if (f === null) b.content = v; else b.content[f] = v; }
+        function addOption(id) { const b = blocks.find(x => x.id === id); b.content.opts.push("Nouvelle option"); render(); }
+        function removeOption(id, idx) { const b = blocks.find(x => x.id === id); if (b.content.opts.length > 1) { b.content.opts.splice(idx, 1); b.content.correct = b.content.correct.filter(i => i !== idx).map(i => i > idx ? i - 1 : i); render(); } }
+        function updateOption(id, idx, val) { const b = blocks.find(x => x.id === id); b.content.opts[idx] = val; }
+        function toggleQuizMode(id) { const b = blocks.find(x => x.id === id); b.content.isMultiple = !b.content.isMultiple; b.content.correct = [0]; render(); }
+        function handleCorrectChange(id, i, c) { const b = blocks.find(x => x.id === id); if (!b.content.isMultiple) b.content.correct = [i]; else { if (c) b.content.correct.push(i); else b.content.correct = b.content.correct.filter(x => x !== i); } render(); }
+
+        function togglePreview() { currentSlide = 0; userAnswers = {}; document.getElementById('previewModal').classList.toggle('hidden'); if (!document.getElementById('previewModal').classList.contains('hidden')) renderSlide(); }
+
+        function renderSlide() {
+            const container = document.getElementById('slideContainer');
+            if (currentSlide >= blocks.length) { renderResults(); return; }
+            const block = blocks[currentSlide];
+            const accent = document.getElementById('themeColor').value;
+            document.getElementById('slideCounter').innerText = `${currentSlide + 1} / ${blocks.length}`;
+            document.getElementById('progressFill').style.width = `${((currentSlide + 1) / blocks.length) * 100}%`;
+            document.getElementById('progressFill').style.backgroundColor = accent;
+
+            let html = `<div class="animate-block py-10">`;
+            if (block.type === 'text') html += `<div class="text-2xl md:text-4xl dark:text-white leading-relaxed text-center">${block.content}</div>`;
+            else if (block.type === 'image') html += `<figure class="text-center"><img src="${block.content.url}" class="rounded-[3rem] shadow-2xl mx-auto max-h-[55vh] object-cover mb-6 border-8 border-white dark:border-slate-800"><figcaption class="text-slate-400 italic text-lg">${block.content.caption}</figcaption></figure>`;
+            else if (block.type === 'video') html += `<div class="aspect-video bg-black rounded-[3rem] overflow-hidden max-w-3xl mx-auto border-4 border-white/10"><iframe class="w-full h-full" src="${block.content}" frameborder="0" allowfullscreen></iframe></div>`;
+            else if (block.type === 'accordion') html += `<div class="max-w-2xl mx-auto"><button onclick="this.nextElementSibling.classList.toggle('hidden')" class="w-full text-left p-6 bg-white dark:bg-slate-800 rounded-3xl font-bold flex justify-between items-center shadow-lg border dark:border-slate-700"><span>${block.content.title}</span><i class="fas fa-chevron-down opacity-50"></i></button><div class="hidden p-8 text-lg opacity-80 leading-relaxed">${block.content.text}</div></div>`;
+            else if (block.type === 'quiz') {
+                const isM = block.content.isMultiple;
+                html += `<div class="max-w-xl mx-auto bg-white dark:bg-slate-800 p-12 rounded-[3.5rem] shadow-2xl border dark:border-slate-700"><h4 class="text-3xl font-black mb-8 text-center">${block.content.q}</h4><div class="space-y-4">${block.content.opts.map((o, i) => `<button onclick="selOpt(this, ${i}, ${isM}, ${block.id})" class="q-opt w-full text-left p-6 bg-slate-50 dark:bg-slate-900/50 border-2 border-transparent rounded-3xl font-bold transition">${o}</button>`).join('')}</div>${isM ? `<button onclick="validateQuiz(${block.id})" class="w-full mt-10 bg-indigo-600 text-white p-5 rounded-3xl font-black uppercase tracking-widest shadow-xl" style="background-color:${accent}">Valider</button>` : ''}</div>`;
+            }
+            container.innerHTML = html + `</div>`;
+        }
+
+        function selOpt(btn, idx, isM, id) {
+            const accent = document.getElementById('themeColor').value;
+            if (!isM) {
+                btn.parentElement.querySelectorAll('.q-opt').forEach(b => { b.style.borderColor = 'transparent'; b.style.backgroundColor = ''; });
+                btn.style.borderColor = accent; btn.style.backgroundColor = accent + '1A';
+                setTimeout(() => { userAnswers[id] = [idx]; nextSlide(); }, 300);
+            } else {
+                if (btn.style.borderColor === accent) { btn.style.borderColor = 'transparent'; btn.style.backgroundColor = ''; }
+                else { btn.style.borderColor = accent; btn.style.backgroundColor = accent + '1A'; }
+            }
+        }
+
+        function validateQuiz(id) {
+            const accent = document.getElementById('themeColor').value;
+            const sels = Array.from(document.querySelectorAll('.q-opt')).filter(b => b.style.borderColor === accent);
+            userAnswers[id] = sels.map(b => Array.from(b.parentElement.children).indexOf(b));
+            nextSlide();
+        }
+
+        function renderResults() {
+            const accent = document.getElementById('themeColor').value;
+            const qz = blocks.filter(b => b.type === 'quiz');
+            let sc = 0;
+            qz.forEach(b => {
+                const ua = userAnswers[b.id] || [];
+                if (ua.length === b.content.correct.length && ua.every(v => b.content.correct.includes(v))) sc++;
+            });
+            const p = qz.length > 0 ? Math.round((sc / qz.length) * 100) : 100;
+            let d = "";
+            if (document.getElementById('showCorrections').checked) {
+                d = `<div class="mt-12 space-y-4 max-w-2xl mx-auto text-left">` + qz.map(b => {
+                    const ok = (userAnswers[b.id] || []).length === b.content.correct.length && (userAnswers[b.id] || []).every(v => b.content.correct.includes(v));
+                    return `<div class="p-6 bg-slate-100 dark:bg-slate-800/50 rounded-3xl border ${ok ? 'border-emerald-500/30' : 'border-red-500/30'}">
+                                <p class="font-bold text-sm mb-2">${ok ? '✓' : '✕'} ${b.content.q}</p>
+                                <p class="text-xs opacity-50">Bonne réponse: <span style="color:${accent}">${b.content.correct.map(i => b.content.opts[i]).join(', ')}</span></p>
+                            </div>`;
+                }).join('') + `</div>`;
+            }
+            document.getElementById('slideContainer').innerHTML = `
+                    <div class="text-center animate-block py-10">
+                        <div class="inline-block w-48 h-48 rounded-full border-[10px] flex items-center justify-center mb-8 shadow-2xl transition-all duration-1000" style="border-color:${accent}">
+                            <span class="text-6xl font-black">${p}%</span>
+                        </div>
+                        <h2 class="text-4xl font-black mb-2 uppercase tracking-tighter">Votre Résultat</h2>
+                        <p class="text-xl opacity-40 font-bold mb-10">${sc} / ${qz.length} correctes</p>
+                        ${d}
+                    </div>`;
+            document.getElementById('progressFill').style.width = '100%';
+            document.getElementById('slideCounter').innerText = "RÉSULTATS";
+        }
+
+        function nextSlide() { if (currentSlide < blocks.length) { currentSlide++; renderSlide(); } }
+        function prevSlide() { if (currentSlide > 0) { currentSlide--; renderSlide(); } }
+
+        function importJSON(input) {
+            const f = input.files[0]; if (!f) return;
+            const r = new FileReader();
+            r.onload = (e) => {
+                const d = JSON.parse(e.target.result);
+                if (d.blocks) blocks = d.blocks;
+                if (d.title) document.getElementById('courseTitle').value = d.title;
+                render();
+            };
+            r.readAsText(f);
+        }
+
+        function exportJSON() {
+            const data = { title: document.getElementById('courseTitle').value, blocks };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = "module.json"; a.click();
+        }
+
+        function exportStandaloneHTML() {
+            const title = document.getElementById('courseTitle').value;
+            const content = JSON.stringify(blocks);
+            const accent = document.getElementById('themeColor').value;
+            const showCorr = document.getElementById('showCorrections').checked;
+
+            const template = `<!DOCTYPE html><html class="dark"><head><meta charset="UTF-8"><title>${title}</title><script src="https://cdn.tailwindcss.com"><\/script><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"><style>body{background:#0f172a; color:white; font-family:sans-serif; overflow:hidden;} .custom-scroll::-webkit-scrollbar {width:5px;} .custom-scroll::-webkit-scrollbar-thumb {background:#475569; border-radius:10px;} .animate-block { animation: subtleScale 0.3s ease forwards; } @keyframes subtleScale { from { transform: scale(0.98); opacity: 0; } to { transform: scale(1); opacity: 1; } }</style></head>
+                <body class="bg-[#0f172a]">
+                    <div id="app" class="h-screen flex flex-col">
+                        <header class="h-20 border-b border-white/5 flex items-center px-10 justify-between backdrop-blur-md bg-white/5">
+                            <span class="font-black uppercase tracking-widest text-sm text-white/60">${title}</span>
+                            <span id="slideCount" class="bg-white/10 px-3 py-1 rounded-full text-[10px] font-bold"></span>
+                        </header>
+                        <div id="slide" class="flex-1 overflow-y-auto p-6 md:p-12 flex items-center justify-center custom-scroll"></div>
+                        <footer class="h-24 border-t border-white/5 flex items-center px-10 justify-between">
+                            <div class="flex-1 h-1 bg-white/10 rounded mr-10"><div id="bar" class="h-full transition-all duration-500" style="background:${accent}"></div></div>
+                            <div class="flex gap-4">
+                                <button onclick="step(-1)" class="w-12 h-12 bg-white/5 rounded-full hover:bg-white/10 transition"><i class="fas fa-chevron-left"></i></button>
+                                <button onclick="step(1)" class="w-12 h-12 bg-white/5 rounded-full hover:bg-white/10 transition"><i class="fas fa-chevron-right"></i></button>
+                            </div>
+                        </footer>
+                    </div>
+                    <script>
+                        const b=${content}; let i=0, ans={}; const acc='${accent}';
+                        function render(){
+                            const s=b[i]; if(!s){f();return;}
+                            document.getElementById('bar').style.width=((i+1)/b.length*100)+'%';
+                            document.getElementById('slideCount').innerText = (i+1) + " / " + b.length;
+                            let h='<div class="w-full max-w-4xl animate-block">';
+                            if(s.type==='text') h+='<div class="text-3xl text-center leading-relaxed">'+s.content+'</div>';
+                            if(s.type==='image') h+='<figure class="text-center"><img src="'+s.content.url+'" class="rounded-[3rem] shadow-2xl mx-auto max-h-[60vh] object-cover mb-4 border-4 border-white/10"><figcaption class="opacity-50 italic">'+s.content.caption+'</figcaption></figure>';
+                            if(s.type==='video') h+='<div class="aspect-video bg-black rounded-[3rem] overflow-hidden border-4 border-white/10"><iframe class="w-full h-full" src="'+s.content+'" frameborder="0" allowfullscreen></iframe></div>';
+                            if(s.type==='accordion') h+='<div class="max-w-2xl mx-auto"><button onclick="this.nextElementSibling.classList.toggle(\\'hidden\\')" class="w-full text-left p-6 bg-white/5 rounded-3xl font-bold flex justify-between items-center border border-white/10"><span>'+s.content.title+'</span><i class="fas fa-chevron-down opacity-50"></i></button><div class="hidden p-8 text-lg opacity-60 leading-relaxed">'+s.content.text+'</div></div>';
+                            if(s.type==='quiz'){
+                                h+='<div class="max-w-xl mx-auto bg-white/5 p-10 rounded-[3rem] border border-white/10 text-center"><h2 class="text-2xl font-bold mb-6">'+s.content.q+'</h2>'+s.content.opts.map((o,x)=>'<button onclick="sel(this,'+x+','+s.content.isMultiple+','+s.id+')" class="q-btn block w-full p-6 mb-4 border-2 border-transparent bg-white/5 rounded-2xl text-left font-bold transition-all">'+o+'</button>').join('')+(s.content.isMultiple?'<button onclick="val('+s.id+')" class="w-full mt-4 p-4 rounded-2xl font-bold" style="background:'+acc+'; color:white">VALIDER</button>':'')+'</div>';
+                            }
+                            document.getElementById('slide').innerHTML=h+'</div>';
+                        }
+                        function sel(btn,x,m,id){
+                            if(!m){
+                                btn.parentElement.querySelectorAll('.q-btn').forEach(k=>{k.style.borderColor="transparent";k.style.backgroundColor=""});
+                                btn.style.borderColor=acc; btn.style.backgroundColor=acc+"1A";
+                                setTimeout(()=>{ans[id]=[x]; step(1);},300);
+                            } else {
+                                if(btn.style.borderColor===acc){btn.style.borderColor="transparent";btn.style.backgroundColor=""}
+                                else{btn.style.borderColor=acc; btn.style.backgroundColor=acc+"1A"}
+                            }
+                        }
+                        function val(id){
+                            const s=Array.from(document.querySelectorAll('.q-btn')).filter(k=>k.style.borderColor===acc);
+                            ans[id]=s.map(k=>Array.from(k.parentElement.querySelectorAll('.q-btn')).indexOf(k));
+                            step(1);
+                        }
+                        function f(){
+                            const qz=b.filter(x=>x.type==='quiz'); let sc=0;
+                            qz.forEach(x=>{const a=ans[x.id]||[]; if(a.length===x.content.correct.length&&a.every(v=>x.content.correct.includes(v)))sc++;});
+                            const p=qz.length>0?Math.round(sc/qz.length*100):100;
+                            let d = "";
+                            if(${showCorr}){ d = '<div class="mt-8 space-y-3 max-w-xl mx-auto text-left">' + qz.map(x=>{const ok=(ans[x.id]||[]).length===x.content.correct.length&&(ans[x.id]||[]).every(v=>x.content.correct.includes(v)); return '<div class="p-4 bg-white/5 rounded-2xl border '+(ok?'border-emerald-500/30':'border-red-500/30')+'"><p class="text-sm font-bold">'+(ok?'✓':'✕')+' '+x.content.q+'</p></div>';}).join("") + '</div>'; }
+                            document.getElementById('slide').innerHTML='<div class="text-center animate-block"><div class="inline-block w-40 h-40 rounded-full border-[8px] flex items-center justify-center mb-6" style="border-color:'+acc+'"><span class="text-5xl font-black">'+p+'%</span></div><h1 class="text-3xl font-bold uppercase">Terminé</h1>'+d+'</div>';
+                        }
+                        function step(n){ if(i+n>=0&&i+n<=b.length){i+=n;render();}}
+                        render();
+                    <\/script>
+                </body></html>`;
+            const blob = new Blob([template], { type: 'text/html' });
+            const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = title + ".html"; a.click();
+        }
+
+        new Sortable(document.getElementById('editor-list'), {
+            animation: 150, handle: '.drag-handle', onEnd: () => {
+                const n = []; document.querySelectorAll('#editor-list [data-id]').forEach(el => n.push(blocks.find(b => b.id == el.dataset.id))); blocks = n;
+            }
+        });
+
+        setDarkMode(true); render();
+    </script>
+</body>
+</html>

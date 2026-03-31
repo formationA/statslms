@@ -1,0 +1,733 @@
+﻿document.getElementById('theme-toggle').addEventListener('click', () => {
+    const html = document.documentElement;
+    const currentTheme = html.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+    html.setAttribute('data-theme', newTheme);
+
+    // Change l'icône
+    const icon = document.querySelector('#theme-toggle i');
+    icon.className = newTheme === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
+});
+function showAlert(msg) {
+    document.getElementById('alert-text').innerText = msg;
+    document.getElementById('alert-modal').style.display = 'flex';
+}
+function closeAlert() { document.getElementById('alert-modal').style.display = 'none'; }
+function toggleHelp(show) { document.getElementById('help-modal').style.display = show ? 'flex' : 'none'; }
+
+function reIndex() {
+    document.querySelectorAll('.card').forEach((card, i) => {
+        card.querySelector('.q-number').innerText = "QUESTION N°" + (i + 1);
+    });
+}
+function addQuestion(data = { q: '', opt: '', ans: '' }) {
+    const list = document.getElementById('questions-list');
+    const div = document.createElement('div');
+    div.className = 'card';
+
+    const optionsArray = data.opt ? data.opt.split(';').map(s => s.trim()).filter(s => s !== "") : ['', '', ''];
+    const answersArray = data.ans ? data.ans.split(';').map(s => s.trim()) : [];
+
+    div.innerHTML = `
+        <button class="remove-btn" onclick="this.parentElement.remove(); reIndex();">Supprimer</button>
+        <span class="q-number"></span>
+        
+        <input type="text" class="inp-q" value="${data.q}" placeholder="Ex: Quelle est la capitale de la France ?" style="margin-bottom:15px;">
+        
+        <label>Options (Cochez la ou les bonne(s) réponse(s))</label>
+        <div class="options-container" style="display: flex; flex-direction: column; gap: 8px; margin-top: 5px;">
+            ${optionsArray.map(opt => `
+                <div class="option-row" style="display: flex; align-items: center; gap: 10px;">
+                    <div class="checkbox-group">
+                     <input type="checkbox" class="opt-check" ${answersArray.includes(opt) && opt !== '' ? 'checked' : ''} 
+                     onchange="syncAnswers(this)">
+                    </div>
+                    <input type="text" class="inp-opt-individual" value="${opt}" 
+                           placeholder="Saisissez un choix..." style="flex: 1; margin: 0;" oninput="syncAnswers(this)">
+                    <button type="button" onclick="this.parentElement.remove(); syncAnswers(this);" 
+                            style="background:none; border:none; color:#ef4444; cursor:pointer; padding:5px; font-size:1.2rem;">&times;</button>
+                </div>
+            `).join('')}
+        </div>
+        
+        <button type="button" class="btn-outline" style="margin-top: 10px; font-size: 0.85em; padding: 6px 12px; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 6px; cursor: pointer;" 
+                onclick="addOptionRow(this)">+ Ajouter un choix</button>
+
+        <input type="hidden" class="inp-o" value="${data.opt}">
+        <input type="hidden" class="inp-a" value="${data.ans}">
+    `;
+
+    list.appendChild(div);
+    reIndex();
+    const lastInput = div.querySelector('.inp-opt-individual');
+    if (lastInput) syncAnswers(lastInput);
+}
+
+function handlePaste() {
+    const raw = document.getElementById('raw-input').value;
+    if (!raw.trim()) return showAlert("Veuillez coller des données avant d'importer !");
+
+    const lines = raw.split(/\r?\n/);
+    lines.forEach(line => {
+        // On sépare par tabulation ou par pipe |, puis on nettoie les espaces
+        let parts = line.split(/[|\t]/).map(s => s.trim()).filter(s => s !== "");
+
+        if (parts.length >= 3) {
+            const firstCell = parts[0].toLowerCase();
+            // IGNORE les lignes de titres ou de séparation Markdown
+            if (firstCell.includes("question") || firstCell.startsWith("---") || firstCell.startsWith("===")) {
+                return;
+            }
+            addQuestion({ q: parts[0], opt: parts[1], ans: parts[2] });
+        }
+    });
+    document.getElementById('raw-input').value = '';
+}
+
+function handleCSV(input) {
+    Papa.parse(input.files[0], {
+        header: true, skipEmptyLines: true, complete: res => {
+            res.data.forEach(row => {
+                let q = row.Question || row.question || "";
+                let o = row.Options || row.options || "";
+                let a = row.Reponse || row.reponse || "";
+                if (q) addQuestion({ q, opt: o, ans: a });
+            });
+        }
+    });
+}
+
+function getQuestions() {
+    const qs = [];
+    let hasError = false;
+    let errorMsg = "";
+
+    document.querySelectorAll('.card').forEach((card, index) => {
+        const q = card.querySelector('.inp-q').value.trim();
+        const o = card.querySelector('.inp-o').value.trim();
+        const a = card.querySelector('.inp-a').value.trim();
+        const qNum = index + 1;
+
+        if (q) {
+            // Vérification : y a-t-il des options ?
+            if (!o) {
+                hasError = true;
+                errorMsg = `La Question n°${qNum} n'a pas de choix de réponse.`;
+            }
+            // Vérification CRITIQUE : y a-t-il au moins une réponse cochée ?
+            else if (!a) {
+                hasError = true;
+                errorMsg = `Veuillez cocher au moins une bonne réponse pour la Question n°${qNum}.`;
+            }
+
+            qs.push({
+                question: q,
+                options: o.split(';').map(s => s.trim()).filter(s => s),
+                bonne_reponse: a.split(';').map(s => s.trim()).filter(s => s)
+            });
+        }
+    });
+
+    if (hasError) {
+        showAlert(errorMsg);
+        return []; // Retourne un tableau vide pour bloquer la suite
+    }
+
+    return qs;
+}
+
+
+function buildPlayerHtml(questions, themeChoice, shuffle, bgChoice, showCorr, passScore) {
+    const themes = {
+        azur: { bg: 'rgba(240, 247, 255, 0.95)', card: '#ffffff', primary: '#3b82f6', accent: '#1d4ed8', fallback: '#f0f9ff' },
+        emerald: { bg: 'rgba(240, 253, 244, 0.95)', card: '#ffffff', primary: '#10b981', accent: '#047857', fallback: '#f0fdf4' },
+        amber: { bg: 'rgba(255, 251, 235, 0.95)', card: '#ffffff', primary: '#f59e0b', accent: '#d97706', fallback: '#fffbeb' }
+    };
+    const bgImages = {
+        transport: "https://images.pexels.com/photos/2199293/pexels-photo-2199293.jpeg?auto=compress&cs=tinysrgb&w=1600",
+        logistique: "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&q=80&w=1600",
+        formation: "https://images.pexels.com/photos/267507/pexels-photo-267507.jpeg?auto=compress&cs=tinysrgb&w=1600",
+        abstrait: "https://images.pexels.com/photos/2310713/pexels-photo-2310713.jpeg?auto=compress&cs=tinysrgb&w=1600"
+    };
+    const selTheme = themes[themeChoice];
+    const selectedImg = bgImages[bgChoice];
+    let bodyStyle = bgChoice !== "none" && selectedImg ? `background: linear-gradient(rgba(15, 23, 42, 0.7), rgba(15, 23, 42, 0.7)), url('${selectedImg}') no-repeat center center fixed; background-size: cover;` : `background-color: ${selTheme.fallback};`;
+
+    const safePassScore = (passScore !== undefined && passScore !== "" && !isNaN(passScore)) ? parseInt(passScore) : 0;
+
+    return '<html><head><meta charset="UTF-8"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">' +
+        '<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"><\/script>' +
+        '<script src="SCORM_API_wrapper.js"><\/script>' +
+        '<style>' +
+        'body { font-family: sans-serif; margin: 0; padding: 20px; min-height: 100vh; display: flex; align-items: center; justify-content: center; ' + bodyStyle + ' box-sizing: border-box; }' +
+        '.quiz-card { background: ' + selTheme.card + '; padding: 35px; border-radius: 24px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); width: 100%; max-width: 650px; text-align: center; max-height: 90vh; overflow-y: auto; position: relative; }' +
+        '.type-badge { display: inline-block; padding: 6px 16px; border-radius: 30px; font-size: 0.85rem; font-weight: bold; background: ' + selTheme.bg + '; color: ' + selTheme.primary + '; margin-bottom: 25px; border: 1px solid ' + selTheme.primary + '; }' +
+        '.progress { height: 8px; background: #e2e8f0; border-radius: 10px; margin-bottom: 25px; overflow: hidden; }' +
+        '.progress-bar { height: 100%; background: ' + selTheme.primary + '; width: 0%; transition: 0.4s; }' +
+        'h2 { margin-bottom: 10px; color: #1e293b; font-size: 1.5rem; }' +
+        '.opt { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 16px; margin: 10px 0; border: 2px solid #f1f5f9; border-radius: 14px; background: white; cursor: pointer; font-size: 1.05rem; text-align: left; transition: 0.2s; color: #334155; font-weight: 500; }' +
+        '.opt:hover { border-color: ' + selTheme.primary + '; background: #f8fafc; }' +
+        '.selected { border-color: ' + selTheme.primary + '; background: ' + selTheme.bg + '; }' +
+        '.correct-ui { border-color: #10b981 !important; background-color: #f0fdf4 !important; color: #10b981 !important; }' +
+        '.wrong-ui { border-color: #ef4444 !important; background-color: #fef2f2 !important; color: #ef4444 !important; }' +
+        '.btn-val { background: ' + selTheme.accent + '; color: white; border: none; padding: 18px; border-radius: 14px; width: 100%; cursor: pointer; font-weight: bold; margin-top: 20px; font-size: 1.1rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }' +
+        '.status-icon { display:none; margin-left:10px; font-size: 1.3rem; }' +
+        '.final-perc { font-size: 5.5rem; font-weight: 900; margin: 10px 0; }' +
+        '.final-raw { font-size: 1.4rem; font-weight: 700; color: #64748b; margin-bottom: 5px; }' +
+        '.threshold-text { font-size: 0.9rem; color: #94a3b8; margin-bottom: 20px; font-style: italic; }' +
+        '.status-msg { font-size: 1.8rem; font-weight: bold; display: inline-block; margin-top: 10px; }' +
+        '.corr-box { text-align: left; margin-top: 20px; padding-top: 20px; border-top: 2px solid #f1f5f9; }' +
+        '.corr-item { margin-bottom: 10px; padding: 12px; border-radius: 10px; background: #f8fafc; font-size: 0.95rem; border-left: 4px solid #e2e8f0; }' +
+        '</style></head><body>' +
+        '<div class="quiz-card" id="box"><div class="progress"><div class="progress-bar" id="pb"></div></div><h2 id="q"></h2><div id="type-box" class="type-badge"></div><div id="choices"></div><button id="v-btn" class="btn-val" style="display:none" onclick="validateMulti()">Valider la réponse</button></div>' +
+        '<script>' +
+
+        //'let data = ' + JSON.stringify(questions) + ';' +
+        'let rawData = ' + JSON.stringify(questions) + ';' +
+        'let data = Array.isArray(rawData) ? rawData : (rawData.quiz ? rawData.quiz : []);' +
+
+        // Normalisation : on s'assure que bonne_reponse est toujours un tableau pour la logique interne
+        //'data.forEach(q => { if(!Array.isArray(q.bonne_reponse)) q.bonne_reponse = [q.bonne_reponse]; });' +
+        //'if(' + shuffle + ') { data = data.sort(() => Math.random() - 0.5); data.forEach(q => q.options = q.options.sort(() => Math.random() - 0.5)); }' +
+
+        'data.forEach(q => { if(!Array.isArray(q.bonne_reponse)) q.bonne_reponse = [q.bonne_reponse]; });' +
+        'if(' + shuffle + ') { data = data.sort(() => Math.random() - 0.5); data.forEach(q => q.options = q.options.sort(() => Math.random() - 0.5)); }' +
+        'let cur = 0, score = 0, userSel = [];' +
+        'window.onload = function() { pipwerks.SCORM.init(); };' +
+        'window.onunload = function() { pipwerks.SCORM.quit(); };' +
+
+        'function render() {' +
+        '  if(cur >= data.length) {' +
+        '    let f = Math.round((score/data.length)*100);' +
+        '    let threshold = ' + safePassScore + ';' +
+        '    let isPassed = f >= threshold;' +
+        '    if(typeof pipwerks !== "undefined" && pipwerks.SCORM.connection.isOpen) {' +
+        '      pipwerks.SCORM.set("cmi.core.score.raw", f);' +
+        '      pipwerks.SCORM.set("cmi.core.lesson_status", isPassed ? "passed" : "failed");' +
+        '      pipwerks.SCORM.quit();' +
+        '    }' +
+        '    if(isPassed && threshold > 0) { confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } }); }' +
+        '    let color = (threshold === 0) ? "' + selTheme.primary + '" : (isPassed ? "#10b981" : "#f59e0b");' +
+        '    let msg = threshold === 0 ? "✨ Activité Terminée" : (isPassed ? "✅ Score Validé" : "⌛ Objectif non atteint");' +
+        '    let subMsg = threshold === 0 ? "Merci d\'avoir complété ce questionnaire !" : (isPassed ? "Excellent travail !" : "Encore un effort pour atteindre le seuil de validation.");' +
+        '    let thresholdHTML = threshold > 0 ? "<div class=\'threshold-text\'>Seuil requis pour validation : " + threshold + "%</div>" : "";' +
+        '    let resHTML = "<div class=\'final-perc\' style=\'color:" + color + "\'>" + f + "%</div>" + ' +
+        '      "<div class=\'final-raw\'>Bonnes réponses : " + score + " / " + data.length + "</div>" + thresholdHTML + ' +
+        '      "<div class=\'status-msg\' style=\'color:" + color + "\'>" + msg + "</div><p style=\'color:#64748b\'>" + subMsg + "</p>";' +
+        '    if(' + showCorr + ') {' +
+        '      resHTML += "<div class=\'corr-box\'><h3>Correction :</h3>";' +
+        '      data.forEach((q, i) => {' +
+        '         resHTML += "<div class=\'corr-item\'><strong>" + (i+1) + ". " + q.question + "</strong><br><span style=\'color:#10b981\'>Réponse : " + q.bonne_reponse.join(", ") + "</span></div>";' +
+        '      });' +
+        '      resHTML += "</div>";' +
+        '    }' +
+        '    document.getElementById("box").innerHTML = resHTML;' +
+        '    return;' +
+        '  }' +
+        '  const q = data[cur]; if(!q) return; userSel = []; ' +
+        '  document.getElementById("pb").style.width = (cur/data.length)*100 + "%";' +
+        '  document.getElementById("type-box").innerText = q.bonne_reponse.length > 1 ? "Plusieurs réponses possibles" : "Une seule réponse possible";' +
+        '  document.getElementById("q").innerText = q.question; ' +
+        '  document.getElementById("v-btn").style.display = q.bonne_reponse.length > 1 ? "block" : "none";' +
+        '  const container = document.getElementById("choices"); container.innerHTML = "";' +
+        '  q.options.forEach(o => {' +
+        '    const b = document.createElement("button"); b.className = "opt"; b.innerHTML = "<span>" + o + "</span><i class=\'fas status-icon\'></i>";' +
+        '    b.onclick = () => {' +
+        '      if(q.bonne_reponse.length === 1) { userSel = [o]; submitAnswer(); }' +
+        '      else { b.classList.toggle("selected"); if(userSel.includes(o)) userSel = userSel.filter(x=>x!==o); else userSel.push(o); }' +
+        '    };' +
+        '    container.appendChild(b);' +
+        '  });' +
+        '}' +
+        'window.validateMulti = function() { if(userSel.length > 0) submitAnswer(); };' +
+        'function submitAnswer() {' +
+        '  const q = data[cur];' +
+        '  const isPerfect = (q.bonne_reponse.length === userSel.length && userSel.every(v => q.bonne_reponse.includes(v)));' +
+        '  if(isPerfect) score++;' +
+        '  document.querySelectorAll(".opt").forEach(btn => {' +
+        '    btn.style.pointerEvents = "none";' +
+        '    const txt = btn.querySelector("span").innerText;' +
+        '    const icon = btn.querySelector(".status-icon");' +
+        '    if(userSel.includes(txt)) {' +
+        '      icon.style.display = "inline";' +
+        '      if(q.bonne_reponse.includes(txt)) {' +
+        '        btn.classList.add("correct-ui"); icon.className = "fas fa-check-circle status-icon";' +
+        '      } else {' +
+        '        btn.classList.add("wrong-ui"); icon.className = "fas fa-times-circle status-icon";' +
+        '      }' +
+        '    }' +
+        '  });' +
+        '  document.getElementById("v-btn").style.display = "none";' +
+        '  setTimeout(() => { cur++; render(); }, 1800);' +
+        '}' +
+        'render(); <\/script></body></html>';
+}
+
+function openPreview() {
+    const qs = getQuestions();
+
+    // MODIFICATION ICI : Au lieu de juste "quitter", on affiche l'alerte
+    if (qs.length === 0) {
+        const alertModal = document.getElementById('alert-modal');
+        const alertText = document.getElementById('alert-text');
+
+        if (alertModal && alertText) {
+            alertText.innerText = "Aucune question à afficher dans l'aperçu !";
+            alertModal.style.display = 'flex';
+        }
+        return; // On arrête là pour ne pas ouvrir l'aperçu vide
+    }
+
+    // Si on arrive ici, c'est que qs.length > 0 (Tout est OK)
+    const scoreVal = document.getElementById('display-mode').value;
+
+    document.getElementById('preview-frame').srcdoc = buildPlayerHtml(
+        qs,
+        document.getElementById('quiz-theme').value,
+        document.getElementById('random').checked,
+        document.getElementById('bg-choice').value,
+        document.getElementById('show-answers').checked,
+        scoreVal
+    );
+
+    document.getElementById('preview-modal').style.display = 'flex';
+}
+function closePreview() {
+    document.getElementById('preview-modal').style.display = 'none';
+    document.getElementById('preview-frame').srcdoc = "";
+}
+
+async function generateScorm() {
+    const qs = getQuestions();
+
+    // MODIFICATION ICI : On affiche l'alerte si aucune question n'est trouvée
+    if (qs.length === 0) {
+        const alertModal = document.getElementById('alert-modal');
+        const alertText = document.getElementById('alert-text');
+
+        if (alertModal && alertText) {
+            alertText.innerText = "Impossible de générer le SCORM : aucune question n'a été ajoutée !";
+            alertModal.style.display = 'flex';
+        }
+        return;
+    }
+
+    // Le reste du code reste identique
+    const zip = new JSZip();
+    const baseName = document.getElementById('export-name').value || "quiz_aftral";
+    const timestamp = getTimestamp();
+    const finalName = `${baseName}_${timestamp}`;
+
+    // Manifeste SCORM
+    zip.file("imsmanifest.xml", '<?xml version="1.0" encoding="UTF-8"?><manifest identifier="MANIFEST-1" version="1.2" xmlns="http://www.imsproject.org/xsd/imscp_rootv1p1p2"><organizations default="ORG-1"><organization identifier="ORG-1"><title>' + finalName + '</title><item identifierRef="RES-1" identifier="ITEM-1"><title>Quiz</title></item></organization></organizations><resources><resource identifier="RES-1" type="webcontent" href="index.html"><file href="index.html"/><file href="SCORM_API_wrapper.js"/></resource></resources></manifest>');
+
+    // Génération du fichier index.html
+    zip.file("index.html", buildPlayerHtml(
+        qs,
+        document.getElementById('quiz-theme').value,
+        document.getElementById('random').checked,
+        document.getElementById('bg-choice').value,
+        document.getElementById('show-answers').checked,
+        document.getElementById('pass-score').value
+    ));
+
+    // Inclusion de la bibliothèque SCORM
+    zip.file("SCORM_API_wrapper.js", 'var pipwerks={SCORM:{version:"1.2",handleCompletionStatus:!0,handleExitMode:!0,API:{handle:null,isFound:!1},connection:{isOpen:!1},init:function(){return this.connection.isOpen=this.API.getHandle()?this.connection.isOpen||"true"===this.API.getHandle().LMSInitialize(""):!1,this.connection.isOpen},get:function(a){return this.connection.isOpen?String(this.API.getHandle().LMSGetValue(a)):null},set:function(a,b){return this.connection.isOpen?"true"===String(this.API.getHandle().LMSSetValue(a,b)):!1},save:function(){return this.connection.isOpen?"true"===String(this.API.getHandle().LMSCommit("")):!1},quit:function(){return this.connection.isOpen?this.API.getHandle().LMSFinish(""):!1},API:{getHandle:function(){var a=window;if(a.API)return a.API;if(a.parent&&a.parent!==a)return this.find(a.parent);return null},find:function(a){var b=0;while(!a.API&&a.parent&&a.parent!==a&&b<10){b++;a=a.parent}return a.API}}}};');
+
+    // Génération et téléchargement du ZIP
+    const blob = await zip.generateAsync({ type: "blob" });
+    saveAs(blob, finalName + ".zip");
+
+    // Cette alerte utilise aussi le nouveau design (40px padding)
+    showAlert("Votre package SCORM est prêt pour le LMS ! 🚀");
+}
+function downloadExampleCSV() {
+    const rows = [["Question", "Options", "Reponse"], ["Quelle est la capitale de la France ?", "Paris ; Lyon ; Marseille", "Paris"], ["Quels sont les fruits rouges ? (Multi)", "Fraise ; Cerise ; Banane ; Kiwi", "Fraise ; Cerise"]];
+    const csvContent = "\uFEFF" + rows.map(e => e.map(cell => `"${cell}"`).join(";")).join("\n");
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "exemple_quiz.csv";
+    link.click();
+}
+
+function prepareChatGPT() {
+    const subject = document.getElementById('ai-subject').value.trim();
+    const count = document.getElementById('ai-count').value;
+    if (!subject) return showAlert("Veuillez saisir un sujet !");
+
+    const prompt = `Génère ${count} questions de quiz sur le sujet suivant : "${subject}".
+Donne-moi le résultat uniquement sous forme de tableau SANS texte avant ni après ni titre.
+Le tableau doit avoir 3 colonnes exactes. il peut parfois y avoir plusieurs réponses :
+1. Question
+2. Options (toutes les options séparées par un point-virgule ;)
+3. Réponse correcte (le texte exact de la bonne réponse)`;
+
+    navigator.clipboard.writeText(prompt).then(() => {
+        showAlert("Prompt copié ! ChatGPT va s'ouvrir automatiquement.");
+        const newWindow = window.open("https://chat.openai.com/chat", "_blank");
+        newWindow.focus();
+        // On ne peut PAS coller automatiquement dans le champ ChatGPT
+        // Mais le texte est déjà copié, l'utilisateur peut juste faire CTRL+V
+    }).catch(err => {
+        showAlert("Erreur lors de la copie. Essayez de copier manuellement.");
+    });
+}
+
+function getTimestamp() {
+    const now = new Date();
+
+    const pad = n => n.toString().padStart(2, "0");
+
+    const year = now.getFullYear() % 100;
+    const month = pad(now.getMonth() + 1);
+    const day = pad(now.getDate());
+    const hours = pad(now.getHours());
+    const minutes = pad(now.getMinutes());
+    const seconds = pad(now.getSeconds());
+
+    return `${year}${month}${day}_${hours}${minutes}${seconds}`;
+}
+
+function exportToCSV() {
+    const qs = getQuestions();
+
+    // MODIFICATION ICI : On force l'affichage de l'alerte si aucune question n'est présente
+    if (qs.length === 0) {
+        const alertModal = document.getElementById('alert-modal');
+        const alertText = document.getElementById('alert-text');
+
+        if (alertModal && alertText) {
+            alertText.innerText = "Impossible d'exporter en CSV : aucune question n'a été ajoutée !";
+            alertModal.style.display = 'flex';
+        }
+        return;
+    }
+
+    // En-têtes du CSV
+    let csvRows = [["Question", "Options", "Reponse"]];
+
+    // Transformation des objets questions en lignes CSV
+    qs.forEach(q => {
+        csvRows.push([
+            q.question,
+            q.options.join(" ; "),
+            q.bonne_reponse.join(" ; ")
+        ]);
+    });
+
+    // Construction du contenu avec BOM pour le support des accents dans Excel
+    const csvContent = "\uFEFF" + csvRows.map(row =>
+        row.map(cell => `"${cell.replace(/"/g, '""')}"`).join(";")
+    ).join("\n");
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    const baseName = document.getElementById('export-name').value || "mon_questionnaire";
+    const timestamp = getTimestamp();
+    link.download = `${baseName}_${timestamp}.csv`;
+
+    link.href = URL.createObjectURL(blob);
+    link.click();
+
+    // Cette alerte profitera aussi du nouveau padding de 40px
+    showAlert("CSV exporté avec succès ! 📄");
+}
+
+// Initialisation de la gestion du Glisser/Déposer au chargement
+window.addEventListener('load', () => {
+    const dropZone = document.getElementById('raw-input');
+
+    // Empêcher le comportement par défaut
+    ['dragover', 'drop'].forEach(evt => {
+        window.addEventListener(evt, e => e.preventDefault());
+        dropZone.addEventListener(evt, e => e.preventDefault());
+    });
+
+    // Effet visuel
+    dropZone.addEventListener('dragover', () => dropZone.style.borderColor = '#3b82f6');
+    dropZone.addEventListener('dragleave', () => dropZone.style.borderColor = '#e2e8f0');
+
+    // Gestion du dépôt
+    dropZone.addEventListener('drop', (e) => {
+        dropZone.style.borderColor = '#e2e8f0';
+        const file = e.dataTransfer.files[0];
+        if (!file) return;
+
+        const fileName = file.name.toLowerCase();
+        const reader = new FileReader();
+
+        reader.onload = (event) => {
+            const content = event.target.result;
+
+            if (fileName.endsWith('.json')) {
+                // TRAITEMENT JSON
+                try {
+                    const json = JSON.parse(content);
+                    parseBeedeezJson(json);
+                } catch (err) {
+                    showAlert("Erreur JSON : " + err.message);
+                }
+            }
+            else if (fileName.endsWith('.csv')) {
+                // TRAITEMENT CSV (Utilise PapaParse déjà présent dans votre projet)
+                Papa.parse(content, {
+                    header: true,
+                    skipEmptyLines: true,
+                    complete: (res) => {
+                        if (res.data.length > 0) {
+                            res.data.forEach(row => {
+                                let q = row.Question || row.question || "";
+                                let o = row.Options || row.options || "";
+                                let a = row.Reponse || row.reponse || "";
+                                if (q) addQuestion({ q, opt: o, ans: a });
+                            });
+                            showAlert(res.data.length + " questions importées du CSV !");
+                        } else {
+                            showAlert("Le fichier CSV est vide ou mal formaté.");
+                        }
+                    }
+                });
+            }
+            else {
+                showAlert("Format non supporté. Déposez un fichier .json ou .csv");
+            }
+        };
+
+        reader.readAsText(file);
+    });
+});
+
+
+function exportToJSON() {
+    // Utilisation de la sécurité centralisée
+    const qsData = getQuestions();
+
+    // MODIFICATION : Si aucune question, on affiche la popup d'alerte
+    if (qsData.length === 0) {
+        const alertModal = document.getElementById('alert-modal');
+        const alertText = document.getElementById('alert-text');
+
+        if (alertModal && alertText) {
+            alertText.innerText = "Impossible d'exporter en JSON : aucune question n'a été ajoutée !";
+            alertModal.style.display = 'flex';
+        }
+        return;
+    }
+
+    // On re-formate pour correspondre à votre structure JSON habituelle
+    const formattedQuizzes = qsData.map(item => ({
+        question: item.question,
+        choix: item.options,
+        reponses_correctes: item.bonne_reponse
+    }));
+
+    const exportData = {
+        title: document.getElementById('export-name').value || "export_quiz",
+        quizzes: formattedQuizzes
+    };
+
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    const link = document.createElement("a");
+
+    const baseName = document.getElementById('export-name').value || "mon_questionnaire";
+    const timestamp = getTimestamp();
+    link.download = `${baseName}_${timestamp}.json`;
+
+    link.href = URL.createObjectURL(blob);
+    link.click();
+
+    // L'alerte de succès profite aussi du nouveau design
+    showAlert("JSON exporté avec succès ! 🤖");
+}
+
+// --- 1. FONCTIONS DE BASE ---
+
+function reIndex() {
+    document.querySelectorAll('.card').forEach((card, i) => {
+        card.querySelector('.q-number').innerText = "QUESTION N°" + (i + 1);
+    });
+}
+
+
+// --- 2. LOGIQUE D'IMPORTATION (CORRIGÉE) ---
+function parseBeedeezJson(data) {
+    handleJsonImport(data);
+}
+
+function handleJsonImport(rawData) {
+    let json;
+    try {
+        json = typeof rawData === 'string' ? JSON.parse(rawData) : rawData;
+    } catch (e) {
+        alert("Erreur : Le fichier JSON est mal formé.");
+        return;
+    }
+
+    const list = document.getElementById('questions-list');
+    list.innerHTML = ""; // On vide tout
+    let count = 0;
+
+    // Détection du format (Standard ou Beedeez)
+    if (json.quizzes && Array.isArray(json.quizzes)) {
+        json.quizzes.forEach(item => {
+            addQuestion({
+                q: item.question || "",
+                opt: Array.isArray(item.choix) ? item.choix.join(' ; ') : "",
+                ans: Array.isArray(item.reponses_correctes) ? item.reponses_correctes.join(' ; ') : ""
+            });
+            count++;
+        });
+    } else if (json.chapters) {
+        json.chapters.forEach(chapter => {
+            if (chapter.quizz && chapter.quizz.questions) {
+                chapter.quizz.questions.forEach(qObj => {
+                    let opts = qObj.choices ? qObj.choices.map(c => c.name).join(' ; ') : "";
+                    let corrects = qObj.choices ? qObj.choices.filter(c => c.good).map(c => c.name).join(' ; ') : "";
+                    addQuestion({ q: qObj.title, opt: opts, ans: corrects });
+                    count++;
+                });
+            }
+        });
+    }
+
+    if (count > 0) {
+        document.getElementById('export-name').value = (json.title || "quiz").replace(/\s+/g, '_');
+        showAlert(count + " questions chargées !");
+    } else {
+        showAlert("Aucune question trouvée dans le fichier.");
+    }
+}
+
+// Écouteur pour le chargement de fichier
+document.getElementById('file-input').addEventListener('change', function (e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => handleJsonImport(event.target.result);
+    reader.readAsText(file);
+});
+
+function updateThresholdLabel(val) {
+    const info = document.getElementById('threshold-info');
+    const score = parseInt(val);
+
+    // Si vide, nul ou égal à 0
+    if (!val || isNaN(score) || score <= 0) {
+        info.innerText = "(Aucun seuil de réussite)";
+        info.style.color = "#64748b"; // Gris par défaut
+        info.style.fontWeight = "normal";
+    } else {
+        info.innerText = "(Seuil actuel : " + val + "%)";
+        info.style.color = "#3b82f6"; // Bleu quand > 0
+        info.style.fontWeight = "bold"; // Optionnel : met en gras pour plus de visibilité
+    }
+}
+
+function updateCheckboxes(inputEl, checkedValues = []) {
+    const card = inputEl.closest('.card');
+    const checkboxArea = card.querySelector('.checkbox-area');
+    const hiddenAnsInput = card.querySelector('.inp-a');
+
+    // Récupérer les options
+    const options = inputEl.value.split(';').map(s => s.trim()).filter(s => s !== "");
+
+    // Si on n'a pas de checkedValues (cas de la frappe manuelle), on garde les anciennes
+    if (checkedValues.length === 0) {
+        card.querySelectorAll('.opt-check:checked').forEach(cb => checkedValues.push(cb.value));
+    }
+
+    checkboxArea.innerHTML = ""; // Vider
+
+    options.forEach(opt => {
+        const isChecked = checkedValues.includes(opt);
+        const wrapper = document.createElement('label');
+        wrapper.style = "display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 0.9em;";
+
+        const cb = document.createElement('input');
+        cb.type = "checkbox";
+        cb.className = "opt-check";
+        cb.value = opt;
+        cb.checked = isChecked;
+
+        // Quand on coche, on met à jour le champ caché inp-a
+        cb.onchange = () => {
+            const selected = [];
+            card.querySelectorAll('.opt-check:checked').forEach(c => selected.push(c.value));
+            hiddenAnsInput.value = selected.join(' ; ');
+        };
+
+        wrapper.appendChild(cb);
+        wrapper.appendChild(document.createTextNode(opt));
+        checkboxArea.appendChild(wrapper);
+    });
+
+    // Mettre à jour le champ caché initialement
+    const selected = [];
+    card.querySelectorAll('.opt-check:checked').forEach(c => selected.push(c.value));
+    hiddenAnsInput.value = selected.join(' ; ');
+}
+
+// Synchronise les cases cochées et les textes vers les champs cachés
+function syncAnswers(el) {
+    const card = el.closest('.card');
+    const rows = card.querySelectorAll('.option-row');
+
+    let allOptions = [];
+    let correctOptions = [];
+
+    rows.forEach(row => {
+        const text = row.querySelector('.inp-opt-individual').value.trim();
+        const isChecked = row.querySelector('.opt-check').checked;
+
+        if (text !== "") {
+            allOptions.push(text);
+            if (isChecked) correctOptions.push(text);
+        }
+    });
+
+    // Mise à jour des champs cachés pour la compatibilité avec getQuestions()
+    card.querySelector('.inp-o').value = allOptions.join(' ; ');
+    card.querySelector('.inp-a').value = correctOptions.join(' ; ');
+}
+
+// Permet d'ajouter dynamiquement une ligne d'option supplémentaire
+function addOptionRow(btn) {
+    const container = btn.previousElementSibling;
+    const div = document.createElement('div');
+    div.className = 'option-row';
+    div.style = "display: flex; align-items: center; gap: 10px; margin-top: 8px;";
+    div.innerHTML = `
+        <div class="checkbox-group">
+            <input type="checkbox" class="opt-check" onchange="syncAnswers(this)">
+        </div>
+        <input type="text" class="inp-opt-individual" placeholder="Nouveau choix..." style="flex: 1; margin: 0;" oninput="syncAnswers(this)">
+        <button type="button" onclick="this.parentElement.remove(); syncAnswers(this);" 
+                style="background:none; border:none; color:#ef4444; cursor:pointer; padding:5px; font-size:1.2rem;">&times;</button>
+    `;
+    container.appendChild(div);
+}
+
+function syncAnswers(el) {
+    const card = el.closest('.card');
+    if (!card) return;
+
+    const rows = card.querySelectorAll('.option-row');
+    let allOptions = [];
+    let correctOptions = [];
+
+    rows.forEach(row => {
+        const text = row.querySelector('.inp-opt-individual').value.trim();
+        const isChecked = row.querySelector('.opt-check').checked;
+
+        if (text !== "") {
+            allOptions.push(text);
+            if (isChecked) correctOptions.push(text);
+        }
+    });
+
+    // Met à jour les inputs cachés que getQuestions() lit
+    card.querySelector('.inp-o').value = allOptions.join(' ; ');
+    card.querySelector('.inp-a').value = correctOptions.join(' ; ');
+}

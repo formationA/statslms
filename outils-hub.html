@@ -1,0 +1,217 @@
+﻿<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Outils de Création - LMS</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
+            --accent: #38bdf8;
+            --accent-hover: #7dd3fc;
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+        }
+
+        /* --- Navbar --- */
+        .navbar {
+            display: flex;
+            align-items: center;
+            padding: 15px 30px;
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-back {
+            color: var(--accent);
+            text-decoration: none;
+            margin-right: 20px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: opacity 0.3s;
+        }
+
+            .nav-back:hover {
+                opacity: 0.8;
+            }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 60px 20px;
+        }
+
+        /* --- Grille des Outils --- */
+        .launcher-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            /* Hauteur augmentée pour compenser l'absence de boutons */
+            padding: 50px 40px;
+            transition: var(--transition);
+            cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            min-height: 180px;
+            justify-content: center;
+        }
+
+            .card:hover {
+                transform: translateY(-8px);
+                border-color: var(--accent);
+                box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+            }
+
+        .icon-box {
+            width: 55px;
+            height: 55px;
+            background: rgba(56, 189, 248, 0.1);
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+            color: var(--accent);
+            font-size: 1.6rem;
+            transition: var(--transition);
+        }
+
+        .card:hover .icon-box {
+            background: var(--accent);
+            color: var(--bg-color);
+        }
+
+        .card h3 {
+            margin: 0 0 12px 0;
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+
+        .card p {
+            color: var(--text-dim);
+            line-height: 1.6;
+            margin: 0;
+            font-size: 1rem;
+            flex-grow: 1;
+        }
+
+        .badge {
+            position: absolute;
+            top: 25px;
+            right: 25px;
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            padding: 4px 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            color: var(--text-dim);
+            letter-spacing: 0.5px;
+        }
+
+        /* Cas particulier pour les liens de téléchargement directs */
+        .download-links {
+            margin-top: 15px;
+            display: flex;
+            gap: 15px;
+        }
+
+            .download-links a {
+                color: var(--accent);
+                text-decoration: none;
+                font-size: 0.85rem;
+                font-weight: 600;
+            }
+
+                .download-links a:hover {
+                    text-decoration: underline;
+                }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="index.html" class="nav-back">
+            <i class="fas fa-chevron-left"></i> Retour
+        </a>
+        <h1 style="font-size: 1.1rem; margin: 0; font-weight: 500;">Outils de Création & Production</h1>
+    </nav>
+
+    <div class="container">
+        <div class="launcher-grid">
+
+            <div class="card" onclick="location.href='outils/quiz-creator.html'">
+                <div class="badge">E-learning</div>
+                <div class="icon-box"><i class="fas fa-file-zipper"></i></div>
+                <h3>Quizz Creator</h3>
+                <p>Générez des packages SCORM 1.2/2004 interactifs pour vos évaluations sur le LMS.</p>
+            </div>
+
+            <div class="card" onclick="location.href='outils/reglement-validation.html'">
+                <div class="badge">Administratif</div>
+                <div class="icon-box"><i class="fas fa-file-signature"></i></div>
+                <h3>Règlement Intérieur</h3>
+                <p>Outil de validation et d'émargement numérique pour le règlement intérieur des centres.</p>
+            </div>
+
+            <div class="card" onclick="location.href='outils/descriptif-creator.html'">
+                <div class="badge">Design</div>
+                <div class="icon-box"><i class="fas fa-file-powerpoint"></i></div>
+                <h3>Descriptif Creator</h3>
+                <p>Concevez vos supports visuels et fiches descriptives de formation en quelques clics.</p>
+            </div>
+
+            <div class="card" onclick="location.href='outils/slides-creator.html'">
+                <div class="badge">Production</div>
+                <div class="icon-box"><i class="fas fa-desktop"></i></div>
+                <h3>Slides Creator</h3>
+                <p>Structurez vos présentations et exportez-les au format web ou PDF en quelques secondes.</p>
+            </div>
+
+            <div class="card" style="cursor: default;">
+                <div class="badge">Logiciels</div>
+                <div class="icon-box"><i class="fas fa-download"></i></div>
+                <h3>Utilitaires</h3>
+                <p>Téléchargez les outils officiels, dont le module d'enregistrement Aftral.</p>
+                <div class="download-links">
+                    <a href="logiciels/aftral-recorder.exe" download><i class="fas fa-file-download"></i> Recorder</a>
+                    <a href="logiciels/convert-html.html" download><i class="fas fa-file-pdf"></i> Convert HTML</a>
+                </div>
+            </div>
+
+            <div class="card" onclick="location.href='outils/assistant-pedago.html'">
+                <div class="badge">Méthodo</div>
+                <div class="icon-box"><i class="fas fa-lightbulb"></i></div>
+                <h3>Assistant Pédago</h3>
+                <p>Optimisez vos objectifs (Bloom) et structurez vos synopsis avant la mise en page.</p>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+</html>

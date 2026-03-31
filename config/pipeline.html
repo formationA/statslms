@@ -1,0 +1,252 @@
+﻿<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pipeline d'Intégration | LMS Ops</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0f172a;
+            --card: #1e293b;
+            --blue: #38bdf8;
+            --green: #10b981;
+            --orange: #fb923c;
+            --white: #f8fafc;
+            --muted: #94a3b8;
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', system-ui, sans-serif;
+            background-color: var(--bg);
+            color: var(--white);
+            line-height: 1.5;
+            padding-bottom: 80px;
+        }
+
+        .navbar {
+            padding: 1rem 2rem;
+            background: var(--card);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 25px auto;
+            padding: 0 20px;
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 25px;
+            border: 1px solid var(--border);
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            color: var(--blue);
+            font-size: 1.25rem;
+            margin: 0 0 15px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        h3 {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            color: var(--muted);
+            letter-spacing: 0.05em;
+            margin: 15px 0 8px 0;
+        }
+
+        .timeline {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+        }
+
+        .step {
+            text-align: center;
+            flex: 1;
+        }
+
+        .step-icon {
+            width: 50px;
+            height: 50px;
+            border: 2px solid var(--blue);
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto 10px;
+            font-size: 1.2rem;
+            background: rgba(56, 189, 248, 0.1);
+        }
+
+        .connector {
+            flex: 0.5;
+            height: 2px;
+            background: var(--border);
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+            .connector::after {
+                content: '➔';
+                position: absolute;
+                right: 0;
+                top: -10px;
+                color: var(--border);
+            }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 20px;
+        }
+
+        .code-block {
+            background: #000;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.8rem;
+            color: #e2e8f0;
+            border-left: 4px solid var(--blue);
+            overflow-x: auto;
+        }
+
+        .logic-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+            .logic-list li {
+                padding: 12px 0;
+                border-bottom: 1px solid var(--border);
+                display: flex;
+                gap: 15px;
+            }
+
+            .logic-list i {
+                color: var(--blue);
+                font-size: 1.1rem;
+                margin-top: 3px;
+            }
+
+        .pill {
+            padding: 2px 8px;
+            border-radius: 5px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .pill-g {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--green);
+            border: 1px solid var(--green);
+        }
+
+        .pill-r {
+            background: rgba(239, 68, 68, 0.15);
+            color: #f87171;
+            border: 1px solid #f87171;
+        }
+
+        .footer-note {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #1e293b;
+            border-top: 1px solid var(--border);
+            padding: 15px 20px;
+            text-align: center;
+            z-index: 1000;
+            box-shadow: 0 -4px 10px rgba(0,0,0,0.3);
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="../config-hub.html" style="color:var(--blue); text-decoration:none; margin-right:20px;"><i class="fas fa-chevron-left"></i> Retour</a>
+        <h1 style="font-size: 1.1rem; margin: 0; font-weight: 600;">Architecture de Flux : AMMON ➔ LMS</h1>
+    </nav>
+
+    <div class="container">
+        <div class="card">
+            <div class="timeline">
+                <div class="step"><div class="step-icon"><i class="fas fa-server"></i></div><b>AMMON</b><br><small>Source ERP</small></div>
+                <div class="connector"></div>
+                <div class="step"><div class="step-icon"><i class="fas fa-cloud-upload-alt"></i></div><b>Site FTP</b><br><small>Dépôt CSV</small></div>
+                <div class="connector"></div>
+                <div class="step"><div class="step-icon" style="border-color:var(--green);"><i class="fas fa-gears"></i></div><b>API Engine</b><br><small>Traitement</small></div>
+                <div class="connector"></div>
+                <div class="step"><div class="step-icon"><i class="fas fa-graduation-cap"></i></div><b>LMS</b><br><small>Production</small></div>
+            </div>
+            <div style="text-align: center; margin-top: 15px; padding-top: 15px; border-top: 1px solid var(--border);">
+                <span style="color:var(--muted); font-size: 0.9rem;">
+                    <i class="far fa-clock"></i> <b>Fréquence :</b> Toutes les heures entre 05:00 et 18:00
+                </span>
+            </div>
+        </div>
+
+        <div class="grid">
+            <div class="card">
+                <h2><i class="fas fa-file-csv"></i> Spécifications Fichiers</h2>
+                <h3>Apprenant.csv</h3>
+                <div class="code-block">
+                    NOM_STAGIAIRE; PRENOM_STAGIAIRE; EMAIL_STAGIAIRE; CODE_PRODUIT; CODE_SESSION; DATE_DEBUT_SESSION; DATE_FIN_SESSION; NOM_CENTRE; NOM_DO; <b style="color:var(--orange)">FLAG</b>; REF_STAGIAIRE; TENANT_ID; QUI_CREA;
+                </div>
+                <h3>Session_Formateur.csv</h3>
+                <div class="code-block">
+                    NOM_FORMATEUR; PRENOM_FORMATEUR; EMAIL_FORMATEUR; FORMATEUR_ID; CODE_PRODUIT; CODE_SESSION; SESSION_ID;
+                </div>
+            </div>
+
+            <div class="card">
+                <h2><i class="fas fa-list-check"></i> Règles Métier</h2>
+                <ul class="logic-list">
+                    <li>
+                        <i class="fas fa-flag"></i>
+                        <span>
+                            <b>Valeurs du FLAG :</b><br>
+                            <span class="pill pill-g">1</span> Inscription active | <span class="pill pill-r">0</span> Annulation
+                        </span>
+                    </li>
+                    <li>
+                        <i class="fas fa-paper-plane"></i>
+                        <span><b>Notifications :</b> Mail automatique envoyé aux apprenants la <u>veille</u> du démarrage.</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-user-clock"></i>
+                        <span>
+                            <b>Visibilité Formateur :</b><br>
+                            Accès à la session uniquement à sa date de planification.<br>
+                            <small style="color:var(--orange)"><i>Ex: Début session le 20, planifié le 23 -> Accès le 23.</i></small>
+                        </span>
+                    </li>
+                </ul>
+            </div>
+        </div> <div class="card" style="border-left: 4px solid var(--orange); text-align: center; margin-top: 20px;">
+            <span style="font-size: 1rem; color: var(--white);">
+                <i class="fas fa-sync-alt" style="color:var(--blue); margin-right: 10px;"></i>
+                <b>Note de mise à jour :</b> Pour renvoyer une donnée modifiée, il est impératif de <u>vider la date d'envoi LMS</u> dans l'ERP Ammon.
+            </span>
+        </div>
+    </div>
+
+    
+
+</body>
+</html>

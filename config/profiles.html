@@ -1,0 +1,351 @@
+﻿<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matrice des Droits LMS | AFTRAL</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --card-alt: #243146; /* Couleur pour l'alternance des lignes */
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
+            --blue: #38bdf8;
+            --accent: #c084fc;
+            --success: #22c55e;
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* --- Navbar --- */
+        .navbar {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            padding: 15px 30px;
+            background: rgba(30, 41, 59, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-sizing: border-box;
+            justify-content: space-between;
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .btn-back {
+            color: var(--blue);
+            text-decoration: none;
+            margin-right: 20px;
+            font-weight: 600;
+        }
+
+        /* --- Search Bar --- */
+        .search-container {
+            padding: 20px 30px 0 30px;
+            max-width: 1800px;
+            margin: 0 auto;
+            width: 98%;
+            box-sizing: border-box;
+        }
+
+        .search-wrapper {
+            position: relative;
+            max-width: 400px;
+        }
+
+            .search-wrapper i {
+                position: absolute;
+                left: 15px;
+                top: 50%;
+                transform: translateY(-50%);
+                color: var(--text-dim);
+            }
+
+        #roleSearch {
+            width: 100%;
+            padding: 12px 15px 12px 45px;
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: white;
+            font-size: 1rem;
+            outline: none;
+            transition: var(--transition);
+        }
+
+            #roleSearch:focus {
+                border-color: var(--blue);
+                box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+            }
+
+        /* --- Table Styling --- */
+        .container {
+            width: 98%;
+            max-width: 1800px;
+            margin: 0 auto;
+            padding: 20px 10px;
+        }
+
+        .matrix-wrapper {
+            background: var(--card-bg);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            overflow-x: auto;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+
+        th, td {
+            padding: 14px 10px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            text-align: center;
+            font-size: 0.95rem;
+        }
+
+        /* --- ALTERNANCE DES COULEURS (ZEBRA) --- */
+        tbody tr.data-row:nth-child(even) {
+            background-color: var(--card-alt);
+        }
+
+        tbody tr.data-row:hover {
+            background-color: rgba(56, 189, 248, 0.05); /* Effet au survol */
+        }
+
+        th:first-child, td:first-child {
+            position: sticky;
+            left: 0;
+            background: inherit; /* Prend la couleur de la ligne (zebra ou normale) */
+            text-align: left;
+            width: 300px;
+            z-index: 10;
+            font-weight: 600;
+            color: var(--text-main);
+            border-right: 3px solid var(--blue);
+            font-size: 0.9rem;
+        }
+
+        /* Correction pour le sticky en mode zebra */
+        tr.data-row:nth-child(even) td:first-child {
+            background-color: var(--card-alt);
+        }
+
+        tr.data-row:nth-child(odd) td:first-child {
+            background-color: var(--card-bg);
+        }
+
+        th {
+            background: rgba(15, 23, 42, 0.9);
+            color: var(--blue);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            height: 60px;
+            font-size: 0.8rem;
+        }
+
+        .has-perm {
+            color: var(--success);
+            font-weight: 900;
+            font-size: 1.4rem;
+        }
+
+        .no-perm {
+            color: rgba(255, 255, 255, 0.05);
+            font-weight: 400;
+        }
+
+        .special-perm {
+            color: var(--accent);
+            font-style: italic;
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+
+        .category-header {
+            background: rgba(56, 189, 248, 0.15) !important;
+            color: var(--blue) !important;
+            font-weight: 800 !important;
+            text-align: center !important;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+        }
+
+        .editable {
+            outline: none;
+        }
+
+        .edit-active .editable:focus {
+            background: rgba(56, 189, 248, 0.15);
+            box-shadow: inset 0 0 0 1px var(--blue);
+        }
+
+        #editStatus {
+            background: var(--success);
+            color: white;
+            display: none;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .hidden-row {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-left">
+            <a href="../config-hub.html" class="btn-back"><i class="fas fa-chevron-left"></i> Retour</a>
+            <h1 style="display:inline; font-size: 1.2rem; margin: 0;">Matrice des Droits LMS</h1>
+            <span id="editStatus" style="margin-left:15px;">ÉDITION ACTIVE</span>
+        </div>
+        <div id="lockToggle" title="Double-clic pour éditer" style="cursor: pointer; padding: 10px;">
+            <i class="fas fa-shield-alt" style="color: var(--blue); font-size: 1.4rem; opacity: 0.4;" id="shieldIcon"></i>
+        </div>
+    </nav>
+
+    <div class="search-container">
+        <div class="search-wrapper">
+            <i class="fas fa-search"></i>
+            <input type="text" id="roleSearch" placeholder="Rechercher une fonction (ex: visio, mdp...)">
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="matrix-wrapper">
+            <table id="permTable">
+                <thead>
+                    <tr>
+                        <th>FONCTIONS / DROITS</th>
+                        <th>Apprenant</th>
+                        <th>Formateur</th>
+                        <th>Gestionnaire</th>
+                        <th>Helpdesk</th>
+                        <th>Concepteur</th>
+                        <th>Superviseur</th>
+                        <th>P. Spécifique</th>
+                    </tr>
+                </thead>
+                <tbody id="matrixBody">
+                    <tr class="category-header"><td colspan="8">Gestion des Groupes & Sessions</td></tr>
+                    <tr class="data-row"><td>Groupe : ajouter / supprimer</td><td class="editable no-perm">X</td><td class="editable has-perm">X</td><td class="editable has-perm">X</td><td class="editable no-perm">X</td><td class="editable no-perm">X</td><td class="editable no-perm">X</td><td class="editable no-perm">X</td></tr>
+                    <tr class="data-row"><td>Groupe : consulter</td><td class="editable no-perm">X</td><td class="editable has-perm">X</td><td class="editable no-perm">X</td><td class="editable no-perm">X</td><td class="editable no-perm">X</td><td class="editable has-perm">X</td><td class="editable no-perm">X</td></tr>
+                    <tr class="data-row"><td>Paramètres session</td><td class="editable no-perm">X</td><td class="editable has-perm">X</td><td class="editable no-perm">X</td><td class="editable no-perm">X</td><td class="editable no-perm">X</td><td class="editable no-perm">X</td><td class="editable no-perm">X</td></tr>
+                    <tr class="data-row"><td>Bloquer / Débloquer</td><td class="editable no-perm">X</td><td class="editable has-perm">X</td><td class="editable no-perm">X</td><td class="editable has-perm">X</td><td class="editable has-perm">X</td><td class="editable has-perm">X</td><td class="editable no-perm">X</td></tr>
+                    <tr class="data-row"><td>Forcer achèvement</td><td class="editable no-perm">X</td><td class="editable has-perm">X</td><td class="editable no-perm">X</td><td class="editable has-perm">X</td><td class="editable has-perm">X</td><td class="editable has-perm">X</td><td class="editable no-perm">X</td></tr>
+
+                    <tr class="category-header"><td colspan="8">Visio & Ressources pédagogiques</td></tr>
+                    <tr class="data-row"><td>Visio création</td><td class="editable no-perm">X</td><td class="editable has-perm">X</td><td class="editable no-perm">X</td><td class="editable no-perm">X</td><td class="editable no-perm">X</td><td class="editable no-perm">X</td><td class="editable has-perm">X</td></tr>
+                    <tr class="data-row"><td>Visio consultation</td><td class="editable has-perm">X</td><td class="editable has-perm">X</td><td class="editable no-perm">X</td><td class="editable no-perm">X</td><td class="editable no-perm">X</td><td class="editable has-perm">X</td><td class="editable no-perm">X</td></tr>
+                    <tr class="data-row"><td>Compléments ressources</td><td class="editable no-perm">X</td><td class="editable has-perm">X</td><td class="editable no-perm">X</td><td class="editable no-perm">X</td><td class="editable no-perm">X</td><td class="editable special-perm">consultation</td><td class="editable no-perm">X</td></tr>
+                    <tr class="data-row"><td>Exercices</td><td class="editable has-perm">X</td><td class="editable has-perm">X</td><td class="editable no-perm">X</td><td class="editable no-perm">X</td><td class="editable no-perm">X</td><td class="editable special-perm">consultation</td><td class="editable no-perm">X</td></tr>
+                    <tr class="data-row"><td>Visualiser les tutos</td><td class="editable has-perm">X</td><td class="editable has-perm">X</td><td class="editable has-perm">X</td><td class="editable has-perm">X</td><td class="editable has-perm">X</td><td class="editable has-perm">X</td><td class="editable has-perm">X</td></tr>
+                    <tr class="data-row"><td>Visualiser les actualités</td><td class="editable no-perm">X</td><td class="editable has-perm">X</td><td class="editable has-perm">X</td><td class="editable has-perm">X</td><td class="editable has-perm">X</td><td class="editable has-perm">X</td><td class="editable has-perm">X</td></tr>
+
+                    <tr class="category-header"><td colspan="8">Gestion Utilisateurs</td></tr>
+                    <tr class="data-row"><td>Réinitialiser le mdp apprenant</td><td class="editable no-perm">X</td><td class="editable has-perm">X</td><td class="editable no-perm">X</td><td class="editable has-perm">X</td><td class="editable has-perm">X</td><td class="editable no-perm">X</td><td class="editable has-perm">X</td></tr>
+                    <tr class="data-row"><td>Supprimer compte users</td><td class="editable no-perm">X</td><td class="editable no-perm">X</td><td class="editable no-perm">X</td><td class="editable no-perm">X</td><td class="editable no-perm">X</td><td class="editable no-perm">X</td><td class="editable no-perm">X</td></tr>
+
+                    <tr class="category-header"><td colspan="8">Justificatifs & Certificats</td></tr>
+                    <tr class="data-row"><td>Justificatif : en cours</td><td class="editable no-perm">X</td><td class="editable has-perm">X</td><td class="editable has-perm">X</td><td class="editable no-perm">X</td><td class="editable has-perm">X</td><td class="editable has-perm">X</td><td class="editable no-perm">X</td></tr>
+                    <tr class="data-row"><td>Justificatif : A date de fin</td><td class="editable no-perm">X</td><td class="editable no-perm">X</td><td class="editable has-perm">X</td><td class="editable no-perm">X</td><td class="editable has-perm">X</td><td class="editable has-perm">X</td><td class="editable no-perm">X</td></tr>
+                    <tr class="data-row"><td>Certificats : en cours</td><td class="editable no-perm">X</td><td class="editable no-perm">X</td><td class="editable special-perm">100%</td><td class="editable no-perm">X</td><td class="editable special-perm">100%</td><td class="editable special-perm">100%</td><td class="editable no-perm">X</td></tr>
+                    <tr class="data-row"><td>Certificats : A date de fin</td><td class="editable special-perm">100% mail</td><td class="editable no-perm">X</td><td class="editable special-perm">100%</td><td class="editable no-perm">X</td><td class="editable special-perm">100%</td><td class="editable special-perm">100%</td><td class="editable no-perm">X</td></tr>
+
+                    <tr class="category-header"><td colspan="8">Programmes & Produits</td></tr>
+                    <tr class="data-row"><td>Programme : consultation</td><td class="editable no-perm">X</td><td class="editable has-perm">X</td><td class="editable has-perm">X</td><td class="editable has-perm">X</td><td class="editable has-perm">X</td><td class="editable has-perm">X</td><td class="editable no-perm">X</td></tr>
+                    <tr class="data-row"><td>Programme : modification</td><td class="editable no-perm">X</td><td class="editable no-perm">X</td><td class="editable no-perm">X</td><td class="editable no-perm">X</td><td class="editable has-perm">X</td><td class="editable no-perm">X</td><td class="editable no-perm">X</td></tr>
+                    <tr class="data-row"><td>Gérer les codes produits</td><td class="editable no-perm">X</td><td class="editable no-perm">X</td><td class="editable no-perm">X</td><td class="editable no-perm">X</td><td class="editable no-perm">X</td><td class="editable no-perm">X</td><td class="editable has-perm">X</td></tr>
+                    <tr class="data-row"><td>Gérer le statut d'un programme</td><td class="editable no-perm">X</td><td class="editable no-perm">X</td><td class="editable no-perm">X</td><td class="editable no-perm">X</td><td class="editable no-perm">X</td><td class="editable no-perm">X</td><td class="editable has-perm">X</td></tr>
+
+                    <tr class="category-header"><td colspan="8">Forum & Tickets Support</td></tr>
+                    <tr class="data-row"><td>Poster Forum Aftral</td><td class="editable no-perm">X</td><td class="editable no-perm">X</td><td class="editable no-perm">X</td><td class="editable no-perm">X</td><td class="editable no-perm">X</td><td class="editable no-perm">X</td><td class="editable has-perm">X</td></tr>
+                    <tr class="data-row"><td>Supprimer post ds forum</td><td class="editable no-perm">X</td><td class="editable has-perm">X</td><td class="editable no-perm">X</td><td class="editable no-perm">X</td><td class="editable no-perm">X</td><td class="editable no-perm">X</td><td class="editable no-perm">X</td></tr>
+                    <tr class="data-row"><td>Supp poste sur forum Aftral</td><td class="editable no-perm">X</td><td class="editable no-perm">X</td><td class="editable no-perm">X</td><td class="editable no-perm">X</td><td class="editable no-perm">X</td><td class="editable no-perm">X</td><td class="editable has-perm">X</td></tr>
+                    <tr class="data-row"><td>Accès gestion des tickets</td><td class="editable no-perm">X</td><td class="editable no-perm">X</td><td class="editable no-perm">X</td><td class="editable has-perm">X</td><td class="editable no-perm">X</td><td class="editable no-perm">X</td><td class="editable has-perm">X</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const lockToggle = document.getElementById('lockToggle');
+        const shieldIcon = document.getElementById('shieldIcon');
+        const editStatus = document.getElementById('editStatus');
+        const matrixBody = document.getElementById('matrixBody');
+        const searchInput = document.getElementById('roleSearch');
+        const CODE_ACCES = "1969";
+
+        searchInput.addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase();
+            const rows = document.querySelectorAll('.data-row');
+            rows.forEach(row => {
+                const text = row.cells[0].textContent.toLowerCase();
+                row.classList.toggle('hidden-row', !text.includes(term));
+            });
+            const categories = document.querySelectorAll('.category-header');
+            categories.forEach(cat => {
+                let next = cat.nextElementSibling;
+                let hasVisible = false;
+                while (next && !next.classList.contains('category-header')) {
+                    if (!next.classList.contains('hidden-row')) { hasVisible = true; break; }
+                    next = next.nextElementSibling;
+                }
+                cat.style.display = hasVisible || term === "" ? "table-row" : "none";
+            });
+        });
+
+        lockToggle.addEventListener('dblclick', () => {
+            const isAlreadyActive = document.body.classList.contains('edit-active');
+            if (!isAlreadyActive) {
+                const tentative = prompt("Accès administrateur requis :");
+                if (tentative === CODE_ACCES) {
+                    document.body.classList.add('edit-active');
+                    editStatus.style.display = 'inline-block';
+                    shieldIcon.style.color = '#22c55e'; shieldIcon.style.opacity = '1';
+                    document.querySelectorAll('.editable').forEach(el => el.contentEditable = "true");
+                }
+            } else {
+                document.body.classList.remove('edit-active');
+                editStatus.style.display = 'none';
+                shieldIcon.style.color = 'var(--blue)'; shieldIcon.style.opacity = '0.4';
+                document.querySelectorAll('.editable').forEach(el => el.contentEditable = "false");
+            }
+        });
+
+        matrixBody.addEventListener('input', (e) => {
+            if (e.target.classList.contains('editable')) {
+                const text = e.target.innerText.trim().toUpperCase();
+                e.target.classList.remove('has-perm', 'no-perm', 'special-perm');
+                if (text === 'X') e.target.classList.add('has-perm');
+                else if (text === '' || text === '-' || text === '0') e.target.classList.add('no-perm');
+                else e.target.classList.add('special-perm');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,174 @@
+﻿<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Centre de Ressources - LMS</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
+            --blue: #38bdf8;
+            --accent-hover: #7dd3fc;
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+        }
+
+        /* --- Navbar --- */
+        .navbar {
+            display: flex;
+            align-items: center;
+            padding: 15px 30px;
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-back {
+            color: var(--blue);
+            text-decoration: none;
+            margin-right: 20px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: opacity 0.3s;
+        }
+
+            .nav-back:hover {
+                opacity: 0.8;
+            }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 60px 20px;
+        }
+
+        /* --- Grille des Ressources --- */
+        .launcher-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
+            justify-content: center;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 50px 40px;
+            transition: var(--transition);
+            cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            min-height: 180px;
+            justify-content: center;
+        }
+
+            .card:hover {
+                transform: translateY(-8px);
+                border-color: var(--blue);
+                box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+            }
+
+        .icon-box {
+            width: 50px;
+            height: 50px;
+            background: rgba(56, 189, 248, 0.1);
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+            color: var(--blue);
+            font-size: 1.5rem;
+            transition: var(--transition);
+        }
+
+        .card:hover .icon-box {
+            background: var(--blue);
+            color: var(--bg-color);
+        }
+
+        .card h3 {
+            margin: 0 0 12px 0;
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+
+        .card p {
+            color: var(--text-dim);
+            line-height: 1.6;
+            margin: 0;
+            font-size: 1rem;
+            flex-grow: 1;
+        }
+
+        .badge {
+            position: absolute;
+            top: 25px;
+            right: 25px;
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            padding: 4px 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            color: var(--text-dim);
+            letter-spacing: 0.5px;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="index.html" class="nav-back">
+            <i class="fas fa-chevron-left"></i> Retour
+        </a>
+        <h1 style="font-size: 1.1rem; margin: 0; font-weight: 500;">Centre de Ressources & Support</h1>
+    </nav>
+
+    <div class="container">
+        <div class="launcher-grid">
+
+            <div class="card" onclick="location.href='ressources/faq.html'">
+                <div class="badge">Support</div>
+                <div class="icon-box"><i class="fas fa-circle-question"></i></div>
+                <h3>FAQ Utilisateurs</h3>
+                <p>Réponses aux questions fréquentes et solutions rapides aux problèmes de navigation courants.</p>
+            </div>
+
+            <div class="card" onclick="location.href='ressources/guide.html'">
+                <div class="badge">Formation</div>
+                <div class="icon-box"><i class="fas fa-book-open-reader"></i></div>
+                <h3>Guide d'utilisation</h3>
+                <p>Documentation complète sur les fonctionnalités et tutoriels pas à pas pour les gestionnaires.</p>
+            </div>
+
+            <div class="card" onclick="location.href='ressources/roadmap.html'">
+                <div class="badge">Futur</div>
+                <div class="icon-box"><i class="fas fa-map-location-dot"></i></div>
+                <h3>Roadmap & Évolutions</h3>
+                <p>Suivez le calendrier des mises à jour, les nouvelles fonctionnalités et le changelog technique.</p>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+</html>

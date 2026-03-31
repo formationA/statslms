@@ -1,0 +1,160 @@
+﻿<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuration & Flux - LMS</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
+            --blue: #38bdf8;
+            --accent-hover: #7dd3fc;
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+        }
+
+        /* --- Navbar --- */
+        .navbar {
+            display: flex;
+            align-items: center;
+            padding: 15px 30px;
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 60px 20px;
+        }
+
+        /* --- Grille --- */
+        .launcher-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
+            justify-content: center;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            /* Hauteur généreuse sans bouton */
+            padding: 50px 40px;
+            transition: var(--transition);
+            cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            justify-content: center;
+            min-height: 180px;
+        }
+
+            .card:hover {
+                transform: translateY(-8px);
+                border-color: var(--blue);
+                box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+            }
+
+        .icon-box {
+            width: 50px;
+            height: 50px;
+            background: rgba(56, 189, 248, 0.1);
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+            color: var(--blue);
+            font-size: 1.5rem;
+            transition: var(--transition);
+        }
+
+        /* Inversion des couleurs au survol */
+        .card:hover .icon-box {
+            background: var(--blue);
+            color: var(--bg-color);
+        }
+
+        .card h3 {
+            margin: 0 0 12px 0;
+            font-size: 1.4rem;
+        }
+
+        .card p {
+            color: var(--text-dim);
+            line-height: 1.6;
+            margin: 0;
+            font-size: 1rem;
+            flex-grow: 1;
+        }
+
+        .badge {
+            position: absolute;
+            top: 25px;
+            right: 25px;
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            padding: 4px 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            color: var(--text-dim);
+            letter-spacing: 0.5px;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="index.html" style="color:var(--blue); text-decoration:none; margin-right:20px; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+           <i class="fas fa-chevron-left"></i> Retour
+        </a>
+        <h1 style="font-size: 1.1rem; margin: 0; font-weight: 500;">Configuration & Flux de Données</h1>
+    </nav>
+
+    <div class="container">
+        <div class="launcher-grid">
+
+            <div class="card" onclick="location.href='config/profiles.html'">
+                <div class="badge">Accès</div>
+                <div class="icon-box"><i class="fas fa-users-gear"></i></div>
+                <h3>Profils & Permissions</h3>
+                <p>Visualisez les profils, droits d'accès et hiérarchies des utilisateurs sur la plateforme.</p>
+            </div>
+
+            <div class="card" onclick="location.href='config/pipeline.html'">
+                <div class="badge">Interface</div>
+                <div class="icon-box"><i class="fas fa-file-import"></i></div>
+                <h3>Intégration CSV > API</h3>
+                <p>Monitoring technique des flux de données, journal des imports et synchronisation API.</p>
+            </div>
+
+            <div class="card" onclick="location.href='config/features.html'">
+                <div class="badge">Paramètres</div>
+                <div class="icon-box"><i class="fas fa-gears"></i></div>
+                <h3>Fonctions LMS</h3>
+                <p>Activation des modules pédagogiques, création de cours et paramétrage du catalogue.</p>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+</html>

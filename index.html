@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LMS Control Center</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
+            --accent: #38bdf8;
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            /* Remonte le contenu vers le haut */
+            align-items: flex-start;
+            min-height: 100vh;
+            /* Espace réduit avant le titre */
+            padding-top: 5vh;
+        }
+
+        .container {
+            width: 95%;
+            max-width: 1100px;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            /* Réduction de l'espace sous le header */
+            margin-bottom: 35px;
+        }
+
+            header h1 {
+                font-size: 2.5rem;
+                margin-bottom: 8px;
+                letter-spacing: -1px;
+            }
+
+            header p {
+                color: var(--text-dim);
+                font-size: 1.1rem;
+                margin: 0;
+            }
+
+        .launcher-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(460px, 1fr));
+            gap: 25px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 50px 40px;
+            text-align: left;
+            transition: var(--transition);
+            cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+            justify-content: center;
+            min-height: 180px;
+        }
+
+            .card:hover {
+                transform: translateY(-8px);
+                border-color: var(--accent);
+                box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+            }
+
+        .icon-box {
+            width: 50px;
+            height: 50px;
+            background: rgba(56, 189, 248, 0.1);
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+            color: var(--accent);
+            font-size: 1.6rem;
+            transition: var(--transition);
+        }
+
+        .card:hover .icon-box {
+            background: var(--accent);
+            color: var(--bg-color);
+        }
+
+        .card h3 {
+            margin: 0 0 12px 0;
+            font-size: 1.5rem;
+        }
+
+        .card p {
+            color: var(--text-dim);
+            line-height: 1.6;
+            margin: 0;
+            font-size: 1rem;
+        }
+
+        .badge {
+            position: absolute;
+            top: 25px;
+            right: 25px;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            padding: 4px 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            color: var(--text-dim);
+            letter-spacing: 1px;
+        }
+
+        @media (max-width: 600px) {
+            .launcher-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .card {
+                padding: 35px 25px;
+                min-height: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>LMS Control Center</h1>
+            <p>Sélectionnez un univers pour gérer vos opérations pédagogiques.</p>
+        </header>
+
+        <div class="launcher-grid">
+
+            <div class="card" onclick="location.href='analytics-hub.html'">
+                <div class="badge">Analyse</div>
+                <div class="icon-box"><i class="fas fa-chart-column"></i></div>
+                <h3>KPI & Statistiques</h3>
+                <p>Suivi de l'engagement, taux de complétion des programmes et rapports de performance en temps réel.</p>
+            </div>
+
+            <div class="card" onclick="location.href='ressources-hub.html'">
+                <div class="badge">Aide</div>
+                <div class="icon-box"><i class="fas fa-folder-open"></i></div>
+                <h3>Centre de Ressources</h3>
+                <p>Accédez à la FAQ, aux guides d'utilisation détaillés et consultez la roadmap des évolutions logicielles.</p>
+            </div>
+
+            <div class="card" onclick="location.href='outils-hub.html'">
+                <div class="badge">Production</div>
+                <div class="icon-box"><i class="fas fa-pen-ruler"></i></div>
+                <h3>Outils de Création</h3>
+                <p>Générateur de Quizz SCORM, validation de règlement intérieur et création de supports de formation.</p>
+            </div>
+
+            <div class="card" onclick="location.href='config-hub.html'">
+                <div class="badge">Système</div>
+                <div class="icon-box"><i class="fas fa-sliders"></i></div>
+                <h3>Configurations & Flux</h3>
+                <p>Gestion des profils utilisateurs, monitoring des imports CSV/API et paramétrage des fonctions LMS.</p>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+</html>

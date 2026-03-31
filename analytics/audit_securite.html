@@ -1,0 +1,322 @@
+﻿<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audit de Sécurité | LMS</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
+            --blue: #38bdf8;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --success: #10b981;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+        }
+
+        /* Navbar */
+        .navbar {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            padding: 15px 30px;
+            background: rgba(30, 41, 59, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-sizing: border-box;
+        }
+
+        .container {
+            width: 95%;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        /* Stats */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.05);
+            text-align: center;
+        }
+
+            .stat-card h4 {
+                margin: 0;
+                color: var(--text-dim);
+                font-size: 0.75rem;
+                text-transform: uppercase;
+            }
+
+            .stat-card div {
+                font-size: 1.5rem;
+                font-weight: bold;
+                margin-top: 8px;
+            }
+
+        /* Barre de recherche optimisée */
+        .search-container {
+            position: sticky;
+            top: 70px;
+            z-index: 90;
+            background: var(--bg-color);
+            padding: 10px 0;
+        }
+
+        .search-bar {
+            width: 100%;
+            padding: 12px 20px;
+            background: var(--card-bg);
+            border: 1px solid var(--blue);
+            border-radius: 8px;
+            color: white;
+            box-sizing: border-box;
+            font-size: 1rem;
+        }
+
+        /* Table */
+        .table-wrapper {
+            background: var(--card-bg);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        th {
+            background: rgba(0,0,0,0.3);
+            color: var(--blue);
+            text-align: left;
+            padding: 15px;
+            position: sticky;
+            top: 0;
+        }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .risk-badge {
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.7rem;
+        }
+
+        .risk-high {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--danger);
+        }
+
+        .risk-med {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--warning);
+        }
+
+        .risk-low {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+        }
+
+        #loading {
+            text-align: center;
+            padding: 20px;
+            color: var(--blue);
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="../analytics-hub.html" style="color:var(--blue); text-decoration:none; margin-right:20px;">
+            <i class="fas fa-chevron-left"></i> Retour
+        </a>
+        <h1 style="font-size: 1.1rem; margin: 0;">Audit Massive Data (query_result.json)</h1>
+    </nav>
+
+    <div class="container">
+        <div class="summary-grid">
+            <div class="stat-card"><h4>Total Entrées</h4><div id="countTotal">-</div></div>
+            <div class="stat-card"><h4>Alertes MDP</h4><div id="countPlain" style="color:var(--danger)">-</div></div>
+            <div class="stat-card"><h4>Admins</h4><div id="countAdmins" style="color:var(--blue)">-</div></div>
+            <div class="stat-card"><h4>Poids Fichier</h4><div>45.8 Mo</div></div>
+        </div>
+
+        <div id="roleDistribution" style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;">
+        </div>
+
+
+        <div class="search-container">
+            <input type="text" id="auditSearch" class="search-bar" placeholder="Recherche instantanée (Nom, Email, Rôle)...">
+        </div>
+
+        <div id="loading"><i class="fas fa-spinner fa-spin"></i> Analyse du fichier en cours...</div>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th onclick="sortTable('Firstname')" style="cursor:pointer">Utilisateur <i class="fas fa-sort"></i></th>
+                        <th onclick="sortTable('Email')" style="cursor:pointer">Email / ID <i class="fas fa-sort"></i></th>
+                        <th onclick="sortTable('Role')" style="cursor:pointer">Rôle <i class="fas fa-sort"></i></th>
+                        <th onclick="sortTable('_riskLevel')" style="cursor:pointer">Risque <i class="fas fa-sort"></i></th>
+                        <th onclick="sortTable('Last Activity')" style="cursor:pointer">Activité <i class="fas fa-sort"></i></th>
+                        <th>Password</th>
+                    </tr>
+                </thead>
+                <tbody id="auditTableBody"></tbody>
+            </table>
+        </div>
+        <div id="sentinel" style="height: 20px;"></div>
+    </div>
+
+    <script>
+        let allUsers = [];
+        let filteredUsers = [];
+        let currentIndex = 0;
+        let sortDirection = 1;
+        const step = 100;
+
+        // 1. FONCTIONS DE LOGIQUE (Trier et Afficher)
+        function renderNextBatch() {
+            const tbody = document.getElementById('auditTableBody');
+            const chunk = filteredUsers.slice(currentIndex, currentIndex + step);
+
+            const html = chunk.map(user => {
+                const hasPlain = user["Plain Password"] && user["Plain Password"].length > 0;
+                return `
+                        <tr>
+                            <td><strong>${user.Firstname || ''} ${user.Lastname || ''}</strong></td>
+                            <td><small>${user.Email || ''}<br><span style="color:var(--text-dim)">${user.ID || ''}</span></small></td>
+                            <td>${user.Role || ''}</td>
+                            <td><span class="risk-badge ${hasPlain ? 'risk-high' : (user.Role === 'ADMINISTRATEUR' ? 'risk-med' : 'risk-low')}">
+                                ${hasPlain ? 'CRITIQUE' : (user.Role === 'ADMINISTRATEUR' ? 'ELEVÉ' : 'BAS')}
+                            </span></td>
+                            <td>${user["Last Activity"] || '-'}</td>
+                            <td title="${user["Plain Password"] || ''}">${hasPlain ? '<i class="fas fa-eye" style="color:var(--danger)"></i> EXPOSÉ' : '<i class="fas fa-lock" style="color:var(--success)"></i>'}</td>
+                        </tr>`;
+            }).join('');
+
+            tbody.insertAdjacentHTML('beforeend', html);
+            currentIndex += step;
+        }
+
+        function sortTable(column) {
+            sortDirection *= -1;
+
+            filteredUsers.sort((a, b) => {
+                let valA = a[column] || "";
+                let valB = b[column] || "";
+
+                // Cas spécial pour le Risque (tri numérique via _riskLevel pré-calculé)
+                if (column === '_riskLevel') {
+                    const rA = (a["Plain Password"] && a["Plain Password"].length > 0) ? 3 : (a.Role === 'ADMINISTRATEUR' ? 2 : 1);
+                    const rB = (b["Plain Password"] && b["Plain Password"].length > 0) ? 3 : (b.Role === 'ADMINISTRATEUR' ? 2 : 1);
+                    return (rA - rB) * sortDirection;
+                }
+
+                if (typeof valA === 'string') valA = valA.toLowerCase();
+                if (typeof valB === 'string') valB = valB.toLowerCase();
+
+                if (valA < valB) return -1 * sortDirection;
+                if (valA > valB) return 1 * sortDirection;
+                return 0;
+            });
+
+            document.getElementById('auditTableBody').innerHTML = '';
+            currentIndex = 0;
+            renderNextBatch();
+        }
+
+        // 2. CHARGEMENT INITIAL
+        async function loadLargeFile() {
+            const loadingDiv = document.getElementById('loading');
+            try {
+                const response = await fetch('query_result.json');
+                if (!response.ok) throw new Error(`Erreur HTTP: ${response.status}`);
+
+                allUsers = await response.json();
+
+                let plainCount = 0;
+                let adminCount = 0;
+                const roles = {};
+
+                for (let i = 0; i < allUsers.length; i++) {
+                    const u = allUsers[i];
+                    if (u["Plain Password"] && u["Plain Password"].length > 0) plainCount++;
+                    if (u.Role === "ADMINISTRATEUR") adminCount++;
+                    roles[u.Role] = (roles[u.Role] || 0) + 1;
+                    u._searchIndex = `${u.Firstname} ${u.Lastname} ${u.Email} ${u.ID} ${u.Role}`.toLowerCase();
+                }
+
+                document.getElementById('countTotal').innerText = allUsers.length.toLocaleString();
+                document.getElementById('countPlain').innerText = plainCount;
+                document.getElementById('countAdmins').innerText = adminCount;
+
+                const roleHtml = Object.entries(roles).map(([role, count]) => `
+                        <span class="risk-badge" style="background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.2); color: var(--blue);">
+                            ${role}: <strong>${count}</strong>
+                        </span>
+                    `).join('');
+                document.getElementById('roleDistribution').innerHTML = roleHtml;
+
+                loadingDiv.style.display = 'none';
+                filteredUsers = allUsers;
+                renderNextBatch();
+
+            } catch (error) {
+                loadingDiv.innerHTML = `<i class="fas fa-exclamation-triangle"></i> Erreur : ${error.message}`;
+            }
+        }
+
+        // 3. ÉVÉNEMENTS (Scroll & Recherche)
+        const observer = new IntersectionObserver(entries => {
+            if (entries[0].isIntersecting && currentIndex < filteredUsers.length) {
+                renderNextBatch();
+            }
+        }, { rootMargin: '300px' });
+
+        observer.observe(document.getElementById('sentinel'));
+
+        let timeout = null;
+        document.getElementById('auditSearch').addEventListener('input', (e) => {
+            clearTimeout(timeout);
+            const val = e.target.value.toLowerCase().trim();
+            timeout = setTimeout(() => {
+                filteredUsers = val === "" ? allUsers : allUsers.filter(u => u._searchIndex.includes(val));
+                document.getElementById('auditTableBody').innerHTML = '';
+                currentIndex = 0;
+                renderNextBatch();
+            }, 200);
+        });
+
+        window.onload = loadLargeFile;
+    </script>
+</body>
+</html>

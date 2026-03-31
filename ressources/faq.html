@@ -1,0 +1,424 @@
+﻿<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAQ | Centre d'Aide LMS</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* STYLE ORIGINAL CONSERVÉ */
+        :root {
+            --bg: #0f172a;
+            --card: #1e293b;
+            --blue: #38bdf8;
+            --green: #10b981;
+            --orange: #fb923c;
+            --white: #f8fafc;
+            --muted: #94a3b8;
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        [data-theme="light"] {
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --white: #1e293b;
+            --muted: #64748b;
+            --border: #e2e8f0;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--white);
+            transition: background-color 0.3s;
+        }
+
+        .navbar {
+            padding: 1rem 2rem;
+            background: #1e293b;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #f8fafc;
+        }
+
+            .navbar h1 {
+                color: #f8fafc !important;
+            }
+
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+            header h1 {
+                color: var(--blue);
+                margin-bottom: 10px;
+            }
+
+        .categories {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .cat-btn {
+            padding: 8px 18px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            background: var(--card);
+            color: var(--white);
+            cursor: pointer;
+            font-weight: 500;
+            transition: 0.2s;
+        }
+
+            .cat-btn.active {
+                background: var(--blue);
+                color: #0f172a;
+                border-color: var(--blue);
+            }
+
+        .theme-toggle {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #ffffff !important;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        .search-container {
+            position: relative;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+        }
+
+            .search-container i.fa-search {
+                position: absolute;
+                left: 15px;
+                color: var(--muted);
+            }
+
+        #faqSearch {
+            width: 100%;
+            padding: 15px 110px 15px 45px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--white);
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+            #faqSearch:focus {
+                border-color: var(--blue);
+                box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
+            }
+
+        #clearSearch {
+            position: absolute;
+            right: 10px;
+            background: var(--blue);
+            border: none;
+            color: #0f172a;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: none;
+        }
+
+        .faq-item {
+            background: var(--card);
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        .faq-question {
+            padding: 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+
+        .faq-answer {
+            padding: 0 20px;
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.3s ease-out;
+            color: var(--muted);
+            background: rgba(0,0,0,0.1);
+        }
+
+        .faq-item.active .faq-answer {
+            padding: 20px;
+            max-height: 2000px;
+            border-top: 1px solid var(--border);
+        }
+
+        .faq-item.active .fa-chevron-down {
+            transform: rotate(180deg);
+        }
+
+        .highlight {
+            color: var(--blue);
+            font-weight: 600;
+        }
+
+        .warning {
+            color: var(--orange);
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div style="display:flex; align-items:center;">
+            <a href="../ressources-hub.html" style="color:var(--blue); text-decoration:none; margin-right:20px;"><i class="fas fa-chevron-left"></i> Retour</a>
+            <h1 style="font-size: 1.1rem; margin: 0;">FAQ & Support Technique v2</h1>
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <button onclick="toggleAdmin()" class="theme-toggle" id="adminBtn"><i id="adminIcon" class="fas fa-lock"></i> Admin</button>
+            <button id="themeToggle" class="theme-toggle"><i id="themeIcon" class="fas fa-sun"></i> Mode</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div id="adminPanel" style="display:none; margin-bottom: 30px; padding: 20px; border: 1px dashed var(--blue); border-radius: 12px; background: rgba(0,0,0,0.2);" data-current-id="">
+            <h3 style="color: var(--blue); margin-top: 0;">🛠 Gestion des questions</h3>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <input type="text" id="newQuestion" placeholder="Question" style="padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--card); color: var(--white);">
+                <select id="newCat" style="padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--card); color: var(--white);">
+                    <option value="flux">Flux & Ammon</option>
+                    <option value="connexion">Connexion</option>
+                    <option value="admin">Administratif</option>
+                    <option value="pedagogie">Pédagogie</option>
+                </select>
+                <textarea id="newAnswer" placeholder="Réponse (HTML accepté)" rows="3" style="padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--card); color: var(--white);"></textarea>
+                <button onclick="addFAQ()" style="background: var(--green); color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold;">Enregistrer</button>
+            </div>
+        </div>
+
+        <header>
+            <h1>Comment pouvons-nous vous aider ?</h1>
+            <p style="color:var(--muted)">Réponses rapides aux questions sur le flux Ammon et le LMS.</p>
+        </header>
+
+        <div class="search-container">
+            <i class="fas fa-search"></i>
+            <input type="text" id="faqSearch" placeholder="Rechercher une question...">
+            <button id="clearSearch">Tout afficher</button>
+        </div>
+
+        <div class="categories">
+            <button class="cat-btn active" data-filter="all">Toutes les questions</button>
+            <button class="cat-btn" data-filter="flux">Flux & Ammon</button>
+            <button class="cat-btn" data-filter="connexion">Connexion</button>
+            <button class="cat-btn" data-filter="admin">Administratif</button>
+            <button class="cat-btn" data-filter="pedagogie">Pédagogie</button>
+        </div>
+
+        <div class="faq-list" id="faqContainer"></div>
+    </div>
+
+    <script>
+        const JSON_PATH = 'faq.json';
+        let faqData = [];
+        let isAdminMode = false;
+
+        async function loadFAQ() {
+            const container = document.getElementById('faqContainer');
+            try {
+                const response = await fetch(JSON_PATH);
+                if (!response.ok) throw new Error('Fichier JSON introuvable');
+                faqData = await response.json();
+                renderFAQ(faqData);
+            } catch (error) {
+                container.innerHTML = `<p style="text-align:center; color:var(--orange);">Erreur : Impossible de charger les questions.</p>`;
+            }
+        }
+
+        function renderFAQ(data) {
+            const container = document.getElementById('faqContainer');
+            container.innerHTML = data.map((item, index) => `
+                    <div class="faq-item" data-cat="${item.cat}" data-id="${item.id || ''}">
+                        <div class="faq-question">
+                            <span><span style="color:var(--blue); margin-right:8px;">${item.id ? item.id + '.' : ''}</span>${item.question}</span>
+                            <div>
+                                ${isAdminMode ? `<i class="fas fa-edit" onclick="event.stopPropagation(); editFAQ(${index})" style="color:var(--blue); margin-right:15px; cursor:pointer;"></i>` : ''}
+                                ${isAdminMode ? `<i class="fas fa-trash" onclick="event.stopPropagation(); deleteFAQ(${index})" style="color:var(--orange); margin-right:15px; cursor:pointer;"></i>` : ''}
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                        </div>
+                        <div class="faq-answer">${item.answer}</div>
+                    </div>
+                `).join('');
+
+            document.querySelectorAll('.faq-question').forEach(q => {
+                q.onclick = () => q.parentElement.classList.toggle('active');
+            });
+        }
+
+        function toggleAdmin() {
+            const pass = prompt("Mot de passe admin :");
+            if (pass === "1969") {
+                isAdminMode = !isAdminMode;
+                document.getElementById('adminPanel').style.display = isAdminMode ? 'block' : 'none';
+                document.getElementById('adminIcon').className = isAdminMode ? 'fas fa-lock-open' : 'fas fa-lock';
+                renderFAQ(faqData);
+            } else {
+                alert("Accès refusé");
+            }
+        }
+
+        function editFAQ(index) {
+            const item = faqData[index];
+            document.getElementById('newQuestion').value = item.question;
+            document.getElementById('newAnswer').value = item.answer;
+            document.getElementById('newCat').value = item.cat;
+            document.getElementById('adminPanel').dataset.currentId = item.id || '';
+            faqData.splice(index, 1);
+            renderFAQ(faqData);
+            window.scrollTo(0, 0);
+        }
+
+        function addFAQ() {
+            const q = document.getElementById('newQuestion').value;
+            const a = document.getElementById('newAnswer').value;
+            const c = document.getElementById('newCat').value;
+            const panel = document.getElementById('adminPanel');
+            const existingId = panel.dataset.currentId;
+
+            if (q && a) {
+                let finalId;
+
+                if (existingId && existingId !== "") {
+                    // Cas 1 : On modifie une question existante, on garde son ID
+                    finalId = parseInt(existingId);
+                } else {
+                    // Cas 2 : Nouvelle question, on calcule l'ID suivant (ex: 18 -> 19)
+                    const maxId = faqData.reduce((max, item) => (item.id > max ? item.id : max), 0);
+                    finalId = maxId + 1;
+                }
+
+                const newEntry = {
+                    id: finalId, // L'ID est bien inclus ici pour le JSON
+                    question: q,
+                    answer: a,
+                    cat: c
+                };
+
+                faqData.push(newEntry);
+
+                // Tri par ID pour garder l'ordre dans le JSON
+                faqData.sort((a, b) => a.id - b.id);
+
+                // Nettoyage du formulaire
+                document.getElementById('newQuestion').value = '';
+                document.getElementById('newAnswer').value = '';
+                panel.dataset.currentId = "";
+
+                saveLocal(); // Envoie le JSON complet avec les IDs à GitHub
+            }
+        }
+
+        function deleteFAQ(index) {
+            if (confirm("Supprimer cette question ?")) {
+                faqData.splice(index, 1);
+                saveLocal();
+            }
+        }
+
+        async function saveLocal() {
+            renderFAQ(faqData);
+            const tempToken = prompt("Entrez votre GitHub Token :");
+            if (!tempToken) return;
+
+            const REPO_OWNER = 'formationA';
+            const REPO_NAME = 'statslms';
+            const FILE_PATH = 'faq.json';
+
+            try {
+                const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
+                const getRes = await fetch(url, {
+                    headers: { 'Authorization': `token ${tempToken}` }
+                });
+                const fileMetadata = await getRes.json();
+                if (!fileMetadata.sha) return;
+
+                const updateRes = await fetch(url, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${tempToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: "Mise à jour FAQ",
+                        content: btoa(unescape(encodeURIComponent(JSON.stringify(faqData, null, 2)))),
+                        sha: fileMetadata.sha
+                    })
+                });
+                if (updateRes.ok) alert("✅ Sauvegarde réussie !");
+            } catch (e) {
+                alert("❌ Erreur réseau.");
+            }
+        }
+
+        const searchInput = document.getElementById('faqSearch');
+        const clearBtn = document.getElementById('clearSearch');
+
+        function filterFAQ() {
+            const searchText = searchInput.value.toLowerCase();
+            const activeCat = document.querySelector('.cat-btn.active').dataset.filter;
+            const items = document.querySelectorAll('.faq-item');
+            clearBtn.style.display = searchText.length > 0 ? 'block' : 'none';
+            items.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                const matchesSearch = text.includes(searchText);
+                const matchesCat = (activeCat === 'all' || item.dataset.cat === activeCat);
+                item.style.display = (matchesSearch && matchesCat) ? "block" : "none";
+            });
+        }
+
+        searchInput.oninput = filterFAQ;
+        document.querySelectorAll('.cat-btn').forEach(btn => {
+            btn.onclick = () => {
+                document.querySelector('.cat-btn.active').classList.remove('active');
+                btn.classList.add('active');
+                filterFAQ();
+            };
+        });
+
+        clearBtn.onclick = () => { searchInput.value = ''; filterFAQ(); };
+
+        document.getElementById('themeToggle').onclick = () => {
+            const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', theme);
+            document.getElementById('themeIcon').className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+        };
+
+        loadFAQ();
+    </script>
+</body>
+</html>

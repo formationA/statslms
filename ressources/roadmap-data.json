@@ -1,0 +1,248 @@
+﻿[
+  {
+    "ui": "Formateur",
+    "task": "Ajout sur les visios à venir d'une action afin d'ajouter dans son agenda la visio",
+    "preprod": "13/03/2026",
+    "prod": "13/03/2026"
+  },
+  {
+    "ui": "Tous",
+    "task": "Tri des listes déroulantes de plateforme par ordre alpha",
+    "preprod": "13/03/2026",
+    "prod": "13/03/2026"
+  },
+  {
+    "ui": "Formateur",
+    "task": "Correction de la pagination des participants d'une visio passée + tri par ordre alpha sur les noms de famille",
+    "preprod": "13/03/2026",
+    "prod": "13/03/2026"
+  },
+  {
+    "ui": "Formateur",
+    "task": "Intégration d'une page avec : Tous les nom + prenom + adresse mail + identifiant par défaut + code session. Recherche multi-sessions.",
+    "preprod": "13/03/2026",
+    "prod": "13/03/2026"
+  },
+  {
+    "ui": "HelpDesk",
+    "task": "Modification du menu : 'Codes produits' est maintenant 'CMS' avec accès aux stats, codes produits et gestion des comptes",
+    "preprod": "13/03/2026",
+    "prod": "13/03/2026"
+  },
+  {
+    "ui": "Admin",
+    "task": "Ajout de la fonctionnalité : 'se connecter en tant que' / dispo sur gestion des comptes + optimisation UI",
+    "preprod": "13/03/2026",
+    "prod": "13/03/2026"
+  },
+  {
+    "ui": "Tous",
+    "task": "Fichier CSV des réponses aux enquêtes de satisfaction",
+    "preprod": "13/03/2026",
+    "prod": "13/03/2026"
+  },
+  {
+    "ui": "Tous",
+    "task": "Fichier json data",
+    "preprod": "13/03/2026",
+    "prod": "13/03/2026"
+  },
+  {
+    "ui": "Tous",
+    "task": "Sur les barres de recherches : ajouter un chenillard pour informer de l'état de la requête",
+    "preprod": "27/02/2026",
+    "prod": "27/02/2026"
+  },
+  {
+    "ui": "Tous",
+    "task": "Ajouter le nombre de corrections / total rendu avant télécharger la correction",
+    "preprod": "27/02/2026",
+    "prod": "27/02/2026"
+  },
+  {
+    "ui": "Tous",
+    "task": "Script de correction des progressions (suite ralentissements de Janvier)",
+    "preprod": "27/02/2026",
+    "prod": "27/02/2026"
+  },
+  {
+    "ui": "Admin",
+    "task": "Ajout de la possibilité de modifier le compte de Formateur à Superviseur",
+    "preprod": "27/02/2026",
+    "prod": "27/02/2026"
+  },
+  {
+    "ui": "Admin",
+    "task": "Correction de la création de compte",
+    "preprod": "27/02/2026",
+    "prod": "27/02/2026"
+  },
+  {
+    "ui": "Apprenant",
+    "task": "Correction du téléchargement et de la visu des corrections individuelles des apprenants",
+    "preprod": "18/02/2026",
+    "prod": "18/02/2026"
+  },
+  {
+    "ui": "Concepteur",
+    "task": "Ajout du rôle concepteur dans les autorisations pour réinitialiser les mdp",
+    "preprod": "17/02/2026",
+    "prod": "17/02/2025"
+  },
+  {
+    "ui": "Tous",
+    "task": "Correction dans 'ressources personnelles' de la recherche par nom avec null",
+    "preprod": "17/02/2026",
+    "prod": "17/02/2025"
+  },
+  {
+    "ui": "HelpDesk",
+    "task": "Correction du téléchargement de la pièce jointe dans les tickets helpdesk",
+    "preprod": "17/02/2026",
+    "prod": "17/02/2025"
+  },
+  {
+    "ui": "Tous",
+    "task": "Retour du bouton forum sur les cartes sessions",
+    "preprod": "17/02/2026",
+    "prod": "17/02/2025"
+  },
+  {
+    "ui": "Tous",
+    "task": "Correction du bouton de téléchargement des certificats visible même sans certificat",
+    "preprod": "17/02/2026",
+    "prod": "17/02/2025"
+  },
+  {
+    "ui": "Tous",
+    "task": "Ajout du bouton de visualisation des réponses dans rapport si enquête existe et complétion > 0",
+    "preprod": "10/02/2026",
+    "prod": "12/02/2026"
+  },
+  {
+    "ui": "Tous",
+    "task": "Masquage dans paramètre du bouton activer enquête quand pas d'enquête associée",
+    "preprod": "10/02/2026",
+    "prod": "12/02/2026"
+  },
+  {
+    "ui": "Apprenant",
+    "task": "Modification de la règle de l'enquête de satisfaction disponible à 00h01 le dernier jour",
+    "preprod": "10/02/2026",
+    "prod": "12/02/2026"
+  },
+  {
+    "ui": "Tous",
+    "task": "Ajout dans historique des sessions la possibilité de forcer le temps des visios d'un apprenant",
+    "preprod": "10/02/2026",
+    "prod": "12/02/2026"
+  },
+  {
+    "ui": "Tous",
+    "task": "Correction dans le justificatif des temps passé des visio quand c'est une visio gestionnaire",
+    "preprod": "10/02/2026",
+    "prod": "12/02/2026"
+  },
+  {
+    "ui": "Tous",
+    "task": "Correction de l'historique et à venir dans agenda, groupe et session",
+    "preprod": "10/02/2026",
+    "prod": "12/02/2026"
+  },
+  {
+    "ui": "Tous",
+    "task": "Suppression de l'icone forum dans sessions et intégration bouton d'accès dans paramètres",
+    "preprod": "03/02/2025",
+    "prod": "12/02/2026"
+  },
+  {
+    "ui": "Admin",
+    "task": "Ajout de la recherche sur l'id aftral pour l'admin sur les utilisateurs",
+    "preprod": "03/02/2025",
+    "prod": "12/02/2026"
+  },
+  {
+    "ui": "Tous",
+    "task": "Correction : recherche par nom, les sessions attachées ne s'affichent plus dans l'accordéon",
+    "preprod": "03/02/2025",
+    "prod": "12/02/2026"
+  },
+  {
+    "ui": "Tous",
+    "task": "Pouvoir rechercher avec des parenthèses",
+    "preprod": "03/02/2025",
+    "prod": "12/02/2026"
+  },
+  {
+    "ui": "Tous",
+    "task": "Intégration de la fonctionnalité d'enquêtes de satisfaction",
+    "preprod": "03/02/2025",
+    "prod": "12/02/2026"
+  },
+  {
+    "ui": "Apprenant",
+    "task": "Correction de l'erreur occured error au téléchargement de la correction",
+    "preprod": "03/02/2025",
+    "prod": "12/02/2026"
+  },
+  {
+    "ui": "Apprenant",
+    "task": "Affichage 'voir tout' par défaut pour l'apprenant et le formateur",
+    "preprod": "03/02/2025",
+    "prod": "12/02/2026"
+  },
+  {
+    "ui": "Tous",
+    "task": "Correction du téléchargement par un apprenant de la correction d'un devoir",
+    "preprod": "28/01/2026",
+    "prod": "28/01/2026"
+  },
+  {
+    "ui": "Tous",
+    "task": "Correction de la popup du commentaire dans le rapport individuel quand le commentaire est long",
+    "preprod": "28/01/2026",
+    "prod": "28/01/2026"
+  },
+  {
+    "ui": "Tous",
+    "task": "Recherche d'un programme sur le titre ou le code produit",
+    "preprod": "27/01/2026",
+    "prod": "28/01/2026"
+  },
+  {
+    "ui": "Tous",
+    "task": "Correction de la fonctionnalité de temps passé qui continue au changement d'onglet",
+    "preprod": "27/01/2026",
+    "prod": "28/01/2026"
+  },
+  {
+    "ui": "Admin",
+    "task": "Recherche d'un compte sur le nom, prénom et email",
+    "preprod": "27/01/2026",
+    "prod": "28/01/2026"
+  },
+  {
+    "ui": "Tous",
+    "task": "Suppression du texte orange dans helpdesk",
+    "preprod": "27/01/2026",
+    "prod": "28/01/2026"
+  },
+  {
+    "ui": "Tous",
+    "task": "Correction de l'affichage du nom dans l'agenda",
+    "preprod": "27/01/2026",
+    "prod": "28/01/2026"
+  },
+  {
+    "ui": "Tous",
+    "task": "Correction des temps dans le rapport individuel (non rétroactif)",
+    "preprod": "27/01/2026",
+    "prod": "28/01/2026"
+  },
+  {
+    "ui": "Tous",
+    "task": "Correction du bug de création de ticket",
+    "preprod": "26/01/2025",
+    "prod": "26/01/2025"
+  }
+]

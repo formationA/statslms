@@ -1,0 +1,292 @@
+﻿<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IT PÉDAGOGIE | LMS Multi-Convertisseur</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.21/mammoth.browser.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --accent: #38bdf8;
+            --nav-bg: rgba(30, 41, 59, 0.8);
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .navbar {
+            padding: 15px 30px;
+            background: var(--nav-bg);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 40px auto;
+            padding: 0 20px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .upload-zone {
+            background: var(--card-bg);
+            border: 2px dashed var(--accent);
+            border-radius: 20px;
+            padding: 50px 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+            .upload-zone:hover {
+                background: rgba(56, 189, 248, 0.05);
+            }
+
+            .upload-zone i {
+                font-size: 3rem;
+                color: var(--accent);
+                margin-bottom: 15px;
+            }
+
+        #output {
+            background: white;
+            color: #334155;
+            padding: 25px;
+            border-radius: 12px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        /* Conteneurs Spécifiques */
+        .pdf-wrapper {
+            position: relative;
+            width: 100%;
+            height: 75vh;
+            overflow: hidden;
+        }
+
+        .pdf-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        embed {
+            width: 100%;
+            height: 100%;
+            border: none;
+            border-radius: 8px;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 15px 0;
+        }
+
+        th, td {
+            border: 1px solid #e2e8f0;
+            padding: 10px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #f8fafc;
+        }
+
+        .btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-secondary {
+            background: #475569;
+            margin-left: 8px;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .info-msg {
+            background: rgba(56, 189, 248, 0.1);
+            color: var(--accent);
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            display: none;
+        }
+    </style>
+</head>
+<body oncontextmenu="return false;">
+
+    <nav class="navbar">
+        <h2 style="margin:0; font-size: 1.1rem;">IT PÉDAGOGIE <span style="color:var(--accent)">| LMS Multi-Tool</span></h2>
+        <div id="actions" style="display:none;">
+            <button class="btn" onclick="exportHTML()"><i class="fas fa-file-code"></i> Exporter Carte LMS</button>
+            <button class="btn btn-secondary" onclick="reset()"><i class="fas fa-sync"></i> Nouveau</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div id="pptInfo" class="info-msg">
+            <i class="fas fa-info-circle"></i> Note : Pour un PowerPoint, l'export optimal dans un LMS se fait via PDF, mais nous générons ici un aperçu compatible.
+        </div>
+
+        <div class="upload-zone" id="dropZone">
+            <i class="fas fa-file-powerpoint"></i>
+            <h3>Importez votre document</h3>
+            <p style="color:#94a3b8; margin: 5px 0 0 0;">PDF, Word, Excel, CSV, PPTX</p>
+            <input type="file" id="fileInput" accept=".pdf,.docx,.xlsx,.csv,.pptx">
+        </div>
+
+        <div id="previewArea" style="display:none; margin-top:20px;">
+            <div id="output"></div>
+        </div>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const output = document.getElementById('output');
+        const actions = document.getElementById('actions');
+        const dropZone = document.getElementById('dropZone');
+        const pptInfo = document.getElementById('pptInfo');
+
+        let currentPDFBase64 = null;
+        let isPPT = false;
+        const pdfParams = "#toolbar=0&navpanes=0&scrollbar=1";
+
+        // Drag & Drop
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(name => {
+            dropZone.addEventListener(name, e => { e.preventDefault(); e.stopPropagation(); });
+        });
+        dropZone.addEventListener('drop', e => { if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]); });
+        dropZone.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', e => { if (e.target.files.length) handleFile(e.target.files[0]); });
+
+        function handleFile(file) {
+            const ext = file.name.split('.').pop().toLowerCase();
+            const reader = new FileReader();
+            isPPT = (ext === 'pptx');
+
+            if (ext === 'docx') {
+                currentPDFBase64 = null;
+                reader.onload = e => {
+                    mammoth.convertToHtml({ arrayBuffer: e.target.result })
+                        .then(res => { output.innerHTML = `<div class="text-content">${res.value}</div>`; showArea(); });
+                };
+                reader.readAsArrayBuffer(file);
+            }
+            else if (['xlsx', 'csv'].includes(ext)) {
+                currentPDFBase64 = null;
+                reader.onload = e => {
+                    const workbook = XLSX.read(new Uint8Array(e.target.result), { type: 'array' });
+                    output.innerHTML = `<div class="table-content">${XLSX.utils.sheet_to_html(workbook.Sheets[workbook.SheetNames[0]])}</div>`;
+                    showArea();
+                };
+                reader.readAsArrayBuffer(file);
+            }
+            else if (ext === 'pdf' || ext === 'pptx') {
+                // Pour PPTX : Le navigateur ne sait pas lire le PPTX nativement.
+                // La meilleure pratique pédagogique est de l'importer après l'avoir enregistré en PDF pour la carte LMS.
+                reader.onload = e => {
+                    currentPDFBase64 = e.target.result;
+                    output.innerHTML = `
+                            <div class="pdf-wrapper">
+                                <div class="pdf-overlay"></div>
+                                <embed src="${currentPDFBase64}${pdfParams}" type="application/pdf" />
+                            </div>`;
+                    if (isPPT) pptInfo.style.display = "block";
+                    showArea();
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function showArea() { document.getElementById('previewArea').style.display = 'block'; actions.style.display = 'flex'; dropZone.style.display = 'none'; }
+        function reset() { window.location.reload(); }
+
+        function exportHTML() {
+            const isDocumentObj = currentPDFBase64 !== null;
+            const content = isDocumentObj ? `<div class="pdf-wrapper"><div class="pdf-overlay"></div><embed src="${currentPDFBase64}${pdfParams}" type="application/pdf" /></div>` : output.innerHTML;
+
+            const fullHTML = `<!DOCTYPE html>
+<html lang="fr">
+<head>
+        <meta charset="UTF-8">
+        <style>
+            body {
+                margin: 0; padding: 20px; display: flex; justify-content: center; align-items: flex-start;
+                background-color: #f1f5f9; min-height: 100vh; font-family: sans-serif;
+                user-select: none; -webkit-user-select: none;
+            }
+            .lms-card {
+                width: 100%; max-width: 1000px; background: white; padding: 25px;
+                border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+                border: 1px solid #e2e8f0; height: auto;
+            }
+            .pdf-wrapper { position: relative; width: 100%; height: 800px; overflow: hidden; }
+            .pdf-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; pointer-events: none; }
+            embed { width: 100%; height: 100%; border-radius: 6px; }
+            .text-content, .table-content { height: auto; width: 100%; text-align: left; }
+            table { border-collapse: collapse; width: 100%; margin: 15px auto; }
+            th, td { border: 1px solid #e2e8f0; padding: 10px; text-align: center; }
+            th { background-color: #f8fafc; }
+        </style>
+</head>
+<body oncontextmenu="return false;" onselectstart="return false;">
+        <div class="lms-card">${content}</div>
+        <script>
+            document.addEventListener('keydown', function(e) {
+                if (e.ctrlKey && (e.key === 'p' || e.key === 's' || e.key === 'u' || e.key === 'c')) {
+                    e.preventDefault(); return false;
+                }
+            });
+        <\/script>
+</body>
+</html>`;
+
+            const blob = new Blob([fullHTML], { type: 'text/html;charset=utf-8' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "itp_lms_export.html";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
+</body>
+</html>

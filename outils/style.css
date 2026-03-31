@@ -1,0 +1,382 @@
+﻿/* --- CONFIGURATION DES THÈMES --- */
+:root {
+    /* Couleurs fixes */
+    --primary: #6366f1;
+    --success: #10b981;
+    --danger: #ef4444;
+    --ia-accent: #a855f7;
+    --import-accent: #64748b;
+    /* --- MODE CLAIR (PAR DÉFAUT) --- */
+    --bg: #f1f5f9;
+    --panel: #ffffff;
+    --panel-light: #f8fafc;
+    --text: #1e293b;
+    --text-dim: #64748b;
+    --border: #e2e8f0;
+    --shadow: rgba(0, 0, 0, 0.1);
+}
+
+/* --- MODE SOMBRE (ACTIVÉ VIA JS) --- */
+[data-theme="dark"] {
+    --bg: #0f172a;
+    --panel: #1e293b;
+    --panel-light: #334155;
+    --text: #f1f5f9;
+    --text-dim: #94a3b8;
+    --border: #334155;
+    --shadow: rgba(0, 0, 0, 0.4);
+}
+
+/* --- BASE --- */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background-color: var(--bg);
+    margin: 0;
+    padding: 20px;
+    color: var(--text);
+    line-height: 1.5;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.container {
+    max-width: 900px;
+    margin: auto;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.creator-mention {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    font-weight: 800;
+    letter-spacing: 1px;
+}
+
+h1 {
+    margin: 10px 0;
+    color: var(--text);
+}
+
+/* --- PANELS (FONDS PASTELES EN MODE CLAIR) --- */
+.panel {
+    background: var(--panel);
+    padding: 25px;
+    border-radius: 16px;
+    box-shadow: 0 10px 15px -3px var(--shadow);
+    margin-bottom: 25px;
+    border: 1px solid var(--border);
+    position: relative;
+    transition: background 0.3s ease;
+}
+
+.panel-ia {
+    border-top: 6px solid var(--ia-accent);
+    background: #faf5ff;
+}
+
+.panel-import {
+    border-top: 6px solid var(--import-accent);
+    background: #f8fafc;
+}
+
+.panel-config {
+    border-top: 6px solid var(--success);
+    background: #f0fdf4;
+}
+
+/* Reset des fonds en mode sombre pour la lisibilité */
+[data-theme="dark"] .panel-ia,
+[data-theme="dark"] .panel-import,
+[data-theme="dark"] .panel-config {
+    background: var(--panel);
+}
+
+.panel-questions {
+    border: 2px dashed var(--border);
+    background: transparent;
+    box-shadow: none;
+}
+
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.9rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 20px;
+}
+
+/* --- GRID & CONFIG --- */
+.grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    align-items: center;
+}
+
+@media (max-width: 600px) {
+    .grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.config-item-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 42px;
+}
+
+    .config-item-group label {
+        font-size: 0.8rem;
+        color: var(--text-dim);
+        font-weight: 700;
+        margin: 0 !important;
+        white-space: nowrap;
+    }
+
+/* --- CARDS & QUESTIONS (LE GRAS + SUPPRESSION DOUBLON) --- */
+.card {
+    background: var(--panel);
+    padding: 20px;
+    border-radius: 12px;
+    border-left: 6px solid var(--primary);
+    margin-bottom: 15px;
+    position: relative;
+    box-shadow: 0 4px 6px var(--shadow);
+}
+
+.q-number {
+    font-weight: 900 !important;
+    color: var(--primary);
+    display: block;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+}
+
+/* Supprime le label gris "QUESTION" qui fait doublon sous QUESTION N°1 */
+.card label:first-of-type {
+    display: none !important;
+}
+
+/* Champ de saisie de la question en GRAS */
+.inp-q {
+    font-weight: 800 !important;
+    font-size: 1.1rem !important;
+    color: var(--text) !important;
+    background: var(--panel-light) !important;
+}
+
+.remove-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    color: var(--danger);
+    background: none;
+    font-size: 0.8rem;
+    text-decoration: underline;
+    cursor: pointer;
+    border: none;
+}
+
+/* --- INPUTS --- */
+input, textarea, select {
+    width: 100%;
+    padding: 12px;
+    margin: 8px 0 16px 0;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    background: var(--panel-light);
+    color: var(--text);
+    font-size: 14px;
+    transition: 0.2s;
+}
+
+    input:focus {
+        border-color: var(--primary);
+        outline: none;
+    }
+
+.panel-config input, .panel-config select {
+    margin: 0 !important;
+}
+
+/* --- CHECKBOXES --- */
+.checkbox-group input[type="checkbox"] {
+    appearance: none;
+    width: 22px;
+    height: 22px;
+    border: 2px solid var(--primary);
+    border-radius: 6px;
+    background: var(--bg);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 !important;
+}
+
+    .checkbox-group input[type="checkbox"]:checked {
+        background: var(--success);
+        border-color: var(--success);
+    }
+
+    .checkbox-group input[type="checkbox"]::after {
+        content: '✔';
+        color: white;
+        font-size: 14px;
+        display: none;
+    }
+
+    .checkbox-group input[type="checkbox"]:checked::after {
+        display: block;
+    }
+
+/* --- BOUTONS --- */
+button {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-main {
+    background: var(--primary);
+    color: white;
+    width: 100%;
+}
+
+.btn-ia {
+    background: var(--ia-accent);
+    color: white;
+    width: 100%;
+    margin-top: 10px;
+}
+
+.btn-outline {
+    background: var(--panel);
+    color: var(--text);
+    border: 1px solid var(--border);
+}
+
+    .btn-outline:hover {
+        background: var(--panel-light);
+    }
+
+.btn-preview {
+    background: var(--import-accent);
+    color: white;
+    flex: 1;
+}
+
+.btn-generate {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    flex: 2;
+}
+
+.action-zone {
+    display: flex;
+    gap: 15px;
+    margin-top: 30px;
+}
+
+/* --- POPUPS (PADDING 40PX) --- */
+#alert-modal, #help-modal, #preview-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.75);
+    z-index: 5000;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(4px);
+}
+
+.alert-content, .help-content {
+    background: var(--panel);
+    padding: 40px !important; /* L'ESPACEMENT DE 40PX */
+    border-radius: 24px;
+    max-width: 500px;
+    width: 90%;
+    text-align: center;
+    border: 1px solid var(--border);
+    box-shadow: 0 25px 50px -12px var(--shadow);
+    animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+#alert-text {
+    display: block;
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: var(--text);
+    margin: 20px 0 30px 0;
+    font-weight: 600;
+}
+
+.alert-icon {
+    font-size: 3.5rem;
+    color: #f59e0b;
+    margin-bottom: 10px;
+}
+
+@keyframes popIn {
+    from {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* --- APERÇU & CORRECTIF CROIX BLANCHE --- */
+.modal-content-full {
+    width: 95%;
+    max-width: 1000px;
+    height: 90vh;
+    background: var(--bg);
+    border-radius: 20px;
+    position: relative;
+    overflow: hidden;
+}
+
+    #preview-modal .remove-btn,
+    #help-modal .remove-btn,
+    .modal-content-full .remove-btn {
+        color: #ffffff !important; /* Force le blanc */
+        background: var(--danger);
+        opacity: 1;
+        padding: 8px 15px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 700;
+        position: absolute;
+        top: 20px;
+        right: 20px;
+    }
+
+/* Correctif spécifique pour le mode sombre */
+[data-theme="dark"] .btn-outline {
+    background-color: var(--panel-light) !important; /* Gris bleuté sombre */
+    color: var(--text) !important; /* Texte blanc cassé */
+    border: 1px dashed var(--border) !important; /* Bordure visible mais discrète */
+}
+
+    /* Optionnel : changement de couleur au survol pour le feedback */
+    [data-theme="dark"] .btn-outline:hover {
+        background-color: var(--border) !important;
+    }

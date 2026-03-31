@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Générateur AFTRAL - Personnalisé</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
+            --blue: #38bdf8;
+            --accent-hover: #7dd3fc;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --aftral-blue: #2d3663;
+            --accent: #5c6eb1;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: #d1d5db;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            color: var(--text-main);
+            overflow: hidden;
+        }
+
+        /* --- Navbar --- */
+        .navbar {
+            display: flex;
+            align-items: center;
+            padding: 15px 30px;
+            background: rgba(30, 41, 59, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-back-link {
+            color: var(--blue);
+            text-decoration: none;
+            margin-right: 20px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+        }
+
+        .nav-back-link:hover {
+            color: var(--accent-hover);
+        }
+
+        /* --- Wrapper Principal --- */
+        .main-wrapper {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        #editor {
+            width: 380px;
+            background: white;
+            padding: 25px;
+            border-right: 1px solid #94a3b8;
+            overflow-y: auto;
+            color: #1e293b;
+        }
+
+        h2 {
+            color: var(--aftral-blue);
+            font-size: 1rem;
+            text-transform: uppercase;
+            border-bottom: 2px solid var(--accent);
+            padding-bottom: 8px;
+            margin-bottom: 20px;
+        }
+
+        .group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            font-weight: 700;
+            font-size: 0.75rem;
+            color: #64748b;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 14px;
+            box-sizing: border-box;
+            transition: var(--transition);
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(92, 110, 177, 0.1);
+        }
+
+        input[type="color"] {
+            height: 40px;
+            padding: 2px;
+            cursor: pointer;
+        }
+
+        textarea {
+            height: 90px;
+            resize: none;
+        }
+
+        .btn-export {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            background: var(--aftral-blue);
+            color: white;
+            font-weight: bold;
+            font-size: 1rem;
+            margin-top: 10px;
+            transition: var(--transition);
+        }
+
+        .btn-export:hover {
+            background: #1e254a;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(45, 54, 99, 0.3);
+        }
+
+        .save-load-zone {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px dashed #cbd5e1;
+        }
+
+        .btn-secondary {
+            background: #f8fafc;
+            color: #475569;
+            padding: 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-secondary:hover {
+            background: #edf2f7;
+            border-color: #94a3b8;
+            color: var(--aftral-blue);
+        }
+
+        #preview-zone {
+            flex-grow: 1;
+            padding: 40px;
+            overflow-y: auto;
+            display: flex;
+            justify-content: center;
+            background: #e2e8f0;
+        }
+
+        #canvas {
+            background: white;
+            width: 100%;
+            max-width: 900px;
+            border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+            height: fit-content;
+        }
+
+        /* --- Popup Stylisée (Modal) --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(8px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: 24px;
+            width: 350px;
+            text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            transform: translateY(-30px);
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            color: #1e293b;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-icon-wrapper {
+            width: 80px;
+            height: 80px;
+            background: #ecfdf5;
+            color: #10b981;
+            font-size: 2.5rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+        }
+
+        .modal-title {
+            font-weight: 800;
+            font-size: 1.4rem;
+            margin-bottom: 10px;
+            color: var(--aftral-blue);
+        }
+
+        .modal-text {
+            color: #64748b;
+            font-size: 1rem;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+
+        .btn-modal {
+            background: var(--aftral-blue);
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-modal:hover {
+            background: #1e254a;
+            transform: scale(1.02);
+            box-shadow: 0 4px 12px rgba(45, 54, 99, 0.2);
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-left" style="display: flex; align-items: center; gap: 20px;">
+            <a href="../outils-hub.html" class="nav-back-link">
+                <i class="fas fa-chevron-left"></i> Retour
+            </a>
+            <h1 style="font-size: 1.1rem; margin: 0; color: white; border-left: 1px solid rgba(255,255,255,0.2); padding-left: 20px; font-family: 'Segoe UI', sans-serif;">
+                IT PÉDAGOGIE <span style="color: #38bdf8; font-weight: normal; margin-left: 10px; font-size: 0.8rem; opacity: 0.8;">Création de Descriptifs</span>
+            </h1>
+        </div>
+
+        <div class="nav-right" style="display: flex; align-items: center; gap: 15px; margin-left: auto;">
+        </div>
+    </nav>
+
+    <div class="main-wrapper">
+        <div id="editor">
+            <h2>Configuration</h2>
+            <div class="group">
+                <label>Couleur des bandeaux</label>
+                <input type="color" id="themeColor" value="#2d3663" oninput="render()">
+            </div>
+
+            <div class="group"><label>Titre de l'élément</label><input type="text" id="title" value="Gestion des temps de conduite" oninput="render()"></div>
+            <div class="group"><label>Sous-titre (Contexte)</label><input type="text" id="subtitle" value="Réglementation Sociale Européenne" oninput="render()"></div>
+            <div class="group"><label>Informations clés</label><input type="text" id="meta" value="Durée estimée : 2h | Niveau : Avancé" oninput="render()"></div>
+            <div class="group"><label>Description</label><textarea id="desc" oninput="render()">Ce contenu permet d'approfondir les règles liées au temps de travail, aux pauses et au repos quotidien/hebdomadaire des conducteurs...</textarea></div>
+            <div class="group"><label>Points clés (1 par ligne)</label><textarea id="objs" oninput="render()">Le disque et la carte tachygraphe&#10;Calcul des amplitudes&#10;Gestion des dépassements exceptionnels</textarea></div>
+            <div class="group"><label>Référence Documentaire</label><input type="text" id="ref" value="REF-AFTRAL-2026-X4" oninput="render()"></div>
+
+            <button class="btn-export" onclick="download()">📥 Télécharger l'HTML</button>
+
+            <div class="save-load-zone">
+                <button class="btn-secondary" onclick="exportConfig()">
+                    <i class="fas fa-file-export"></i> Sauver Config
+                </button>
+                <button class="btn-secondary" onclick="document.getElementById('importFile').click()">
+                    <i class="fas fa-file-import"></i> Charger Config
+                </button>
+                <input type="file" id="importFile" style="display:none" accept=".json" onchange="importConfig(this)">
+            </div>
+        </div>
+
+        <div id="preview-zone">
+            <div id="canvas"></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-content">
+            <div class="modal-icon-wrapper"><i class="fas fa-check" id="modalIcon"></i></div>
+            <div class="modal-title" id="modalTitle">Succès !</div>
+            <div class="modal-text" id="modalText">Opération réussie.</div>
+            <button class="btn-modal" onclick="closeModal()">Continuer</button>
+        </div>
+    </div>
+
+    <script>
+        function lightenColor(col, amt) {
+            col = col.replace(/^#/, '');
+            var num = parseInt(col, 16);
+            var r = (num >> 16) + amt;
+            if (r > 255) r = 255; else if (r < 0) r = 0;
+            var b = ((num >> 8) & 0x00FF) + amt;
+            if (b > 255) b = 255; else if (b < 0) b = 0;
+            var g = (num & 0x0000FF) + amt;
+            if (g > 255) g = 255; else if (g < 0) g = 0;
+            return "#" + (g | (b << 8) | (r << 16)).toString(16).padStart(6, '0');
+        }
+
+        function showModal(title, text, type = "success") {
+            const overlay = document.getElementById('modalOverlay');
+            const icon = document.getElementById('modalIcon');
+            const iconWrapper = document.querySelector('.modal-icon-wrapper');
+            document.getElementById('modalTitle').innerText = title;
+            document.getElementById('modalText').innerText = text;
+            if (type === "error") {
+                icon.className = "fas fa-times";
+                iconWrapper.style.background = "#fee2e2"; iconWrapper.style.color = "#ef4444";
+            } else {
+                icon.className = "fas fa-check";
+                iconWrapper.style.background = "#ecfdf5"; iconWrapper.style.color = "#10b981";
+            }
+            overlay.classList.add('active');
+        }
+
+        function closeModal() { document.getElementById('modalOverlay').classList.remove('active'); }
+
+        function render() {
+            const themeColor = document.getElementById('themeColor').value;
+            const lightColor = lightenColor(themeColor, 30);
+            const title = document.getElementById('title').value;
+            const subtitle = document.getElementById('subtitle').value;
+            const meta = document.getElementById('meta').value;
+            const desc = document.getElementById('desc').value;
+            const ref = document.getElementById('ref').value;
+            const objsRaw = document.getElementById('objs').value;
+            const objs = objsRaw.split('\n').filter(t => t.trim() !== "");
+
+            const metaHtml = meta.trim() !== "" ? `
+                <div style="padding: 0 50px; margin-top: -22px; position: relative; z-index: 5;">
+                    <div style="background: #f1f5f9; border: 1px solid #cbd5e1; display: inline-block; padding: 10px 20px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; color: ${themeColor}; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                        ${meta}
+                    </div>
+                </div>` : "";
+
+            let pointsClesHtml = "";
+            if (objs.length > 0) {
+                const listHtml = objs.map(o => `<div style="display:flex; align-items:flex-start; margin-bottom:8px; color:#334155;"><span style="color:${themeColor}; margin-right:12px; font-weight:bold;">•</span><span style="font-size:1.05rem;">${o}</span></div>`).join('');
+                pointsClesHtml = `<div style="background: #f8fafc; padding: 20px 25px; border-radius: 10px; border: 1px solid #f1f5f9; margin-top: 15px;"><h3 style="color: ${themeColor}; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px;">Points clés</h3>${listHtml}</div>`;
+            }
+
+            const content = `
+                <div style="font-family: 'Segoe UI', Helvetica, Arial, sans-serif; color: #1e293b; background: white; margin: 0 auto; max-width: 900px; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
+                    <div style="background: linear-gradient(90deg, ${lightColor} 0%, ${themeColor} 100%); color: white; padding: 35px 50px 45px 50px;">
+                        <div style="text-transform: uppercase; font-size: 0.75rem; letter-spacing: 2px; opacity: 0.8; margin-bottom: 8px; font-weight: 500;">${subtitle}</div>
+                        <h1 style="margin: 0; font-size: 2rem; font-weight: 800; line-height: 1.1;">${title}</h1>
+                    </div>
+                    ${metaHtml}
+                    <div style="padding: 40px 50px;">
+                        <h3 style="color: ${themeColor}; font-size: 0.85rem; text-transform: uppercase; border-bottom: 2px solid ${themeColor}; display: inline-block; padding-bottom: 3px; margin-bottom: 15px;">Description</h3>
+                        <p style="font-size: 1.1rem; line-height: 1.6; color: #475569; text-align: justify; margin: 0;">${desc.replace(/\n/g, '<br>')}</p>
+                        ${pointsClesHtml}
+                    </div>
+                    <div style="background: ${themeColor}; color: white; padding: 15px 50px; display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem;">
+                        <span style="font-weight: 600; opacity: 0.9;">AFTRAL | DPSO</span>
+                        <span>${ref}</span>
+                    </div>
+                </div>`;
+
+            document.getElementById('canvas').innerHTML = content;
+        }
+
+        function download() {
+            const content = document.getElementById('canvas').innerHTML;
+            const refName = document.getElementById('ref').value.trim() || 'Fiche_AFTRAL';
+            const blob = new Blob([`<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"></head><body style="margin:40px; background:#f0f2f5; display:flex; justify-content:center;">${content}</body></html>`], { type: 'text/html' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `${refName}.html`;
+            a.click();
+            showModal("Exportation", "Fiche HTML générée avec succès !");
+        }
+
+        function exportConfig() {
+            const config = {
+                themeColor: document.getElementById('themeColor').value,
+                title: document.getElementById('title').value,
+                subtitle: document.getElementById('subtitle').value,
+                meta: document.getElementById('meta').value,
+                desc: document.getElementById('desc').value,
+                objs: document.getElementById('objs').value,
+                ref: document.getElementById('ref').value
+            };
+            const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `CONFIG_${config.ref || 'AFTRAL'}.json`;
+            a.click();
+            showModal("Sauvegarde", "Fichier de configuration exporté.");
+        }
+
+        function importConfig(input) {
+            const file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                try {
+                    const config = JSON.parse(e.target.result);
+                    document.getElementById('themeColor').value = config.themeColor || "#2d3663";
+                    document.getElementById('title').value = config.title || "";
+                    document.getElementById('subtitle').value = config.subtitle || "";
+                    document.getElementById('meta').value = config.meta || "";
+                    document.getElementById('desc').value = config.desc || "";
+                    document.getElementById('objs').value = config.objs || "";
+                    document.getElementById('ref').value = config.ref || "";
+                    render();
+                    showModal("Import Réussi", "Configuration chargée.");
+                } catch (err) {
+                    showModal("Erreur", "Fichier invalide.", "error");
+                }
+            };
+            reader.readAsText(file);
+            input.value = "";
+        }
+
+        render();
+    </script>
+</body>
+</html>
