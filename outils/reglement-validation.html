@@ -376,7 +376,75 @@
         </div>
     </div>
 
+
+
     <script>
+        // --- NOUVEAU : Chargement du fichier JSON externe ---
+        async function chargerReglement() {
+            try {
+                const response = await fetch('reglement.json');
+                if (!response.ok) throw new Error("Fichier introuvable");
+
+                const data = await response.json();
+                const box = document.getElementById('rulesBox');
+                let html = "";
+
+                // 1. En-tête (Titre, Sous-titre, Version)
+                html += `<h1 style="text-align:center; color:#0055A4; margin-bottom:5px;">${data.titre_general}</h1>`;
+                html += `<p style="text-align:center; font-weight:bold; margin-top:0;">${data.sous_titre}</p>`;
+                html += `<p style="text-align:right; font-size:0.8rem; color:#64748b;">${data.code_document} - ${data.version}</p>`;
+
+                // 2. Préambule général
+                html += `<div style="background:#f8fafc; padding:15px; border-radius:8px; border-left:4px solid #0055A4; margin-bottom:20px;">
+                    ${data.preambule}
+                 </div>`;
+
+                // 3. Boucle sur les sections
+                data.sections.forEach(section => {
+                    html += `<h2 style="background:#2d3663; color:white; padding:10px; border-radius:4px; margin-top:30px;">
+                        Section ${section.id} : ${section.titre}
+                     </h2>`;
+
+                    // Introduction et Objectifs (si présents)
+                    if (section.contenu_introductif) {
+                        html += `<p><strong>${section.contenu_introductif}</strong></p>`;
+                    }
+                    if (section.objectifs) {
+                        html += `<ul>${section.objectifs.map(obj => `<li>${obj}</li>`).join('')}</ul>`;
+                    }
+
+                    // Champ d'application
+                    if (section.champ_application) {
+                        html += `<p style="font-style:italic; color:#475569;">${section.champ_application}</p>`;
+                    }
+
+                    // Articles de la section
+                    if (section.articles) {
+                        section.articles.forEach(art => {
+                            html += `<h3 style="color:#0055A4; border-bottom:1px solid #e2e8f0; padding-bottom:5px;">
+                                Article ${art.num} : ${art.titre}
+                             </h3>`;
+                            html += `<p>${art.texte}</p>`;
+                        });
+                    }
+                });
+
+                html += `<p style="text-align:center; margin-top:60px; color: #94a3b8;">*** Fin du document ***</p>`;
+
+                box.innerHTML = html;
+
+            } catch (err) {
+                console.error(err);
+                document.getElementById('rulesBox').innerHTML = `
+            <div style="color:#ef4444; text-align:center; padding:20px;">
+                <i class="fas fa-exclamation-triangle fa-2x"></i><br>
+                <strong>Erreur de chargement</strong><br>
+                Le navigateur bloque l'accès au fichier JSON en mode local.<br>
+                <small>Utilisez un serveur local (Live Server) ou hébergez les fichiers.</small>
+            </div>`;
+            }
+        }
+
         // --- Système Popup ---
         function showModal(title, text, isError = false) {
             document.getElementById('modalTitle').innerText = title;
@@ -411,7 +479,12 @@
                 api.LMSFinish("");
             }
         }
-        window.onload = initSCORM;
+
+        // MODIFIÉ : On lance le chargement du JSON ET du SCORM au démarrage
+        window.onload = function () {
+            initSCORM();
+            chargerReglement();
+        };
 
         // --- Logique Signature Verrouillée ---
         const rulesBox = document.getElementById('rulesBox');
@@ -476,9 +549,9 @@
 
             const manifest = `<?xml version="1.0" encoding="UTF-8"?>
 <manifest identifier="RI_AFTRAL" version="1.0" xmlns="http://www.imsproject.org/xsd/imscp_rootv1p1p2">
-              <metadata><schema>ADL SCORM</schema><schemaversion>1.2</schemaversion></metadata>
-              <organizations default="org"><organization identifier="org"><title>Règlement Intérieur</title><item identifier="item1" identifierref="res1"><title>Signature</title></item></organization></organizations>
-              <resources><resource identifier="res1" adlcp:scormtype="sco" href="index.html"></resource></resources>
+                  <metadata><schema>ADL SCORM</schema><schemaversion>1.2</schemaversion></metadata>
+                  <organizations default="org"><organization identifier="org"><title>Règlement Intérieur</title><item identifier="item1" identifierref="res1"><title>Signature</title></item></organization></organizations>
+                  <resources><resource identifier="res1" adlcp:scormtype="sco" href="index.html"></resource></resources>
 </manifest>`;
 
             zip.file("index.html", htmlContent);

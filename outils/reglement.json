@@ -1,0 +1,524 @@
+{
+  "titre_general": "RÈGLEMENT INTÉRIEUR GÉNÉRAL DES APPRENANTS",
+  "sous_titre": "Organisme de formation et Centre de Formation d'Apprentis (CFA)",
+  "version": "Version 18",
+  "code_document": "AQ0080",
+  "preambule": "Le présent règlement intérieur est établi conformément aux articles L6352-3, L6352-4, R6352-1 à R6352-15 du Code du travail et à l’arrêté du 26 juin 2012 précisant les conditions d'exploitation des établissements chargés d'organiser les stages de sensibilisation à la sécurité routière. AFTRAL est un organisme de formation professionnelle dont le siège social est domicilié 46 avenue de Villiers – 75017 PARIS.",
+  "sections": [
+    {
+      "id": 1,
+      "titre": "PRÉAMBULE ET DISPOSITIONS GÉNÉRALES",
+      "contenu_introductif": "Le présent règlement intérieur a pour objet de :",
+      "objectifs": [
+        "fixer la nature et les limites des droits et obligations de l'apprenant et du centre de formation qui l'accueille, dans le souci de rendre le séjour de l'apprenant efficace et paisible, afin qu'il puisse bénéficier au mieux de l'action de formation dans laquelle il s'est engagé ;",
+        "rappeler les principales mesures applicables en matière d'hygiène et de sécurité dans l'établissement ;",
+        "fixer les règles applicables en matière de discipline et notamment la nature et l'échelle des sanctions applicables aux apprenants, ainsi que les droits de ceux-ci en cas de sanction ;",
+        "préciser les modalités selon lesquelles est assurée, pour les stages d'une durée supérieure à 500 heures, la représentation des apprenants."
+      ],
+      "champ_application": "Il s’applique à tous les apprenants, quel que soit leur statut (salarié en formation, demandeur d'emploi, apprenti, etc.) que l'organisme accueille dans ses locaux ou dans des locaux mis à sa disposition. Il s'applique également aux formations dispensées à distance. Ces dispositions visent à garantir le bon déroulement des sessions en ligne et à formaliser les règles applicables à la formation à distance.",
+      "disposition_specifique_apprentis": "Les apprentis sont tenus de respecter le règlement intérieur de l'organisme de formation ainsi que celui de leur entreprise d'accueil. En cas de manquement, les sanctions applicables sont celles prévues par le règlement intérieur applicable au lieu où le manquement a été constaté.",
+      "articles": [
+        {
+          "num": 1,
+          "titre": "Modification de la situation personnelle de l'apprenant",
+          "texte": "Toute modification de la situation personnelle de l'apprenant au regard des renseignements fournis lors de l'inscription doit être immédiatement portée à la connaissance du secrétariat de l'organisme de formation."
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "titre": "RÈGLES D'HYGIÈNE ET DE SÉCURITÉ",
+      "articles": [
+        {
+          "num": 2,
+          "titre": "Principes généraux",
+          "texte": "Chaque apprenant doit veiller à sa sécurité personnelle et à celle des autres en respectant les consignes générales et particulières de sécurité et d'hygiène en vigueur sur le lieu de formation. Dans le cadre des formations à distance, chaque apprenant est responsable de l'hygiène et de la sécurité de son environnement personnel. L'organisme de formation ne pourra être tenu responsable des incidents survenus hors de ses locaux. L'apprenant doit néanmoins veiller à préserver sa santé lors des sessions à distance, en respectant les bonnes pratiques ergonomiques, en prévoyant des pauses visuelles régulières et en aménageant correctement son poste de travail."
+        },
+        {
+          "num": 3,
+          "titre": "Consignes d'incendie",
+          "texte": "Les consignes d’incendie, et notamment un plan de localisation des extincteurs et des issues de secours, sont affichées dans les locaux de l’organisme de manière à être connues de tous les apprenants. Des démonstrations ou exercices sont prévus pour vérifier le fonctionnement du matériel de lutte contre l’incendie ainsi que les consignes de prévention et d’évacuation. Les apprenants sont tenus d’exécuter sans délai l’ordre d’évacuation donné par le formateur ou par un salarié de l’établissement."
+        },
+        {
+          "num": 4,
+          "titre": "Accident",
+          "texte": "Tout accident ou incident survenu à l’occasion ou en cours de formation doit être immédiatement déclaré par l’apprenant accidenté ou par les personnes témoins de l’accident au responsable de l’organisme ou à son représentant. La déclaration d’accident doit être établie par l’organisme de formation, qui avertit lui-même l’entreprise dans les meilleurs délais, conformément à la procédure interne de déclaration d’accident du travail.",
+          "disposition_specifique_apprentis": "L’employeur est prévenu dans les meilleurs délais, ainsi que les représentants légaux pour les apprentis mineurs. Le CFA ne saurait être responsable du rapatriement des apprentis après la prise en charge par les secours."
+        },
+        {
+          "num": 5,
+          "titre": "Mesures d'hygiène et de sécurité exceptionnelles",
+          "texte": "Toute mesure exceptionnelle d'hygiène et/ou de sécurité temporaire, communiquée par voie d'affichage ou oralement par le responsable de l'organisme ou son représentant, devra être respectée et appliquée."
+        },
+        {
+          "num": 6,
+          "titre": "Consommation d'alcool et de stupéfiants",
+          "texte": "L’introduction, la distribution et/ou la consommation, dans les locaux, sur les plateaux techniques ou dans les véhicules de l’organisme de formation, de toute boisson alcoolisée ou de produits stupéfiants sont interdites. Dans le souci d’assurer la sécurité collective et compte tenu des conséquences graves pouvant découler d’un état d’ivresse ou d’une altération des capacités individuelles du fait de la consommation de produits stupéfiants lors de la réalisation des activités professionnelles, la Direction de l’organisme de formation, ou son représentant, pourra initier des contrôles (alcootest, test salivaire, contrôle médical) en cas de suspicion d’état d’ébriété, d’état sous emprise de produits stupéfiants, ou de troubles manifestes de l’état de vigilance constituant un danger pour les apprenants, les formateurs, les usagers du réseau routier et/ou les tiers.",
+          "procedure_controle": {
+            "description": "Toute décision de recourir à un tel contrôle sera mise en oeuvre dans les conditions suivantes :",
+            "points": [
+              "L’apprenant concerné sera informé de la décision de procéder à un contrôle d’alcoolémie ou à un test salivaire, tout en étant précisé qu’il a le droit de refuser ce contrôle. Il sera également averti qu’il peut demander la présence, lors du test, d’un représentant des apprenants ou d’une personne de son choix (salarié ou apprenant de l’organisme de formation) qui est présente ce jour-là.",
+              "En cas de résultat positif au contrôle, l’apprenant pourra demander à effectuer un nouveau test dans les trente minutes suivantes pour une contre-expertise."
+            ]
+          },
+          "sanctions": [
+            "Des sanctions disciplinaires pourront être appliquées aux apprenants dont le résultat à l’éthylotest dépasse la limite légale autorisée pour la conduite, fixée à 0,25 mg/L d’air expiré.",
+            "Ces sanctions s’appliqueront également en cas de consommation de produits stupéfiants.",
+            "Par ailleurs, des sanctions pourront être prises à l’encontre des apprenants qui refusent de se soumettre au test d’alcoolémie réalisé avec un éthylotest et/ou au test salivaire de dépistage des stupéfiants."
+          ]
+        },
+        {
+          "num": 7,
+          "titre": "Interdiction de fumer et de vapoter",
+          "sous_articles": [
+            {
+              "id": "7.1",
+              "titre": "Interdiction de fumer",
+              "texte": "En application de l’article L. 3511-7 du code de la santé publique, il est formellement interdit de fumer dans l’enceinte de l’établissement, y compris dans les espaces extérieurs. Cette interdiction s’applique réglementairement :",
+              "points": [
+                "dans tous les locaux fermés et couverts de l’organisme de formation ;",
+                "dans les moyens de transport collectif utilisés lors des formations ;",
+                "dans les espaces non couverts des établissements destinés à la formation ou à l’hébergement des mineurs."
+              ],
+              "extension_direction": [
+                "à l’ensemble des espaces extérieurs appartenant à l’établissement, sauf zones spécifiquement désignées et signalées comme « espace fumeurs » ;",
+                "dans les véhicules utilisés lors des formations, même individuels ;",
+                "lors des visites ou stages en entreprise, selon le règlement applicable dans ces lieux."
+              ]
+            },
+            {
+              "id": "7.2",
+              "titre": "Interdiction de vapoter",
+              "texte": "En application de l’article L. 3513-6 du code de la santé publique (décret d’application n° 2017-633 du 25 avril 2017), il est interdit de vapoter dans les lieux à usage collectif fermés ou couverts. Cette interdiction s’applique :",
+              "points": [
+                "dans tous les locaux fermés et couverts de l’organisme de formation ;",
+                "dans les salles de formation, bureaux et espaces communs ;",
+                "dans les véhicules utilisés lors des formations."
+              ]
+            },
+            {
+              "id": "7.3",
+              "titre": "Sanctions",
+              "texte": "Le non-respect de ces interdictions expose l’apprenant aux sanctions prévues par le présent règlement intérieur ainsi qu’aux sanctions prévues par les dispositions légales en vigueur. Des pauses peuvent être aménagées pour permettre aux apprenants de sortir des locaux aux endroits autorisés, sans perturber le bon déroulement des formations."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "titre": "UTILISATION DES LOCAUX ET MATÉRIELS",
+      "articles": [
+        {
+          "num": 8,
+          "titre": "Maintien en bon état du matériel",
+          "texte": "Chaque apprenant a l’obligation de conserver en bon état le matériel qui lui est confié. Les apprenants sont tenus d’utiliser le matériel conformément à son objet. L’utilisation du matériel à d’autres fins, notamment personnelles, est interdite, sauf si des matériels spécifiques sont mis à disposition à cet effet. Suivant la formation suivie, les apprenants peuvent être tenus de consacrer le temps nécessaire à l’entretien ou au nettoyage du matériel. À la fin de la formation, l’apprenant est tenu de restituer tout matériel et document en sa possession appartenant à l’organisme de formation, à l’exception des documents pédagogiques distribués, qui restent sa propriété. La documentation pédagogique remise lors des sessions de formation est protégée au titre des droits d’auteur et ne peut être réutilisée ou dupliquée autrement que pour un strict usage personnel. Les supports de formation sont protégés par le droit d’auteur. Toute reproduction ou diffusion sans autorisation est strictement interdite."
+        },
+        {
+          "num": 9,
+          "titre": "Utilisation des véhicules, engins, machines et moyens informatiques",
+          "texte": "Lorsque le permis de conduire est requis pour l’utilisation des véhicules de formation, l’apprenant doit présenter, le premier jour de la formation, l’original de son permis de conduire valide. Une copie du permis de conduire est ensuite placée dans le dossier des participants. Lors d’une formation nécessitant la détention du permis de conduire : si l’apprenant ne détient plus son permis de conduire, il doit informer immédiatement le responsable de la formation et ne plus conduire de véhicule. Les véhicules, engins et machines ne doivent être utilisés qu’en présence d’un formateur et sous sa surveillance. Toute anomalie dans leur fonctionnement et tout incident doivent être immédiatement signalés au formateur en charge de la formation suivie. Le matériel informatique mis à disposition des apprenants est à usage exclusivement pédagogique. Il est interdit d’installer ou de télécharger des logiciels ou fichiers non motivés par le programme pédagogique suivi. Ces matériels informatiques doivent être conservés dans leur configuration initiale."
+        },
+        {
+          "num": 10,
+          "titre": "Port des vêtements de sécurité",
+          "texte": "Lorsque la formation l'exige, les apprenants ne seront admis en cours pratique que s'ils portent les vêtements et accessoires de sécurité imposés (gants, casques, chaussures, lunettes, etc.)."
+        },
+        {
+          "num": 11,
+          "titre": "Vestiaires",
+          "texte": "Le vestiaire ou armoire individuelle mis à la disposition de chaque apprenant pour ses vêtements et outils personnels doit être tenu dans un constant état de propreté. L’apprenant ne doit l’utiliser que pour l’usage auquel il est destiné. Après avoir préalablement informé les apprenants, la Direction de l’organisme de formation ou son représentant pourra ouvrir les armoires et vestiaires afin d’en contrôler l’état et le contenu. En cas d’absence ou de refus des apprenants, la Direction de l’organisme de formation ou son représentant pourra faire ouvrir les vestiaires en présence de deux témoins dans les situations suivantes :",
+          "cas_ouverture": [
+            "lorsque des vols auront été constatés dans l’organisme ;",
+            "lorsque l’urgence ou la sécurité le commanderont, notamment en raison de la présence probable, dans les vestiaires, de substances, d’objets ou de matériels dangereux, toxiques ou insalubres, ou susceptibles de le devenir."
+          ]
+        },
+        {
+          "num": 12,
+          "titre": "Restauration",
+          "texte": "Dans les cas où un restaurant existe dans l’enceinte de l’organisme de formation, les apprenants peuvent y prendre leurs repas aux heures fixées pour les repas. Il est interdit aux apprenants de prendre leurs repas dans les locaux affectés à la formation, sauf autorisation spéciale donnée par la Direction de l’organisme de formation ou son représentant. Seules sont autorisées les collations prises au cours des pauses dans les lieux réservés à cet effet."
+        },
+        {
+          "num": 13,
+          "titre": "Accès aux postes de distribution de boissons",
+          "texte": "Les apprenants ont accès, au moment des pauses fixées, aux postes de distribution de boissons non alcoolisées, fraîches ou chaudes, s’ils existent."
+        }
+      ]
+    },
+    {
+      "id": "3bis",
+      "titre": "DISPOSITIONS SPÉCIFIQUES À LA FORMATION À DISTANCE",
+      "articles": [
+        {
+          "num": 14,
+          "titre": "Prérequis techniques et matériels",
+          "texte": "Pour suivre une formation à distance, l’apprenant doit disposer des équipements techniques suivants :",
+          "points": [
+            "un ordinateur, une tablette ou un smartphone compatible avec les outils pédagogiques utilisés ;",
+            "une connexion internet stable permettant de suivre des sessions de visioconférence ;",
+            "une webcam et un microphone fonctionnels ;",
+            "un espace de travail calme et propice à l’apprentissage."
+          ],
+          "note": "L’organisme communique avant la formation les prérequis techniques spécifiques à chaque formation. L’apprenant est responsable de s’assurer qu’il dispose du matériel et de l’environnement adéquats pour suivre la formation à distance dans de bonnes conditions."
+        },
+        {
+          "num": "14bis",
+          "titre": "Identification et sécurité informatique",
+          "texte": "L’accès aux plateformes d’apprentissage en ligne et aux ressources pédagogiques numériques se fait via des identifiants personnels communiqués à l’apprenant au début de la formation. Ces identifiants sont strictement confidentiels et ne doivent pas être partagés. L’apprenant s’engage à :",
+          "points": [
+            "ne pas partager ses identifiants de connexion avec des tiers ;",
+            "ne pas enregistrer, capturer, diffuser ou partager les sessions de formation sans l’autorisation expresse de l’organisme de formation ;",
+            "ne pas installer de logiciels malveillants pouvant compromettre la sécurité des plateformes ;",
+            "signaler immédiatement toute anomalie, problème de sécurité ou difficulté technique repéré(e) sur la plateforme de formation."
+          ],
+          "note": "En cas de besoin d’assistance technique, l’apprenant peut contacter le support dédié mis en place par l’organisme de formation afin d’assurer la continuité pédagogique et le bon déroulement des sessions."
+        },
+        {
+          "num": "14ter",
+          "titre": "Usage des plateformes et outils numériques",
+          "texte": "Les plateformes de formation et les outils numériques mis à disposition sont réservés à un usage strictement pédagogique dans le cadre de la formation suivie. L’apprenant s’engage à :",
+          "points": [
+            "utiliser les plateformes conformément à leur destination pédagogique ;",
+            "ne pas détourner les outils numériques à des fins personnelles ou commerciales ;",
+            "respecter la propriété intellectuelle des contenus pédagogiques mis à disposition ;",
+            "ne pas perturber le fonctionnement technique des plateformes."
+          ],
+          "note": "Toute utilisation abusive ou détournée des plateformes pourra faire l’objet de sanctions disciplinaires."
+        },
+        {
+          "num": "14quater",
+          "titre": "Modalités d'interaction et comportement en ligne",
+          "texte": "Lors des sessions de formation synchrones (visioconférences, classes virtuelles, etc.), l’apprenant doit adopter un comportement professionnel identique à celui attendu en présentiel :",
+          "points": [
+            "se présenter dans une tenue correcte et adaptée ;",
+            "activer sa caméra lorsque cela est demandé par le formateur, sauf impossibilité technique justifiée ;",
+            "utiliser la fonction « lever la main » ou le chat pour demander la parole ;",
+            "désactiver son microphone lorsqu’il ne s’exprime pas pour éviter les bruits parasites ;",
+            "interagir de façon respectueuse avec le formateur et les autres apprenants ;",
+            "être présent et attentif pendant toute la durée de la session."
+          ],
+          "note": "Les règles de savoir-vivre et de respect mutuel s’appliquent également dans les espaces d’échanges écrits (forums, chats, mails). Tout propos injurieux, discriminatoire ou inapproprié pourra faire l’objet de sanctions."
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "titre": "RÈGLES DE DISCIPLINE",
+      "articles": [
+        {
+          "num": 15,
+          "titre": "Assiduité",
+          "texte": "Les apprenants sont tenus de suivre avec assiduité la formation à laquelle ils sont inscrits et de respecter les horaires fixés. Les horaires sont fixés par la Direction et portés à la connaissance des apprenants notamment lors de l'envoi ou de la remise de la convocation. L'organisme de formation se réserve, dans les limites imposées par les dispositions en vigueur, le droit de modifier les horaires en fonction des nécessités de service. Les apprenants doivent se conformer aux modifications apportées. Chaque demi-journée, les apprenants doivent émarger pour attester de leur présence.",
+          "formation_distance": {
+            "regles": "L’assiduité est vérifiée par les traces de connexion à la plateforme de formation, la participation active aux activités synchrones (visioconférences, classes virtuelles, etc.), la réalisation des travaux personnels et le respect des échéances fixées. L’organisme de formation met en place un dispositif de suivi permettant de s’assurer de l’engagement et de la progression de chaque apprenant, et se réserve le droit de contacter l’apprenant en cas d’absences répétées ou de manque d’activité sur la plateforme.",
+            "points": [
+              "Les apprenants doivent respecter les horaires fixés pour la formation à distance, se connecter ponctuellement et participer activement aux activités pédagogiques, en suivant les consignes données par le formateur. Un comportement collaboratif et respectueux est attendu lors des interactions en ligne.",
+              "Des émargements électroniques ou attestations de présence pourront être utilisés.",
+              "Toute perturbation ou non-respect des consignes pourra entraîner des sanctions disciplinaires."
+            ]
+          }
+        },
+        {
+          "num": 16,
+          "titre": "Absences et retards",
+          "texte": "En cas d'absence ou de retard à la formation, les apprenants doivent avertir le formateur qui a en charge la formation ou le service administratif de l'organisme, et s'en justifier le jour même. Par ailleurs, les apprenants ne peuvent s'absenter pendant les heures de stage, sauf circonstances exceptionnelles précisées par la Direction de l'organisme. Toute absence doit impérativement faire l'objet d'un arrêt de travail / d'une convocation officielle. Si une absence est prévue, elle doit être autorisée par l'employeur qui en informe l'organisme. Un cumul d'absences peut entraîner l'impossibilité de se présenter aux examens ou sessions de validation. Lorsque les apprenants sont des salariés d'entreprise, l'organisme doit informer l'entreprise de ces absences ou retards. Toute absence ou retard non justifié par des circonstances particulières constitue une faute passible de sanctions disciplinaires. En tant que salarié de son entreprise, la présence et la participation active aux cours constituent une obligation pour chaque apprenant qui doit respecter l'ensemble des horaires de formation définis par l'emploi du temps : le temps de formation étant rémunéré par l'employeur. En outre, pour les apprenants demandeurs d'emploi rémunérés par l'État ou une région, les absences non justifiées entraîneront, en application de l'article R6341-45 du Code du Travail, une retenue de rémunération proportionnelle à la durée desdites absences.",
+          "disposition_specifique_apprentis": "Toute absence fait l'objet d'un avis écrit envoyé à l'employeur et aux responsables légaux des apprentis mineurs. L'apprenti qui aura été absent ne sera admis en cours que s'il justifie cette absence auprès du CFA (préalablement à sa reprise). Sauf autorisation exceptionnelle, il est interdit de sortir de l'établissement pendant et entre les enseignements. Dans le cadre d'un contrat en alternance, en cas de maladie durant les périodes d'enseignements, l'apprenti devra envoyer un arrêt de travail (original) à son employeur, et fournir une photocopie à l'organisme.",
+          "formation_distance": {
+            "consideres_comme_absences": [
+              "la non-connexion aux sessions synchrones programmées ;",
+              "l’absence de connexion planifiée à la plateforme de formation, sans justification préalable et acceptée par l’organisme ;",
+              "la connexion tardive aux classes virtuelles ;",
+              "l’absence de participation aux activités pédagogiques obligatoires ;",
+              "la non-réalisation des travaux et évaluations dans les délais impartis."
+            ],
+            "justification": "Les règles concernant la justification des absences et des retards s’appliquent de la même manière qu’en présentiel. L’apprenant doit prévenir l’organisme de formation en cas d’impossibilité technique de se connecter ou en cas d’absence planifiée."
+          }
+        },
+        {
+          "num": 17,
+          "titre": "Accès à l'organisme",
+          "texte": "Sauf autorisation expresse de la Direction, les apprenants ayant accès à l'organisme pour suivre leur formation ne peuvent :",
+          "points": [
+            "y entrer ou y demeurer à d'autres fins ;",
+            "y introduire, faire introduire ou faciliter l'introduction de personnes étrangères à l'organisme, ni de marchandises destinées à être vendues au personnel ou aux apprenants."
+          ]
+        },
+        {
+          "num": 18,
+          "titre": "Le livret d'apprentissage (spécifique aux apprentis)",
+          "texte": "Le livret d’apprentissage est dématérialisé et accessible sur la plateforme dédiée. L’ensemble des validations s’effectue par signature électronique, conférant la même valeur juridique qu’une signature manuscrite. L’apprenti veille à la bonne tenue de son livret et sollicite les signatures nécessaires à chaque étape. Le CFA contrôle régulièrement l’actualisation et la conformité du livret numérique."
+        },
+        {
+          "num": 19,
+          "titre": "Tenue et comportement",
+          "texte": "Les apprenants sont invités à se présenter à l'organisme de formation en tenue décente. Celle-ci doit être adaptée à la formation suivie, et aux métiers auxquels la formation prépare. Ils sont tenus d'avoir un comportement correct à l'égard de toute personne présente dans l'organisme de formation. De même, aucun propos, voire injure, à raison de l'origine, de l'appartenance religieuse, raciale, ethnique, du sexe (dont agissements sexistes), des opinions ou du handicap ne sera toléré que ce soit d'apprenant à apprenant ou envers tout salarié de l'organisme.",
+          "comportements_interdits": [
+            "détenir des armes, cutters et autres objets présentant un danger pour autrui et soi-même ;",
+            "avoir des attitudes provocatrices (paroles, gestes), des comportements susceptibles de constituer des pressions sur les autres personnes (harcèlement moral – harcèlement sexuel), s'adonner à la violence physique ou verbale et au racket ;",
+            "modifier la programmation des postes informatiques et des imprimantes ;",
+            "télécharger des programmes et utiliser des logiciels non autorisés par les formateurs."
+          ]
+        },
+        {
+          "num": 20,
+          "titre": "Fraude aux examens et évaluations",
+          "texte": "Est considérée comme fraude toute action ou tentative visant à tromper les formateurs ou évaluateurs sur les compétences et connaissances réelles de l'apprenant. Sont notamment considérés comme actes frauduleux :",
+          "actes_frauduleux": [
+            "l'utilisation de documents ou matériels non autorisés pendant une épreuve ;",
+            "la communication avec d'autres apprenants ou des personnes extérieures pendant une épreuve ;",
+            "le plagiat, la copie ou la falsification de travaux ;",
+            "l'usurpation d'identité ;",
+            "l'utilisation de dispositifs électroniques non autorisés (téléphones, montres connectées, etc.) ;",
+            "la récupération non autorisée des sujets d'examen."
+          ],
+          "sanctions_fraude": {
+            "principe": "En cas de fraude ou tentative de fraude constatée, l'organisme de formation se réfère systématiquement au règlement d'examen du certificateur concerné, qui prévoit les procédures et sanctions applicables.",
+            "defaut_dispositions": [
+              "l'annulation de l'épreuve pour l'apprenant concerné ;",
+              "l'interdiction de se présenter aux épreuves de la session en cours ;",
+              "des sanctions disciplinaires conformément aux articles 24 à 26 du présent Règlement."
+            ]
+          }
+        },
+        {
+          "num": 21,
+          "titre": "Téléphone portable",
+          "texte": "Les téléphones portables doivent être éteints lors des séances de formation sauf autorisation du formateur. Il est formellement interdit d'enregistrer ou de filmer les sessions de formation. Il est interdit de filmer, de prendre en photo les matériels et ressources pédagogiques, les collaborateurs de l'organisme de formation, les autres apprenants ainsi que toutes les autres personnes, à l'intérieur de l'enceinte du site et pendant les cours extérieurs."
+        },
+        {
+          "num": 22,
+          "titre": "Circulation - parc de stationnement",
+          "texte": "Lorsque la disposition des lieux le permet, l'accès dans le site en véhicule automobile ou en deux roues, entraîne le respect des règles du Code de la Route. La vitesse y est limitée à 20 km/h sauf indication contraire. Si un parc de stationnement est mis à disposition des apprenants, son accès n'est autorisé qu'aux heures de début et de fin de demi-journée et de journée. Le stationnement des véhicules doit avoir lieu dans les emplacements réservés à cet effet, sans causer de gêne aux autres usagers. Pour les sites qui disposent d'un plan de circulation et/ou d'un document « plan de circulation piétons » il est impératif de suivre ce(s) plan(s) lors de déplacement dans le site. Les bornes de recharge électrique disponibles sur le site sont strictement réservées à l'usage exclusif des véhicules de l'organisme de formation. Elles ne sont pas accessibles aux apprenants ou aux visiteurs."
+        },
+        {
+          "num": 23,
+          "titre": "Infraction au code de la route",
+          "texte": "En cas d'infraction au code de la route lors de séance de formation, l'apprenant titulaire d'un permis de conduire en vigueur assumera les conséquences pécuniaires et le retrait de points sur son permis de conduire afférents à l'infraction."
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "titre": "SANCTIONS ET PROCÉDURES DISCIPLINAIRES",
+      "articles": [
+        {
+          "num": 24,
+          "titre": "Sanctions disciplinaires",
+          "texte": "Tout manquement de l’apprenant à l’une des prescriptions du présent règlement intérieur, ainsi qu’en cas de fraude aux épreuves d’examen, pourra faire l’objet d’une sanction. Conformément à l’article R6352-3 du Code du travail, constitue une sanction toute mesure, autre que les observations verbales, prise par la Direction de l’organisme de formation ou son représentant à la suite d’un agissement de l’apprenant considéré comme fautif. Cette mesure peut affecter, immédiatement ou non, la présence de l’intéressé dans la formation ou remettre en cause la continuité de sa formation.",
+          "cas_application": [
+            "manquement à l’une des prescriptions du règlement intérieur ;",
+            "fraude aux épreuves d’examen ;",
+            "comportement non conforme aux règles établies."
+          ],
+          "echelle_sanctions": [
+            "Avertissement : En cas de première incivilité ;",
+            "Blâme ou rappel à l’ordre : En cas de seconde incivilité ;",
+            "Exclusion temporaire (mesure conservatoire) : En cas d’agression comportementale ou verbale ;",
+            "Exclusion définitive : En cas d’agression verbale de gravité exceptionnelle (notamment menace de mort, menace grave à l’intégrité physique ou psychologique d’une personne), la Direction peut prononcer une exclusion définitive dès la première occurrence, après examen des circonstances et dans le respect de la procédure disciplinaire prévue à l’article 25 ;",
+            "Remise à disposition temporaire auprès de l’employeur : Selon la gravité du comportement ;",
+            "Exclusion définitive : Pour toute agression physique, une seconde agression verbale (hors cas de gravité exceptionnelle), ou une troisième incivilité."
+          ],
+          "dispositions_generales": [
+            "les amendes ou autres sanctions pécuniaires sont interdites ;",
+            "en cas d’exclusion définitive, l’apprenant ne pourra prétendre à aucun remboursement des frais de formation. L’autorité administrative compétente sera informée dans les plus brefs délais."
+          ],
+          "procedure_suivi": "Toute sanction disciplinaire, à l’exception de l’observation verbale, est prononcée dans le respect de la procédure disciplinaire prévue à l’article 25 du présent règlement intérieur. Un suivi écrit des sanctions prononcées est tenu par l’organisme de formation afin de garantir la traçabilité des décisions. La Direction peut prendre en compte des circonstances atténuantes dans l’appréciation de la sanction."
+        },
+        {
+          "num": 25,
+          "titre": "Procédure disciplinaire",
+          "texte": "Conformément aux articles R6352-4 à R6352-8 du Code du travail : aucune sanction ne peut être infligée à l’apprenant ou à l’apprenti sans qu’il ait été informé au préalable des griefs retenus contre lui.",
+          "etapes": [
+            {
+              "etape": "Information",
+              "texte": "Avant toute sanction, l’apprenant est informé oralement des griefs retenus contre lui. Si la procédure est engagée, cette information est confirmée par écrit."
+            },
+            {
+              "etape": "Convocation à un entretien",
+              "texte": "L’apprenant reçoit une convocation écrite précisant : la date, l’heure et le lieu de l’entretien ; la possibilité d’être assisté par une personne de son choix : un autre apprenant de la même session de formation, un salarié de l’organisme de formation ou le délégué des apprenants de sa promotion. Pour les mineurs, les représentants légaux sont également convoqués."
+            },
+            {
+              "etape": "Entretien disciplinaire",
+              "texte": "Lors de cet entretien : la Direction expose les faits reprochés et recueille les explications de l’intéressé ; l’apprenant peut s’exprimer librement sur les faits."
+            },
+            {
+              "etape": "Décision et notification",
+              "texte": "Après un délai minimal d’un jour franc suivant l’entretien, et dans un délai maximal de quinze jours. La sanction est notifiée par écrit (lettre remise contre décharge ou lettre recommandée avec accusé de réception). La notification précise : les motifs de la sanction ; la nature et la durée de la sanction ; les éventuelles modalités d’application ; les voies et délais de recours."
+            }
+          ]
+        },
+        {
+          "num": "25bis",
+          "titre": "Contestation des sanctions et recours",
+          "contestation": "L'apprenant peut contester par écrit les sanctions qui lui sont appliquées dans un délai de 15 jours à compter de leur notification. La contestation doit être adressée au directeur du site.",
+          "recours_possibles": [
+            "le médiateur désigné par la chambre consulaire compétente (chambre de commerce et d’industrie, chambre des métiers et de l’artisanat ou chambre d’agriculture) (pour les apprentis) ;",
+            "le médiateur de la consommation dont relève l'organisme (coordonnées disponibles sur le site aftral.com) ;",
+            "les services compétents en matière de formation professionnelle ;",
+            "les instances juridictionnelles compétentes."
+          ]
+        },
+        {
+          "num": 26,
+          "titre": "Spécificités pour les Centres de Formation d'Apprentis (CFA)",
+          "texte": "Conformément aux articles R6352-3 à R6352-8 du Code du travail, toute sanction envisagée à l’encontre d’un apprenti suit une procédure spécifique.",
+          "convocation_prealable": "L’apprenti est convoqué par la Direction du CFA ou son représentant par lettre recommandée ou remise contre décharge. La convocation précise la date, l’heure et le lieu de l’entretien ainsi que les motifs de la sanction envisagée. L’employeur est informé (article R6352-4).",
+          "entretien_disciplinaire": "Lors de l’entretien, l’apprenti peut se faire assister par une personne de son choix : un autre apprenti de sa session de formation, un salarié de l’organisme de formation ou le délégué des apprentis de sa promotion. Pour les mineurs, les représentants légaux sont également convoqués. La Direction expose les faits reprochés et recueille les explications de l’apprenti.",
+          "notification_ecrite": "La décision motivée est notifiée entre un jour franc et quinze jours après l’entretien (article R6352-6). L’employeur est informé dans les meilleurs délais.",
+          "mesures_conservatoires": "Une exclusion temporaire immédiate peut être mise en oeuvre si nécessaire (article R6352-7), mais aucune exclusion définitive ne peut être prononcée sans respecter cette procédure. En cas d’exclusion définitive, y compris pour agression verbale d’une gravité exceptionnelle, la procédure décrite à l’article 25 s’applique. L’employeur et le financeur sont alertés (article R6352-8)."
+        },
+        {
+          "num": 27,
+          "titre": "Dispositions particulières pour les stages de sensibilisation à la sécurité routière",
+          "texte": "Conformément à l'arrêté du 26 juin 2012 relatif aux stages de sensibilisation à la sécurité routière, une exclusion définitive peut être prononcée dans les cas suivants :",
+          "cas_exclusion": [
+            "1. désintérêt manifeste pour la formation dispensée ;",
+            "2. comportement laissant apparaître la consommation de produits psychoactifs ;",
+            "3. non-respect des horaires de formation."
+          ]
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "titre": "REPRÉSENTATION DES APPRENANTS",
+      "articles": [
+        {
+          "num": 28,
+          "titre": "Modalités de déroulement des élections",
+          "texte": "Pour les formations d'une durée supérieure à 500 heures, il est procédé simultanément à l'élection d'un délégué titulaire et d'un délégué suppléant au scrutin uninominal à deux tours. Tous les apprenants sont électeurs et éligibles. Les candidatures sont déposées dans les trois jours qui suivent le début de la formation. Le scrutin a lieu, pendant les heures de la formation, au plus tôt vingt heures et au plus tard quarante heures après le début de la formation. Le Directeur de l'organisme de formation a à sa charge l'organisation du scrutin, dont il assure le bon déroulement. Il dresse un procès-verbal de carence, à conserver dans le dossier de la formation puis à archiver, lorsque la représentation des apprenants ne peut être assurée. Les délégués sont élus pour la durée de la formation. Les délégués suppléants ont vocation à exercer les fonctions ci-après énoncées (voir article 29) en l'absence des délégués titulaires. Les fonctions des délégués titulaires et suppléants prennent fin lorsqu'ils cessent, pour quelque cause que ce soit, de participer à la formation. Si le délégué titulaire et le délégué suppléant ont cessé leurs fonctions avant la fin de la formation, il est procédé à une nouvelle élection, dans les conditions prévues ci-dessus. Toutefois, si seul le délégué titulaire cesse ses fonctions avant la fin de la formation, le délégué suppléant assure l'exercice desdites fonctions jusqu'à l'issue de la formation sans qu'il soit nécessaire de procéder à une nouvelle élection."
+        },
+        {
+          "num": 29,
+          "titre": "Rôle des délégués des apprenants",
+          "texte": "Les délégués font toute suggestion pour améliorer le déroulement des formations et les conditions de vie des apprenants dans l'organisme de formation. Ils présentent toutes les réclamations individuelles ou collectives relatives à ces matières, aux conditions d'hygiène et de sécurité et à l'application du règlement intérieur général.",
+          "missions": [
+            "communiquer aux formateurs les suggestions des apprenants sur l'amélioration du déroulement des formations et des conditions de vie dans l'organisme ;",
+            "présenter les réclamations individuelles ou collectives relatives à ces matières, aux conditions d'hygiène et de sécurité et à l'application du règlement intérieur ;",
+            "faire connaître au conseil de perfectionnement, lorsqu'il est prévu, les observations des apprenants sur les questions relevant de la compétence de ce conseil."
+          ],
+          "note": "Un local sera mis à la disposition des représentants pour l'exercice de leurs fonctions lorsque cela est possible."
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "titre": "CONSEIL DE PERFECTIONNEMENT",
+      "articles": [
+        {
+          "num": 30,
+          "titre": "Constitution du conseil de perfectionnement",
+          "texte": "Dans le cadre de son organisation, et conformément à l'article L6231-1 du Code du travail, un conseil de perfectionnement national est institué au sein de l'organisme de formation pour les CFA. Conformément aux articles R6231-5 et D6332-80 du Code du travail, le Conseil de Perfectionnement est composé de :",
+          "composition": [
+            "le responsable de l'organisme de formation ou son représentant désigné, qui assure la présidence du conseil ;",
+            "des représentants désignés des personnels enseignants ;",
+            "des représentants des organisations professionnelles et institutionnelles partenaires de l'organisme de formation ;",
+            "des personnes qualifiées, désignées par l'organisme en raison de leur expertise dans les domaines concernés par les formations dispensées."
+          ],
+          "missions": [
+            "donner son avis sur l'organisation et le contenu des enseignements ;",
+            "formuler toute proposition en vue d'améliorer les conditions de formation ;",
+            "se prononcer sur les résultats des évaluations des formations."
+          ]
+        },
+        {
+          "num": 31,
+          "titre": "Fonctionnement du conseil de perfectionnement national AFTRAL",
+          "texte": "Le conseil de perfectionnement national se réunit au moins une fois par an, sur convocation de son président, qui arrête l'ordre du jour. Le conseil de perfectionnement national peut inviter à participer à ses travaux, à titre consultatif et pour une séance déterminée, toute personne dont l'expérience est de nature à éclairer ses travaux. Les convocations sont adressées aux membres du conseil au moins 15 jours avant la date de la réunion. Un procès-verbal des séances du conseil est dressé et adressé à l'ensemble des membres."
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "titre": "AUTRES DISPOSITIONS",
+      "articles": [
+        {
+          "num": 32,
+          "titre": "RGPD (Règlement Général sur la Protection des Données)",
+          "texte": "AFTRAL s'engage à respecter le Règlement (UE) 2016/679 du Parlement Européen et du Conseil, dit RGPD, ainsi que la Loi n° 78-17 du 6 janvier 1978 modifiée, dite Loi Informatique & Libertés. À ce titre, les apprenants sont informés qu'AFTRAL procède à des traitements de données en sa qualité de Responsable de Traitement, sur la base :",
+          "bases_legales": [
+            "du consentement ;",
+            "du contrat liant l'organisme de formation à la personne qui suit une formation ou à son employeur ;",
+            "du respect de ses obligations légales ;",
+            "de son intérêt légitime."
+          ],
+          "droits": "Tout apprenant dispose de droits d'accès, de modification ou de suppression des données le concernant et de droit de limitation ou d'opposition au traitement de ces données, qu'il peut exercer en contactant notre Délégué à la Protection des Données (DPD) :",
+          "contact_dpd": [
+            "par email : dpd@aftral.com ;",
+            "par courrier : Délégué à la Protection des Données - AFTRAL 46 avenue de Villiers 75017 Paris"
+          ],
+          "note": "Une Charte sur la protection des données personnelles, périodiquement mise à jour, est disponible depuis le site aftral.com. Elle contient notamment la liste des sous-traitants et les destinations des données personnelles. AFTRAL ne cède ni ne revend en aucune manière les données personnelles qui lui sont confiées. En cas d'insatisfaction après ce contact, si une personne estime que ses droits Informatique et Libertés ne sont pas respectés ou ne sont pas conformes aux règles de protection des données, elle peut adresser une réclamation à la CNIL."
+        },
+        {
+          "num": 33,
+          "titre": "Enquêtes",
+          "texte": "Dans le cadre de la formation professionnelle, différentes enquêtes sont obligatoires soit demandées par les financeurs soit liées à des obligations réglementaires (article L6111-8 du code du travail). Les apprenants pourront être sollicités pour participer aux évaluations de satisfaction et aux enquêtes d'insertion professionnelle."
+        },
+        {
+          "num": 34,
+          "titre": "Information et affichage",
+          "texte": "La circulation de l'information se fait par affichage sur les panneaux prévus à cet effet, ainsi que par le biais des applications ou plateformes mises à disposition des apprenants. La publicité commerciale, la propagande politique, syndicale ou religieuse sont interdites dans l'enceinte de l'organisme."
+        },
+        {
+          "num": 35,
+          "titre": "Séquences en entreprise",
+          "texte": "Lors des séquences de formation se déroulant en entreprise, les apprenants sont tenus de respecter les règles d'hygiène et de sécurité en vigueur dans l'entreprise d'accueil. Les autres dispositions du règlement intérieur de l'organisme de formation restent applicables, sauf incompatibilité avec le règlement intérieur de l'entreprise."
+        },
+        {
+          "num": 36,
+          "titre": "Responsabilité de l'organisme en cas de vol ou endommagement de biens personnels des apprenants",
+          "texte": "L'organisme de formation décline toute responsabilité en cas de perte, vol ou détérioration des objets personnels de toute natures déposés par les apprenants dans son enceinte (salles de cours, ateliers, locaux administratifs, parc de stationnement, vestiaires...). En aucun cas, la Direction de l’organisme de formation ne peut être tenue pour responsable des conséquences des actes commis par l'apprenant, en dehors des séquences pédagogiques, à l'extérieur du centre."
+        },
+        {
+          "num": "36bis",
+          "titre": "Protection des contenus numériques",
+          "texte": "Les contenus pédagogiques numériques (vidéos, présentations, documents PDF, exercices interactifs, etc.) mis à disposition sur les plateformes de formation à distance sont protégés par le droit d'auteur et sont la propriété exclusive de l'organisme de formation ou de ses partenaires autorisés. L'apprenant s'engage à :",
+          "points": [
+            "ne pas reproduire, télécharger, modifier ou diffuser les contenus pédagogiques sans autorisation expresse ;",
+            "ne pas enregistrer les sessions de formation synchrones ;",
+            "ne pas partager ses accès à la plateforme avec des tiers ;",
+            "utiliser les ressources uniquement dans le cadre de sa formation personnelle."
+          ],
+          "note": "Toute violation de ces règles pourra faire l'objet de poursuites judiciaires en plus des sanctions disciplinaires prévues au présent règlement."
+        },
+        {
+          "num": "37ter",
+          "titre": "Droit à l'image et confidentialité des échanges",
+          "texte": "Lors des sessions de formation à distance impliquant l'activation de la caméra :",
+          "points": [
+            "l'apprenant est informé que son image peut être visible par l'ensemble des participants ;",
+            "l'enregistrement des sessions par l'organisme ne peut se faire qu'avec l'accord préalable des apprenants ;",
+            "les apprenants s'engagent à ne pas enregistrer, capturer ou diffuser les sessions ;",
+            "les échanges dans les forums, chats et autres espaces de discussion sont confidentiels et ne doivent pas être diffusés en dehors du cadre de la formation."
+          ]
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "titre": "DISPOSITIONS FINALES",
+      "articles": [
+        {
+          "num": 38,
+          "titre": "Publicité et accessibilité du règlement",
+          "texte": "Un exemplaire du présent règlement intérieur est :",
+          "points": [
+            "disponible et consultable dans les locaux de l'organisme de formation ;",
+            "accessible sur le site Internet aftral.com ;",
+            "un lien vers le règlement intérieur hébergé sur le site Internet aftral.com est inclus dans les informations relatives à la convention de formation, transmises à chaque apprenant avant son inscription définitive."
+          ],
+          "note": "Le secrétariat de l'organisme de formation peut également fournir un exemplaire papier sur simple demande. Toute modification du règlement intérieur fait l'objet d'une information aux apprenants par voie d'affichage."
+        },
+        {
+          "num": 39,
+          "titre": "Entrée en application",
+          "texte": "Le présent règlement intérieur général entre en application à compter du 15 juillet 2025"
+        }
+      ]
+    }
+  ],
+  "signature": {
+    "lieu": "Fait à ………………………………….",
+    "date": "le ……………………"
+  }
+}
