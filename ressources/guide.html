@@ -56,7 +56,6 @@
                 color: var(--blue);
             }
 
-        /* Grille de tutoriels */
         .tuto-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -132,49 +131,47 @@
             margin-bottom: 10px;
         }
 
-        /* Styles de la Modale */
-        .modal {
+        /* --- STYLES MODALE --- */
+        .modal-overlay {
             display: none;
             position: fixed;
-            z-index: 2000;
-            left: 0;
             top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0,0,0,0.9);
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 1000;
             align-items: center;
             justify-content: center;
         }
 
         .modal-content {
-            position: relative;
             width: 90%;
-            max-width: 900px;
-        }
-
-        .close-modal {
-            position: absolute;
-            top: -40px;
-            right: 0;
-            color: white;
-            font-size: 35px;
-            cursor: pointer;
-        }
-
-        .video-container {
-            padding-top: 56.25%;
+            max-width: 1000px;
+            height: 80vh;
+            background: #000;
             position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--blue);
         }
 
-            .video-container iframe {
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                border: 0;
-                border-radius: 8px;
-            }
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            color: white;
+            font-size: 30px;
+            cursor: pointer;
+            z-index: 1001;
+            text-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
     </style>
 </head>
 <body>
@@ -197,12 +194,10 @@
         </div>
     </div>
 
-    <div id="videoModal" class="modal">
-        <div class="modal-content">
-            <span class="close-modal" onclick="closeModal()">&times;</span>
-            <div class="video-container">
-                <iframe id="videoFrame" src="" allow="autoplay; fullscreen" allowfullscreen></iframe>
-            </div>
+    <div id="videoModal" class="modal-overlay" onclick="closeModal()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <iframe id="videoFrame" src=""></iframe>
         </div>
     </div>
 
@@ -227,7 +222,7 @@
                                     <div class="tuto-desc">${tuto.desc}</div>
                                 </div>
                                 <button onclick="openModal('${tuto.url}')" class="btn-launch">
-                                    Lancer le tuto <i class="fas fa-play-circle"></i>
+                                    Voir le tutoriel <i class="fas fa-play-circle"></i>
                                 </button>
                             </div>
                         `;
@@ -236,33 +231,29 @@
 
             } catch (error) {
                 console.error('Erreur:', error);
-                container.innerHTML = `<p style="text-align:center; color:#f97316;">Erreur : Impossible de charger les tutos.</p>`;
+                container.innerHTML = `<p style="text-align:center; color:var(--muted);">Erreur : Impossible de charger les tutos.</p>`;
             }
         }
 
-        // Fonctions pour gérer la modale
         function openModal(url) {
             const modal = document.getElementById('videoModal');
             const iframe = document.getElementById('videoFrame');
-            iframe.src = url;
+
+            // On affiche la modale
             modal.style.display = 'flex';
-            document.body.style.overflow = 'hidden'; // Bloque le scroll derrière
+            // On charge l'URL
+            iframe.src = url;
+            // On empêche le scroll de la page de fond
+            document.body.style.overflow = 'hidden';
         }
 
         function closeModal() {
             const modal = document.getElementById('videoModal');
             const iframe = document.getElementById('videoFrame');
-            iframe.src = ''; // Arrête la vidéo
-            modal.style.display = 'none';
-            document.body.style.overflow = 'auto'; // Réactive le scroll
-        }
 
-        // Fermeture au clic à l'extérieur de la vidéo
-        window.onclick = function (event) {
-            const modal = document.getElementById('videoModal');
-            if (event.target == modal) {
-                closeModal();
-            }
+            modal.style.display = 'none';
+            iframe.src = ''; // On vide l'iframe pour stopper la vidéo
+            document.body.style.overflow = 'auto';
         }
 
         window.onload = loadTutos;
