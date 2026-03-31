@@ -112,5 +112,11 @@
     "cat": "admin",
     "question": "Le formateur ne redescend pas dans le LMS",
     "answer": "Plusieurs cas peuvent expliquer que le formateur ne soit pas visible dans le LMS :<br><br><ul style=\"padding-left: 20px; margin: 10px 0;\"><li>Le formateur<span class=\"warning\"> n'est pas encore planifié :</span> Il doit être affecté à la session pour être transmis au LMS.</li><li>Le formateur<span class=\"warning\"> existe déjà avec un rôle apprenant et la même adresse mail :</span> S'il a été inscrit en tant qu'apprenant avant d'être planifié comme formateur, cela peut bloquer la remontée correcte.</li><li><span class=\"warning\">Problème de flux Ammon &gt; LMS :</span> Si le flux n'est pas fonctionnel, les données ne sont pas synchronisées.</li></ul><br>Dans ces cas, vérifier la planification, les rôles utilisateurs et le bon fonctionnement du flux de synchronisation."
+  },
+  {
+    "id": 20,
+    "cat": "admin",
+    "question": "L'apprenant ne redescend pas dans le LMS",
+    "answer": "<p>Plusieurs cas peuvent expliquer que l'apprenant ne soit pas visible dans le LMS :</p><ul style=\"padding-left: 20px; margin: 10px 0;\"><li>L'apprenant<span class=\"warning\"> n'est pas inscrit à la session dans Ammon :</span><br>Il doit être inscrit à la session pour être transmis au LMS.</li><li>Le programme<span class=\"warning\"> n'est pas coché e-learning dans le LMS :</span><br>Vérifier que la session est bien paramétrée pour être synchronisée.</li><li>L'apprenant<span class=\"warning\"> a été inscrit récemment :</span><br>Un délai de synchronisation est nécessaire (maximum 1 heure).<br>Le flux s'exécute toutes les heures de <span class=\"highlight\">5h00 à 18h00</span>.</li><li>L'apprenant<span class=\"warning\"> existe déjà avec une autre adresse email ou un autre ID Aftral :</span><br>Cela peut créer un conflit de synchronisation.</li></ul><p>➡️ Vérifier l'inscription à la session, le paramétrage e-learning, les délais de synchronisation et les éventuels doublons.</p>"
   }
 ]
