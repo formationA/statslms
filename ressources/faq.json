@@ -106,5 +106,11 @@
     "cat": "pedagogie",
     "question": "Quand l'enquête de satisfaction est-elle accessible ?",
     "answer": "L'enquête se déclenche automatiquement le <span class=\"highlight\">dernier jour de la formation</span> (si la progression est > 0%).<br><br><ul style=\"padding-left: 20px; margin: 10px 0;\"><li><span class=\"highlight\">Le dernier jour :</span> L'apprenant y accède directement <span class=\"highlight\">depuis sa session</span> de formation sur le LMS.</li><li><span class=\"warning\">Via les relances :</span> Si l'enquête n'est pas remplie, un mail est envoyé 2 jours, puis 1 semaine après. Ce mail contient un <span class=\"highlight\">lien direct</span> permettant de répondre sans avoir besoin de retourner sur la session.</li></ul>"
+  },
+  {
+    "id": 19,
+    "cat": "admin",
+    "question": "Le formateur ne redescend pas dans le LMS",
+    "answer": "Plusieurs cas peuvent expliquer que le formateur ne soit pas visible dans le LMS :<br><br><ul style=\"padding-left: 20px; margin: 10px 0;\"><li><span class=\"warning\">Le formateur n'est pas encore planifié :</span> Il doit être affecté à la session pour être transmis au LMS.</li><li><span class=\"warning\">Le formateur existe déjà avec un rôle apprenant :</span> S'il a été inscrit en tant qu'apprenant avant d'être planifié comme formateur, cela peut bloquer la remontée correcte.</li><li><span class=\"warning\">Problème de flux Ammon &gt; LMS :</span> Si le flux n'est pas fonctionnel, les données ne sont pas synchronisées.</li></ul><br>Dans ces cas, vérifier la planification, les rôles utilisateurs et le bon fonctionnement du flux de synchronisation."
   }
 ]
