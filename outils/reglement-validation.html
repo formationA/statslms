@@ -291,11 +291,13 @@
         .scorm-mode .document-card {
             border: none;
             box-shadow: none;
-            max-width: 100%;
-            /* Espace extérieur autour de la carte */
-            margin: 20px;
-            /* Espace intérieur entre le bord de la carte et votre contenu SCORM */
-            padding: 15px;
+            /* On réduit légèrement le max-width pour laisser respirer sur grand écran */
+            max-width: 95%;
+            /* Centre la carte et ajoute 20px d'espace en haut/bas */
+            margin: 20px auto;
+            /* Espace interne pour que le texte ne colle pas aux bords */
+            padding: 25px;
+            box-sizing: border-box;
         }
 
     </style>
