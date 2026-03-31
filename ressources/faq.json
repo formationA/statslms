@@ -27,37 +27,37 @@
     "id": 5,
     "cat": "connexion",
     "question": "Première connexion de l'apprenant : quelle procédure ?",
-    "answer": "<p>Procédure standard (Email valide) :</p><ul style=\"padding-left: 20px; margin: 10px 0;\"><li>L'apprenant reçoit un mail avec sa <span class=\"highlight\">Référence Stagiaire</span>.</li><li>Il saisit son e-mail et cette référence sur le LMS.</li><li>Il crée son mot de passe définitif.</li></ul>"
+    "answer": "**Procédure standard (Email valide) :**\n\n* L'apprenant reçoit un mail avec sa <span class=\"highlight\">Référence Stagiaire</span>.\n* Il saisit son e-mail et cette référence sur le LMS.\n* Il crée son mot de passe définitif."
   },
   {
     "id": 6,
     "cat": "connexion",
     "question": "L'apprenant a un e-mail fictif, comment se connecte-t-il ?",
-    "answer": "<p>L'autonomie par e-mail est impossible dans ce cas :</p><ul style=\"padding-left: 20px; margin: 10px 0;\"><li>L'apprenant doit demander son <span class=\"highlight\">e-mail fictif</span> et sa <span class=\"highlight\">Référence Stagiaire</span> à son formateur.</li><li>Il utilise cette référence pour sa première connexion.</li><li>Il définit son mot de passe personnel à cette étape.</li></ul>"
+    "answer": "**L'autonomie par e-mail est impossible dans ce cas :**\n\n* L'apprenant doit demander son <span class=\"highlight\">e-mail fictif</span> et sa <span class=\"highlight\">Référence Stagiaire</span> à son formateur.\n* Il utilise cette référence pour sa première connexion.\n* Il définit son mot de passe personnel à cette étape."
   },
   {
     "id": 7,
     "cat": "connexion",
     "question": "Un apprenant a oublié son mot de passe ? <span class=\"tag-valide\">(cas e-mail valide)</span>",
-    "answer": "<p>Si l'adresse email est valide, l'apprenant est autonome :</p><ul style=\"padding-left: 20px; margin: 10px 0;\"><li>Se rendre sur la page de connexion et cliquer sur <span class=\"highlight\">\"Mot de passe oublié ?\"</span>.</li><li>Saisir son adresse email (celle de l'ERP).</li><li>Un lien de réinitialisation lui est envoyé immédiatement.</li></ul><p><span class=\"warning\">Attention :</span> Si rien n'est reçu, vérifiez l'exactitude de l'email dans Ammon.</p>"
+    "answer": "Si l'adresse email est valide, l'apprenant est autonome :\n\n* Se rendre sur la page de connexion et cliquer sur <span class=\"highlight\">\"Mot de passe oublié ?\"</span>.\n* Saisir son adresse email (celle de l'ERP).\n* Un lien de réinitialisation lui est envoyé immédiatement.\n\n<span class=\"warning\">Attention :</span> Si rien n'est reçu, vérifiez l'exactitude de l'email dans Ammon."
   },
   {
     "id": 8,
     "cat": "connexion",
     "question": "Un apprenant a oublié son mot de passe ? <span class=\"tag-fictif\">(cas e-mail fictif)</span>",
-    "answer": "<p>Le formateur doit réinitialiser l'accès manuellement :</p><ul style=\"padding-left: 20px; margin: 10px 0;\"><li>Aller dans la session > menu <span class=\"highlight\">Participants</span>.</li><li>Cliquer sur <span class=\"highlight\">Réinitialiser</span> sur la ligne du stagiaire.</li><li>Communiquer à nouveau la <span class=\"highlight\">Référence Stagiaire</span> pour permettre la reconnexion.</li></ul>"
+    "answer": "Le formateur doit réinitialiser l'accès manuellement :\n\n* Aller dans la session > menu <span class=\"highlight\">Participants</span>.\n* Cliquer sur <span class=\"highlight\">Réinitialiser</span> sur la ligne du stagiaire.\n* Communiquer à nouveau la <span class=\"highlight\">Référence Stagiaire</span> pour permettre la reconnexion."
   },
   {
     "id": 9,
     "cat": "connexion",
     "question": "Je suis collaborateur AFTRAL, comment me connecter ?",
-    "answer": "<p><i class=\"fas fa-info-circle\" style=\"color:var(--blue)\"></i> Aucun mot de passe spécifique n'est requis :</p><ul style=\"padding-left: 20px; margin: 10px 0; list-style: none;\"><li style=\"margin-bottom: 10px;\"><i class=\"fas fa-mouse-pointer\" style=\"margin-right: 8px; color: var(--green)\"></i> Cliquez sur le bouton <span class=\"highlight\">\"Collaborateurs AFTRAL\"</span> sur la page d'accueil.</li><li style=\"margin-bottom: 15px;\"><i class=\"fas fa-key\" style=\"margin-right: 8px; color: var(--green)\"></i> La connexion est automatique via le <span class=\"highlight\">SSO</span> (vos identifiants de session Windows).</li></ul><div style=\"background: rgba(255,255,255,0.05); padding: 12px; border-radius: 6px; border-left: 3px solid var(--blue);\"><p style=\"margin: 0 0 8px 0; font-weight: 600; color: var(--white);\">Attribution automatique de votre rôle :</p><ul style=\"padding-left: 18px; margin: 0; font-size: 0.9rem;\"><li><span class=\"highlight\">Profil Formateur :</span> Si vous avez été planifié au moins une fois sur une session dans le LMS.</li><li><span class=\"highlight\">Profil Gestionnaire :</span> Par défaut, si aucune planification n'est détectée.</li></ul></div>"
+    "answer": "### Aucun mot de passe spécifique n'est requis :\n\n* Cliquez sur le bouton <span class=\"highlight\">\"Collaborateurs AFTRAL\"</span> sur la page d'accueil.\n* La connexion est automatique via le <span class=\"highlight\">SSO</span> (vos identifiants Windows).\n\n**Attribution automatique de votre rôle :**\n* **Profil Formateur :** Si planifié au moins une fois sur une session.\n* **Profil Gestionnaire :** Par défaut, si aucune planification n'est détectée."
   },
   {
     "id": 10,
     "cat": "connexion",
     "question": "Je suis formateur externe (FPPH), comment obtenir mes accès ?",
-    "answer": "<div style=\"margin-bottom: 20px;\"><p style=\"font-weight: 600; color: var(--white); margin-bottom: 8px;\"><i class=\"fas fa-paper-plane\" style=\"color: var(--blue); margin-right: 8px;\"></i> Première planification</p><p style=\"margin-top: 5px;\">Dès votre <span class=\"highlight\">première planification</span> sur une session dans le LMS, un mail automatique vous est envoyé. Ce message contient votre identifiant ainsi que la procédure pour définir votre mot de passe.</p></div><div style=\"background: rgba(251, 146, 60, 0.1); padding: 15px; border-radius: 8px; border-left: 3px solid var(--orange);\"><p style=\"margin: 0 0 10px 0; font-weight: 600; color: var(--orange);\"><i class=\"fas fa-unlock-alt\" style=\"margin-right: 8px;\"></i> En cas d'oubli ou de perte</p><p style=\"margin: 0; font-size: 0.95rem;\">L'autonomie est totale via l'interface de connexion :</p><ul style=\"padding-left: 20px; margin: 10px 0; font-size: 0.9rem;\"><li>Cliquez sur le lien <span class=\"highlight\">\"Mot de passe oublié ?\"</span>.</li><li>Renseignez votre <span class=\"highlight\">adresse e-mail</span> (celle communiquée à l'AFTRAL).</li><li>Un lien de réinitialisation vous sera immédiatement envoyé par courriel.</li></ul></div>"
+    "answer": "**Première planification :**\nDès votre première planification, un mail automatique vous est envoyé avec votre identifiant et la procédure.\n\n**En cas d'oubli ou de perte :**\nL'autonomie est totale via l'interface :\n* Cliquez sur <span class=\"highlight\">\"Mot de passe oublié ?\"</span>.\n* Renseignez votre adresse e-mail.\n* Un lien de réinitialisation vous sera envoyé."
   },
   {
     "id": 11,
@@ -69,54 +69,54 @@
     "id": 12,
     "cat": "admin",
     "question": "Quels documents sont accessibles au profil Gestionnaire ?",
-    "answer": "<p>Le profil Gestionnaire dispose de droits étendus pour le suivi administratif :</p><ul style=\"padding-left: 20px; margin: 10px 0;\"><li>Extraction des <span class=\"highlight\">rapports d'avancement</span> (par session) .</li><li>Téléchargement des <span class=\"highlight\">justificatifs de fin de formation</span> et certificats .</li></ul>"
+    "answer": "Le profil Gestionnaire dispose de droits étendus pour le suivi administratif :\n\n* Extraction des <span class=\"highlight\">rapports d'avancement</span> (par session).\n* Téléchargement des <span class=\"highlight\">justificatifs</span> de fin de formation et <span class=\"highlight\">certificats</span>."
   },
   {
     "id": 13,
     "cat": "pedagogie",
     "question": "Comment consulter le détail de ma progression (Apprenant) ?",
-    "answer": "<p>Chaque apprenant peut suivre son activité en temps réel sur ses sessions actives.</p><ul style=\"padding-left: 20px; margin: 10px 0;\"><li>Visualisation du <span class=\"highlight\">temps global passé</span> sur la formation.</li><li>Détail par ressource (nombre de tentatives, score, date).</li><li>Consultation des visios dans l'agenda avec <span class=\"highlight\">rappel la veille</span> si programmée.</li></ul>"
+    "answer": "Chaque apprenant peut suivre son activité en temps réel :\n\n* Visualisation du <span class=\"highlight\">temps global passé</span>.\n* Détail par ressource (tentatives, score, date).\n* Consultation des visios dans l'agenda avec <span class=\"highlight\">rappel la veille</span>."
   },
   {
     "id": 14,
     "cat": "admin",
     "question": "Pourquoi l'apprenant a été déconnecté automatiquement ?",
-    "answer": "<p><i class=\"fas fa-user-clock\" style=\"color:var(--orange)\"></i> Pour des raisons de sécurité et de protection des données :</p><p>Le système prévoit une <span class=\"warning\">déconnexion automatique</span> après un temps d'inaction de <span class=\"warning\">15 minutes</span> sur la plateforme pour les apprenants.</p>"
+    "answer": "Pour des raisons de sécurité et de protection des données, le système prévoit une <span class=\"warning\">déconnexion automatique</span> après un temps d'inaction de <span class=\"warning\">15 minutes</span>."
   },
   {
     "id": 15,
     "cat": "pedagogie",
     "question": "Une nouvelle ressource a été ajoutée au programme, pourquoi ne s'affiche-t-elle pas ?",
-    "answer": "<p>Le flux gère les mises à jour selon des règles précises pour ne pas perturber les parcours entamés :</p><ul style=\"padding-left: 20px; margin: 10px 0;\"><li>Une ressource <span class=\"highlight\">modifiée</span> est répercutée sur les formations en cours.</li><li>Cependant, une ressource <span class=\"warning\">nouvellement ajoutée</span> à un programme n'est pas répercutée dans les sessions déjà démarrées.</li></ul>"
+    "answer": "Le flux gère les mises à jour pour ne pas perturber les parcours entamés :\n\n* Une ressource <span class=\"highlight\">modifiée</span> est répercutée partout.\n* Une ressource <span class=\"warning\">nouvellement ajoutée</span> n'est pas répercutée dans les sessions déjà démarrées."
   },
   {
     "id": 16,
     "cat": "admin",
     "question": "Les apprenants reçoivent-ils des rappels en cas de non-connexion ?",
-    "answer": "<p>Oui, le système de flux intègre un mécanisme de suivi automatique :</p><p>Des <span class=\"highlight\">mails de relance</span> sont générés et envoyés spécifiquement aux apprenants qui ne se sont pas encore connectés à leur session.</p>"
+    "answer": "Oui, le système de flux intègre un mécanisme de suivi automatique : des <span class=\"highlight\">mails de relance</span> sont envoyés aux apprenants qui ne se sont pas encore connectés."
   },
   {
     "id": 17,
     "cat": "admin",
     "question": "Comment l'apprenant recoit son certificat de réussite ?",
-    "answer": "Si le <span class=\"highlight\">seuil de réussite</span> a été atteint sur un programme soumis à certificat, celui-ci est **envoyé par mail** à l'apprenant dès la validation.<br><br><span class=\"warning\">Alternative :</span> La gestionnaire peut également le <span class=\"highlight\">télécharger directement</span> depuis la plateforme pour lui remettre manuellement si besoin."
+    "answer": "Si le <span class=\"highlight\">seuil de réussite</span> est atteint, le certificat est **envoyé par mail** dès la validation.\n\n<span class=\"warning\">Alternative :</span> La gestionnaire peut le télécharger directement pour une remise manuelle."
   },
   {
     "id": 18,
     "cat": "pedagogie",
     "question": "Quand l'enquête de satisfaction est-elle accessible ?",
-    "answer": "L'enquête se déclenche automatiquement le <span class=\"highlight\">dernier jour de la formation</span> (si la progression est > 0%).<br><br><ul style=\"padding-left: 20px; margin: 10px 0;\"><li><span class=\"highlight\">Le dernier jour :</span> L'apprenant y accède directement <span class=\"highlight\">depuis sa session</span> sur le LMS.</li><li><span class=\"highlight\">Action formateur :</span> L'enquête peut aussi être déclenchée manuellement par le formateur depuis son interface (<span class=\"highlight\">Session > Paramètres</span>).</li><li><span class=\"warning\">Via les relances :</span> Si l'enquête n'est pas remplie, des mails de relance avec un <span class=\"highlight\">lien direct</span> sont envoyés après 2 jours, puis 1 semaine.</li></ul>"
+    "answer": "L'enquête se déclenche le <span class=\"highlight\">dernier jour</span> (si progression > 0%).\n\n* **Accès direct :** Depuis la session LMS.\n* **Action formateur :** Déclenchement manuel via Session > Paramètres.\n* **Relances :** Mails envoyés après 2 jours, puis 1 semaine."
   },
   {
     "id": 19,
     "cat": "flux",
     "question": "Le formateur ne redescend pas dans le LMS",
-    "answer": "Plusieurs cas peuvent expliquer que le formateur ne soit pas visible dans le LMS :<br><br><ul style=\"padding-left: 20px; margin: 10px 0;\"><li>Le formateur<span class=\"warning\"> n'est pas encore planifié :</span> Il doit être affecté à la session pour être transmis au LMS.</li><li>Le formateur<span class=\"warning\"> existe déjà avec un rôle apprenant et la même adresse mail :</span> S'il a été inscrit en tant qu'apprenant avant d'être planifié comme formateur, cela peut bloquer la remontée correcte.</li><li><span class=\"warning\">Problème de flux Ammon &gt; LMS :</span> Si le flux n'est pas fonctionnel, les données ne sont pas synchronisées.</li></ul><br>Dans ces cas, vérifier la planification, les rôles utilisateurs et le bon fonctionnement du flux de synchronisation."
+    "answer": "Plusieurs causes possibles :\n\n* Formateur <span class=\"warning\">non planifié</span> dans Ammon.\n* Le formateur <span class=\"warning\">existe déjà comme apprenant</span> avec le même e-mail.\n* Problème technique sur le flux de synchronisation."
   },
   {
     "id": 20,
     "cat": "flux",
     "question": "L'apprenant ne redescend pas dans le LMS",
-    "answer": "<p>Plusieurs cas peuvent expliquer que l'apprenant ne soit pas visible dans le LMS :</p><ul style=\"padding-left: 20px; margin: 10px 0;\"><li>L'apprenant<span class=\"warning\"> n'est pas inscrit à la session dans Ammon :</span><br>Il doit être inscrit à la session pour être transmis au LMS.</li><li>Le programme<span class=\"warning\"> n'est pas coché e-learning dans le LMS :</span><br>Vérifier que la session est bien paramétrée pour être synchronisée.</li><li>L'apprenant<span class=\"warning\"> a été inscrit récemment :</span><br>Un délai de synchronisation est nécessaire (maximum 1 heure).<br>Le flux s'exécute toutes les heures de <span class=\"highlight\">5h00 à 18h00</span>.</li><li>L'apprenant<span class=\"warning\"> existe déjà avec un autre ID Aftral :</span><br>Cela peut créer un conflit de synchronisation.</li></ul><p><span class=\"warning\">Important :</span> Après toute modification dans Ammon, il est nécessaire de <span class=\"highlight\">vider la date d'envoi</span> afin de relancer la synchronisation vers le LMS.</p><p>➡️ Vérifier l'inscription à la session, le paramétrage e-learning, les délais de synchronisation et les éventuels doublons.</p>"
+    "answer": "Vérifiez les points suivants :\n\n* L'apprenant est-il bien <span class=\"warning\">inscrit à la session</span> dans Ammon ?\n* Le programme est-il coché <span class=\"warning\">e-learning</span> dans le LMS ?\n* Délai de synchronisation (max 1h entre 5h et 18h).\n* Conflit d'ID (doublon Aftral).\n\n**Important :** Videz la <span class=\"highlight\">date d'envoi</span> dans Ammon pour forcer le renvoi."
   }
 ]
