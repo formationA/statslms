@@ -79,7 +79,7 @@
   },
   {
     "id": 14,
-    "cat": "admin",
+    "cat": "connexion",
     "question": "Pourquoi l'apprenant a été déconnecté automatiquement ?",
     "answer": "<p><i class=\"fas fa-user-clock\" style=\"color:var(--orange)\"></i> Pour des raisons de sécurité et de protection des données :</p><p>Le système prévoit une <span class=\"warning\">déconnexion automatique</span> après un temps d'inaction de <span class=\"warning\">15 minutes</span> sur la plateforme pour les apprenants.</p>"
   },
