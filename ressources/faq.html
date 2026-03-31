@@ -6,7 +6,7 @@
     <title>FAQ | Centre d'Aide LMS</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        /* STYLE ORIGINAL CONSERVÉ */
+        /* --- VOS STYLES ORIGINAUX CONSERVÉS --- */
         :root {
             --bg: #0f172a;
             --card: #1e293b;
@@ -159,7 +159,12 @@
             align-items: center;
             font-weight: 600;
             transition: background 0.3s;
+            outline: none; /* Pour le focus propre */
         }
+
+            .faq-question:hover, .faq-question:focus {
+                background: rgba(255,255,255,0.05);
+            }
 
         .faq-answer {
             padding: 0 20px;
@@ -168,7 +173,22 @@
             transition: all 0.3s ease-out;
             color: var(--muted);
             background: rgba(0,0,0,0.1);
+            line-height: 1.6; /* Améliore la lisibilité */
         }
+
+            /* --- AMÉLIORATION DU STYLE DES RÉPONSES --- */
+            .faq-answer ul {
+                margin: 10px 0;
+                padding-left: 25px;
+            }
+
+            .faq-answer li {
+                margin-bottom: 8px;
+            }
+
+            .faq-answer p {
+                margin-bottom: 10px;
+            }
 
         .faq-item.active .faq-answer {
             padding: 20px;
@@ -188,6 +208,17 @@
         .warning {
             color: var(--orange);
             font-weight: 600;
+        }
+
+        /* Tag de catégorie visuel optionnel */
+        .faq-cat-tag {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            background: rgba(56, 189, 248, 0.1);
+            color: var(--blue);
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-left: 10px;
         }
     </style>
 </head>
@@ -216,7 +247,10 @@
                     <option value="pedagogie">Pédagogie</option>
                 </select>
                 <textarea id="newAnswer" placeholder="Réponse (HTML accepté)" rows="3" style="padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--card); color: var(--white);"></textarea>
-                <button onclick="addFAQ()" style="background: var(--green); color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold;">Enregistrer</button>
+                <div style="display:flex; gap:10px;">
+                    <button onclick="addFAQ()" style="flex:2; background: var(--green); color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold;">Enregistrer</button>
+                    <button onclick="cancelEdit()" id="cancelBtn" style="flex:1; display:none; background: var(--muted); color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer;">Annuler</button>
+                </div>
             </div>
         </div>
 
@@ -262,22 +296,34 @@
         function renderFAQ(data) {
             const container = document.getElementById('faqContainer');
             container.innerHTML = data.map((item, index) => `
-                    <div class="faq-item" data-cat="${item.cat}" data-id="${item.id || ''}">
-                        <div class="faq-question">
-                            <span><span style="color:var(--blue); margin-right:8px;">${item.id ? item.id + '.' : ''}</span>${item.question}</span>
-                            <div>
-                                ${isAdminMode ? `<i class="fas fa-edit" onclick="event.stopPropagation(); editFAQ(${index})" style="color:var(--blue); margin-right:15px; cursor:pointer;"></i>` : ''}
-                                ${isAdminMode ? `<i class="fas fa-trash" onclick="event.stopPropagation(); deleteFAQ(${index})" style="color:var(--orange); margin-right:15px; cursor:pointer;"></i>` : ''}
-                                <i class="fas fa-chevron-down"></i>
+                        <div class="faq-item" data-cat="${item.cat}" data-id="${item.id || ''}">
+                            <div class="faq-question" tabindex="0" onkeydown="handleKey(event, this)">
+                                <span>
+                                    <span style="color:var(--blue); margin-right:8px; font-size:0.9rem; opacity:0.7;">#${item.id || index + 1}</span>
+                                    ${item.question}
+                                </span>
+                                <div style="display:flex; align-items:center;">
+                                    ${isAdminMode ? `<i class="fas fa-edit" onclick="event.stopPropagation(); editFAQ(${index})" title="Modifier" style="color:var(--blue); margin-right:15px; cursor:pointer;"></i>` : ''}
+                                    ${isAdminMode ? `<i class="fas fa-trash" onclick="event.stopPropagation(); deleteFAQ(${index})" title="Supprimer" style="color:var(--orange); margin-right:15px; cursor:pointer;"></i>` : ''}
+                                    <i class="fas fa-chevron-down" style="font-size:0.8rem; color:var(--muted)"></i>
+                                </div>
                             </div>
+                            <div class="faq-answer">${item.answer}</div>
                         </div>
-                        <div class="faq-answer">${item.answer}</div>
-                    </div>
-                `).join('');
+                    `).join('');
 
+            // Réattacher les événements clic
             document.querySelectorAll('.faq-question').forEach(q => {
                 q.onclick = () => q.parentElement.classList.toggle('active');
             });
+        }
+
+        // Support clavier (Entrée / Espace)
+        function handleKey(e, element) {
+            if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                element.parentElement.classList.toggle('active');
+            }
         }
 
         function toggleAdmin() {
@@ -292,15 +338,27 @@
             }
         }
 
+        // LOGIQUE ÉDITION AMÉLIORÉE
+        let editIndex = -1;
+
         function editFAQ(index) {
+            editIndex = index;
             const item = faqData[index];
             document.getElementById('newQuestion').value = item.question;
             document.getElementById('newAnswer').value = item.answer;
             document.getElementById('newCat').value = item.cat;
             document.getElementById('adminPanel').dataset.currentId = item.id || '';
-            faqData.splice(index, 1);
-            renderFAQ(faqData);
-            window.scrollTo(0, 0);
+
+            document.getElementById('cancelBtn').style.display = 'block';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function cancelEdit() {
+            editIndex = -1;
+            document.getElementById('newQuestion').value = '';
+            document.getElementById('newAnswer').value = '';
+            document.getElementById('adminPanel').dataset.currentId = "";
+            document.getElementById('cancelBtn').style.display = 'none';
         }
 
         function addFAQ() {
@@ -314,32 +372,18 @@
                 let finalId;
 
                 if (existingId && existingId !== "") {
-                    // Cas 1 : On modifie une question existante, on garde son ID
                     finalId = parseInt(existingId);
+                    // Si on modifie, on remplace l'ancien par le nouveau dans l'index concerné
+                    faqData[editIndex] = { id: finalId, question: q, answer: a, cat: c };
                 } else {
-                    // Cas 2 : Nouvelle question, on calcule l'ID suivant (ex: 18 -> 19)
                     const maxId = faqData.reduce((max, item) => (item.id > max ? item.id : max), 0);
                     finalId = maxId + 1;
+                    faqData.push({ id: finalId, question: q, answer: a, cat: c });
                 }
 
-                const newEntry = {
-                    id: finalId, // L'ID est bien inclus ici pour le JSON
-                    question: q,
-                    answer: a,
-                    cat: c
-                };
-
-                faqData.push(newEntry);
-
-                // Tri par ID pour garder l'ordre dans le JSON
                 faqData.sort((a, b) => a.id - b.id);
-
-                // Nettoyage du formulaire
-                document.getElementById('newQuestion').value = '';
-                document.getElementById('newAnswer').value = '';
-                panel.dataset.currentId = "";
-
-                saveLocal(); // Envoie le JSON complet avec les IDs à GitHub
+                cancelEdit();
+                saveLocal();
             }
         }
 
@@ -352,7 +396,7 @@
 
         async function saveLocal() {
             renderFAQ(faqData);
-            const tempToken = prompt("Entrez votre GitHub Token :");
+            const tempToken = prompt("Entrez votre GitHub Token pour confirmer la sauvegarde sur le serveur :");
             if (!tempToken) return;
 
             const REPO_OWNER = 'formationA';
@@ -365,7 +409,7 @@
                     headers: { 'Authorization': `token ${tempToken}` }
                 });
                 const fileMetadata = await getRes.json();
-                if (!fileMetadata.sha) return;
+                if (!fileMetadata.sha) throw new Error("Sha introuvable");
 
                 const updateRes = await fetch(url, {
                     method: 'PUT',
@@ -374,17 +418,18 @@
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        message: "Mise à jour FAQ",
+                        message: "Mise à jour FAQ via interface",
                         content: btoa(unescape(encodeURIComponent(JSON.stringify(faqData, null, 2)))),
                         sha: fileMetadata.sha
                     })
                 });
-                if (updateRes.ok) alert("✅ Sauvegarde réussie !");
+                if (updateRes.ok) alert("✅ Sauvegarde réussie sur GitHub !");
             } catch (e) {
-                alert("❌ Erreur réseau.");
+                alert("❌ Erreur lors de la sauvegarde. Vérifiez votre token.");
             }
         }
 
+        // RECHERCHE ET FILTRES (CONSERVÉS)
         const searchInput = document.getElementById('faqSearch');
         const clearBtn = document.getElementById('clearSearch');
 
@@ -393,8 +438,9 @@
             const activeCat = document.querySelector('.cat-btn.active').dataset.filter;
             const items = document.querySelectorAll('.faq-item');
             clearBtn.style.display = searchText.length > 0 ? 'block' : 'none';
+
             items.forEach(item => {
-                const text = item.textContent.toLowerCase();
+                const text = item.innerText.toLowerCase();
                 const matchesSearch = text.includes(searchText);
                 const matchesCat = (activeCat === 'all' || item.dataset.cat === activeCat);
                 item.style.display = (matchesSearch && matchesCat) ? "block" : "none";
