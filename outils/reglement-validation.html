@@ -668,13 +668,12 @@
                     return;
                 }
                 const zip = new JSZip();
-                const finalName = "Signature Reglement Interieur";
 
                 // 1. Capture du contenu et clonage
                 const contenuFixe = document.getElementById('rulesBox').innerHTML;
                 let docClone = document.documentElement.cloneNode(true);
 
-                // 2. Gestion du LOGO (Base64)
+                // 2. Gestion du LOGO (Base64) - Conservé
                 const logoOriginal = document.querySelector('img[src*="logo"]');
                 if (logoOriginal && logoOriginal.naturalWidth > 0) {
                     const canvas = document.createElement('canvas');
@@ -687,9 +686,11 @@
 
                 // 3. Injection du contenu
                 const targetBox = docClone.querySelector('#rulesBox');
-                if (targetBox) targetBox.innerHTML = contenuFixe;
-                targetBox.setAttribute('contenteditable', 'false');
-                targetBox.style.userSelect = 'none';
+                if (targetBox) {
+                    targetBox.innerHTML = contenuFixe;
+                    targetBox.setAttribute('contenteditable', 'false');
+                    targetBox.style.userSelect = 'none';
+                }
 
                 // 4. Configuration de l'interface
                 const clonedBtn = docClone.querySelector('#btnSubmit');
@@ -709,7 +710,7 @@
                     clonedCheck.setAttribute('onchange', "document.getElementById('btnSubmit').disabled = !this.checked");
                 }
 
-                // 5. Script injecté dans le SCORM
+                // 5. Script injecté (Logique de signature + Scroll)
                 const scriptText = `
             var api = null;
             function findAPI(win) {
@@ -733,7 +734,7 @@
                 const box = document.getElementById('rulesBox');
                 if(box) {
                     box.onscroll = function() {
-                        if (box.scrollHeight - box.scrollTop <= box.clientHeight + 45) {
+                        if (box.scrollHeight - box.scrollTop <= box.clientHeight + 100) {
                             const info = document.getElementById('scrollInfo');
                             const area = document.getElementById('actionArea');
                             if(info) info.classList.add('hidden');
@@ -747,8 +748,6 @@
                 const now = new Date();
                 const dateStr = now.toLocaleString('fr-FR');
                 if (api) {
-                    api.LMSSetValue("cmi.core.score.min", "0");
-                    api.LMSSetValue("cmi.core.score.max", "100");
                     api.LMSSetValue("cmi.core.score.raw", "100");
                     api.LMSSetValue("cmi.core.lesson_status", "passed");
                     api.LMSSetValue("cmi.comments", "Signé le : " + dateStr);
@@ -759,103 +758,38 @@
                 document.getElementById('checkAgree').disabled = true;
                 document.getElementById('timestamp').innerText = "Signé le " + dateStr;
                 document.getElementById('msgSuccess').classList.remove('hidden');
-                if (typeof showModal === 'function') {
-                    showModal("Signé !", "Votre émargement a été transmis (100%).");
-                } else {
-                    alert("Document signé et validé !");
-                }
+                alert("Document signé et validé !");
             }
         `;
 
                 const scriptElement = document.createElement('script');
-                let cleanScript = scriptText.replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&');
-                scriptElement.textContent = cleanScript;
-
+                scriptElement.textContent = scriptText.replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&');
                 const bodyClone = docClone.getElementsByTagName('body')[0] || docClone;
                 bodyClone.appendChild(scriptElement);
 
-                // Style SCORM avec scroll interne forcé
+                // 6. Style SCORM - CSS FLEXBOX POUR FORCER LE CONTENEUR
                 const styleSCORM = document.createElement('style');
                 styleSCORM.textContent = `
-    /* 1. On fixe la hauteur totale à la taille de l'aperçu LMS */
-    html, body { 
-        height: 100% !important; 
-        margin: 0 !important; 
-        padding: 0 !important; 
-        overflow: hidden !important; 
-        background-color: #f4f4f4; /* Couleur de fond du LMS */
-    }
-
-    /* 2. La "Carte Blanche" (le container) */
-    .scorm-mode .container { 
-        display: flex !important; 
-        flex-direction: column !important; 
-        height: 98vh !important; /* Presque toute la hauteur mais pas plus */
-        max-width: 900px !important; 
-        margin: 10px auto !important; 
-        padding: 20px !important;
-        background: white !important;
-        border-radius: 8px !important;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1) !important;
-        box-sizing: border-box !important;
-    }
-
-    /* 3. Le Règlement (la zone de texte) */
-    #rulesBox { 
-        flex: 1 1 auto !important; /* Prend tout l'espace central */
-        overflow-y: auto !important; /* FORCE LE SCROLL ICI */
-        border: 1px solid #eee !important; 
-        padding: 15px !important;
-        margin-bottom: 15px !important;
-        background: #fff !important;
-    }
-
-    /* 4. Zone du bouton (toujours visible en bas) */
-    #actionArea, #scrollInfo { 
-        flex-shrink: 0 !important; 
-        text-align: center !important;
-        padding-top: 10px !important;
-        border-top: 1px solid #f0f0f0 !important;
-    }
-
-    /* Masquer les éléments inutiles qui mangent de la place */
-    .navbar, footer, .no-print { display: none !important; }
-`;
-
+            html, body { height: 100% !important; margin: 0 !important; padding: 0 !important; overflow: hidden !important; }
+            .scorm-mode { display: flex !important; flex-direction: column !important; height: 100vh !important; width: 100vw !important; align-items: center; justify-content: center; background: #f0f0f0; }
+            .scorm-mode .container { display: flex !important; flex-direction: column !important; height: 90vh !important; width: 90% !important; background: white !important; padding: 20px !important; box-shadow: 0 0 15px rgba(0,0,0,0.1); border-radius: 8px; box-sizing: border-box; }
+            #rulesBox { flex: 1 1 auto !important; overflow-y: auto !important; border: 1px solid #ddd !important; margin: 15px 0 !important; padding: 10px !important; }
+            #actionArea, #scrollInfo { flex-shrink: 0 !important; padding: 10px 0 !important; }
+            .navbar { display: none !important; }
+        `;
                 bodyClone.appendChild(styleSCORM);
 
-                // Nettoyage HTML
-                const nav = docClone.querySelector('.navbar');
-                if (nav) nav.remove();
+                // 7. Nettoyage et Génération
                 let propreHtml = "<!DOCTYPE html>\n" + docClone.outerHTML;
                 propreHtml = propreHtml.replace(/chargerReglement\s*\(\s*\)\s*;?/g, '// Intégré');
                 propreHtml = propreHtml.replace('<body', '<body class="scorm-mode"');
 
-                // 7. GÉNÉRATION DU MANIFESTE (CORRIGÉ)
                 const manifest = `<?xml version="1.0" encoding="UTF-8"?>
-                <manifest identifier="RI_AFTRAL_SCO" version="1.1" 
-                          xmlns="http://www.imsproject.org/xsd/imscp_rootv1p1p2" 
-                          xmlns:adlcp="http://www.adlnet.org/xsd/adlcp_rootv1p2" 
-                          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-                          xsi:schemaLocation="http://www.imsproject.org/xsd/imscp_rootv1p1p2 imscp_rootv1p1p2.xsd http://www.adlnet.org/xsd/adlcp_rootv1p2 adlcp_rootv1p2.xsd">
-                  <metadata>
-                    <schema>ADL SCORM</schema>
-                    <schemaversion>1.2</schemaversion>
-                  </metadata>
-                  <organizations default="ORG-1">
-                    <organization identifier="ORG-1">
-                      <title>Règlement Intérieur AFTRAL</title>
-                      <item identifier="ITEM-1" identifierref="RES-1">
-                        <title>Signature du Règlement</title>
-                      </item>
-                    </organization>
-                  </organizations>
-                  <resources>
-                    <resource identifier="RES-1" type="webcontent" adlcp:scormtype="sco" href="index.html">
-                      <file href="index.html"/>
-                    </resource>
-                  </resources>
-                </manifest>`;
+<manifest identifier="RI_AFTRAL_SCO" version="1.1" xmlns="http://www.imsproject.org/xsd/imscp_rootv1p1p2" xmlns:adlcp="http://www.adlnet.org/xsd/adlcp_rootv1p2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.imsproject.org/xsd/imscp_rootv1p1p2 imscp_rootv1p1p2.xsd http://www.adlnet.org/xsd/adlcp_rootv1p2 adlcp_rootv1p2.xsd">
+  <metadata><schema>ADL SCORM</schema><schemaversion>1.2</schemaversion></metadata>
+  <organizations default="ORG-1"><organization identifier="ORG-1"><title>Règlement Intérieur</title><item identifier="ITEM-1" identifierref="RES-1"><title>Signature</title></item></organization></organizations>
+  <resources><resource identifier="RES-1" type="webcontent" adlcp:scormtype="sco" href="index.html"><file href="index.html"/></resource></resources>
+</manifest>`;
 
                 zip.file("imsmanifest.xml", manifest);
                 zip.file("index.html", propreHtml);
@@ -865,7 +799,7 @@
                     a.href = URL.createObjectURL(content);
                     a.download = "SCORM_Reglement_Signe.zip";
                     a.click();
-                    showModal("Succès", "Le pack SCORM est prêt !");
+                    showModal("Succès", "Le pack SCORM est prêt et optimisé pour l'affichage !");
                 });
 
             } catch (error) {
