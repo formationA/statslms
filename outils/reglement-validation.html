@@ -646,106 +646,97 @@
                 }
                 const zip = new JSZip();
 
-                // 1. Capture du contenu actuel
+                // 1. Capture du contenu et clonage
                 const contenuFixe = document.getElementById('rulesBox').innerHTML;
-
-                // 2. Clone du document pour modification
                 let docClone = document.documentElement.cloneNode(true);
 
-                // 3. Gestion du LOGO (Conversion en Base64)
-                // On cherche l'image du logo dans le document original
+                // 2. Gestion du LOGO (Base64)
                 const logoOriginal = document.querySelector('img[src*="logo"]');
                 if (logoOriginal) {
                     const canvas = document.createElement('canvas');
                     canvas.width = logoOriginal.naturalWidth;
                     canvas.height = logoOriginal.naturalHeight;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(logoOriginal, 0, 0);
-                    const dataURL = canvas.toDataURL("image/png");
-
-                    // On remplace le chemin par les données réelles dans le clone
+                    canvas.getContext('2d').drawImage(logoOriginal, 0, 0);
                     const logoClone = docClone.querySelector('img[src*="logo"]');
-                    if (logoClone) logoClone.src = dataURL;
+                    if (logoClone) logoClone.src = canvas.toDataURL("image/png");
                 }
 
-                // 4. Injection du contenu dans le clone
+                // 3. Injection du contenu
                 const targetBox = docClone.querySelector('#rulesBox');
                 if (targetBox) targetBox.innerHTML = contenuFixe;
 
-                // 5. Préparation de l'interface de signature dans le clone
+                // 4. RÉINITIALISATION DE L'ÉTAT (On cache tout pour forcer le scroll dans le SCORM)
                 const clonedActionArea = docClone.querySelector('#actionArea');
                 const clonedScrollInfo = docClone.querySelector('#scrollInfo');
                 const clonedBtn = docClone.querySelector('#btnSubmit');
                 const clonedCheck = docClone.querySelector('#checkAgree');
 
-                if (clonedActionArea) clonedActionArea.classList.remove('hidden');
-                if (clonedScrollInfo) clonedScrollInfo.classList.add('hidden');
-
-                if (clonedBtn) {
-                    clonedBtn.disabled = false;
-                    clonedBtn.setAttribute('onclick', "validerSignatureSCORM()");
-                }
+                if (clonedActionArea) clonedActionArea.classList.add('hidden'); // Caché au début
+                if (clonedScrollInfo) clonedScrollInfo.classList.remove('hidden'); // "Scrollez pour signer" visible
+                if (clonedBtn) clonedBtn.disabled = true;
                 if (clonedCheck) {
-                    clonedCheck.checked = true;
+                    clonedCheck.checked = false;
                     clonedCheck.setAttribute('onchange', "document.getElementById('btnSubmit').disabled = !this.checked");
                 }
 
-                // 6. Injection du script de validation pour le SCORM
-                const scriptSecours = document.createElement('script');
-                scriptSecours.textContent = `
+                // 5. INJECTION DU SCRIPT DE LOGIQUE SCORM (Scroll + Modal)
+                const scriptSCORM = document.createElement('script');
+                scriptSCORM.textContent = `
+            // Gestion du scroll dans le SCORM
+            const box = document.getElementById('rulesBox');
+            box.onscroll = function() {
+                if (box.scrollHeight - box.scrollTop <= box.clientHeight + 20) {
+                    document.getElementById('scrollInfo').classList.add('hidden');
+                    document.getElementById('actionArea').classList.remove('hidden');
+                }
+            };
+
             function validerSignatureSCORM() {
                 const now = new Date();
                 const dateStr = now.toLocaleString('fr-FR');
+                
                 if (typeof completeSCORM === 'function') {
                     completeSCORM(dateStr);
                 }
-                if(document.getElementById('btnSubmit')) document.getElementById('btnSubmit').classList.add('hidden');
-                if(document.getElementById('checkAgree')) document.getElementById('checkAgree').disabled = true;
-                if(document.getElementById('timestamp')) document.getElementById('timestamp').innerText = "Le " + dateStr;
-                if(document.getElementById('msgSuccess')) document.getElementById('msgSuccess').classList.remove('hidden');
-                alert("Signature enregistrée avec succès.");
+
+                // UI Update
+                document.getElementById('btnSubmit').classList.add('hidden');
+                document.getElementById('checkAgree').disabled = true;
+                document.getElementById('timestamp').innerText = "Le " + dateStr;
+                document.getElementById('msgSuccess').classList.remove('hidden');
+                
+                // Utilisation de votre MODAL au lieu de alert()
+                if (typeof showModal === 'function') {
+                    showModal("Signé !", "Votre émargement a été enregistré avec succès.");
+                }
             }
         `;
-                docClone.querySelector('body').appendChild(scriptSecours);
+                docClone.querySelector('body').appendChild(scriptSCORM);
 
-                // 7. Nettoyage (Navbar)
+                // 6. Nettoyage Interface
                 const nav = docClone.querySelector('.navbar');
                 if (nav) nav.remove();
 
                 let propreHtml = docClone.outerHTML;
-
-                // 8. Neutralisation du JSON externe
-                propreHtml = propreHtml.replace(/chargerReglement\s*\(\s*\)\s*;?/g, '// Contenu déjà intégré');
+                propreHtml = propreHtml.replace(/chargerReglement\s*\(\s*\)\s*;?/g, '// Intégré');
                 propreHtml = propreHtml.replace('<body', '<body class="scorm-mode"');
 
-                // 9. Manifeste
-                const manifest = `<?xml version="1.0" encoding="UTF-8"?>
-<manifest identifier="RI_AFTRAL" version="1.0" xmlns="http://www.imsproject.org/xsd/imscp_rootv1p1p2">
-    <metadata><schema>ADL SCORM</schema><schemaversion>1.2</schemaversion></metadata>
-    <organizations default="org">
-        <organization identifier="org">
-            <title>Règlement Intérieur</title>
-            <item identifier="item1" identifierref="res1"><title>Signature du Règlement</title></item>
-        </organization>
-    </organizations>
-    <resources><resource identifier="res1" adlcp:scormtype="sco" href="index.html"></resource></resources>
-</manifest>`;
+                // 7. Manifeste & ZIP
+                const manifest = '<?xml version="1.0" encoding="UTF-8"?><manifest identifier="RI_AFTRAL" version="1.0" xmlns="http://www.imsproject.org/xsd/imscp_rootv1p1p2"><metadata><schema>ADL SCORM</schema><schemaversion>1.2</schemaversion></metadata><organizations default="org"><organization identifier="org"><title>Règlement Intérieur</title><item identifier="item1" identifierref="res1"><title>Signature</title></item></organization></organizations><resources><resource identifier="res1" adlcp:scormtype="sco" href="index.html"></resource></resources></manifest>';
 
-                // 10. Finalisation du ZIP
                 zip.file("index.html", propreHtml);
                 zip.file("imsmanifest.xml", manifest);
 
-                zip.generateAsync({ type: "blob" }).then(function (content) {
+                zip.generateAsync({ type: "blob" }).then(content => {
                     const a = document.createElement("a");
                     a.href = URL.createObjectURL(content);
                     a.download = "SCORM_RI_Final.zip";
                     a.click();
-                    showModal("Succès", "Le package SCORM avec logo est généré.");
+                    showModal("Succès", "SCORM généré avec scroll obligatoire.");
                 });
 
             } catch (error) {
-                console.error(error);
-                showModal("Erreur", "Une erreur est survenue lors de la génération : " + error.message, true);
+                showModal("Erreur", error.message, true);
             }
         }
 
