@@ -775,13 +775,48 @@
                 bodyClone.appendChild(scriptElement);
 
                 // Style SCORM
+                // Style SCORM optimisé
                 const styleSCORM = document.createElement('style');
                 styleSCORM.textContent = `
-            html, body { height: 100vh !important; overflow: hidden !important; }
-            .scorm-mode .container { display: flex !important; flex-direction: column !important; height: 100vh !important; max-width: 98% !important; margin: 0 auto !important; padding: 10px !important; }
-            #rulesBox { flex: 1 !important; overflow-y: auto !important; border: 1px solid #ddd !important; margin-bottom: 15px !important; }
-            #actionArea, #scrollInfo { flex-shrink: 0 !important; padding: 10px 0 !important; }
-        `;
+                    /* On utilise 100% au lieu de 100vh pour mieux s'adapter à l'iFrame du LMS */
+                    html, body { 
+                        height: 100% !important; 
+                        margin: 0 !important; 
+                        padding: 0 !important; 
+                        overflow: hidden !important; 
+                    }
+                    .scorm-mode {
+                        display: flex !important;
+                        flex-direction: column !important;
+                        height: 100% !important;
+                    }
+                    .scorm-mode .container { 
+                        display: flex !important; 
+                        flex-direction: column !important; 
+                        height: 100% !important; 
+                        width: 100% !important;
+                        max-width: 95% !important; 
+                        margin: 0 auto !important; 
+                        padding: 10px !important;
+                        box-sizing: border-box !important;
+                    }
+                    /* Le secret est ici : le rulesBox prend tout l'espace disponible (flex: 1) 
+                       et force le bouton à rester en bas de l'écran */
+                    #rulesBox { 
+                        flex: 1 1 auto !important; 
+                        overflow-y: auto !important; 
+                        border: 1px solid #ddd !important; 
+                        margin-bottom: 10px !important;
+                        -webkit-overflow-scrolling: touch; /* Fluidité sur mobile */
+                    }
+                    #actionArea, #scrollInfo { 
+                        flex: 0 0 auto !important; 
+                        padding: 10px 0 !important;
+                        background: white; /* Pour être sûr qu'il soit visible au-dessus du reste */
+                        border-top: 1px solid #eee;
+                    }
+                `;
+
                 bodyClone.appendChild(styleSCORM);
 
                 // Nettoyage HTML
