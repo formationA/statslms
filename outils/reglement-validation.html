@@ -664,38 +664,45 @@
         function generateSCORM() {
             try {
                 if (typeof JSZip === 'undefined') {
-                    showModal("Erreur", "La bibliothèque JSZip n'est pas chargée.", true);
+                    alert("La bibliothèque JSZip n'est pas chargée.");
                     return;
                 }
                 const zip = new JSZip();
 
                 // 1. Capture du contenu et clonage
-                const contenuFixe = document.getElementById('rulesBox').innerHTML;
+                const rulesBox = document.getElementById('rulesBox');
+                if (!rulesBox) {
+                    alert("Erreur : #rulesBox introuvable");
+                    return;
+                }
+                const contenuFixe = rulesBox.innerHTML;
                 let docClone = document.documentElement.cloneNode(true);
 
                 // 2. Gestion du LOGO (Base64)
-                const logoOriginal = document.querySelector('img[src*="logo"]');
+                const logoOriginal = document.querySelector('img[src*="logo"]') || document.querySelector('header img');
                 if (logoOriginal && logoOriginal.naturalWidth > 0) {
                     const canvas = document.createElement('canvas');
                     canvas.width = logoOriginal.naturalWidth;
                     canvas.height = logoOriginal.naturalHeight;
-                    canvas.getContext('2d').drawImage(logoOriginal, 0, 0);
-                    const logoClone = docClone.querySelector('img[src*="logo"]');
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(logoOriginal, 0, 0);
+                    const logoClone = docClone.querySelector('img[src*="logo"]') || docClone.querySelector('header img');
                     if (logoClone) logoClone.src = canvas.toDataURL("image/png");
                 }
 
-                // 3. Injection et nettoyage forcé des styles inline
+                // 3. Injection et nettoyage du clone
                 const targetBox = docClone.querySelector('#rulesBox');
                 if (targetBox) {
                     targetBox.innerHTML = contenuFixe;
                     targetBox.setAttribute('contenteditable', 'false');
                     targetBox.style.userSelect = 'none';
-                    targetBox.style.height = 'auto'; // Force le clone à être extensible
+                    targetBox.style.height = 'auto';
                     targetBox.style.maxHeight = 'none';
                 }
 
                 // 4. Script injecté (Mémoire LMS + Détection Scroll)
-                const scriptText = `
+                const scriptElement = document.createElement('script');
+                scriptElement.textContent = `
             var api = null;
             function findAPI(win) {
                 var findAttempts = 0;
@@ -708,7 +715,7 @@
             }
 
             function verifierStatutPrecedent() {
-                if (!api) return;
+                if (!api) return false;
                 var status = api.LMSGetValue("cmi.core.lesson_status");
                 if (status === "passed" || status === "completed") {
                     document.getElementById('actionArea').classList.add('hidden');
@@ -750,7 +757,7 @@
             };
 
             function validerSignatureSCORM() {
-                const dateStr = new Date().toLocaleString('fr-FR');
+                var dateStr = new Date().toLocaleString('fr-FR');
                 if (api) {
                     api.LMSSetValue("cmi.core.score.raw", "100");
                     api.LMSSetValue("cmi.core.lesson_status", "passed");
@@ -763,9 +770,6 @@
                 document.getElementById('msgSuccess').classList.remove('hidden');
             }
         `;
-
-                const scriptElement = document.createElement('script');
-                scriptElement.textContent = scriptText;
                 docClone.body.appendChild(scriptElement);
 
                 // 5. Style SCORM - ÉLARGISSEMENT ET FIX LOGO
@@ -785,30 +789,23 @@
                 box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
                 box-sizing: border-box !important;
             }
-            /* FIX LOGO : Flexbox pour éviter le chevauchement */
             .scorm-mode header {
                 display: flex !important; align-items: center !important;
                 gap: 40px !important; position: static !important;
                 text-align: left !important; border-bottom: 2px solid #e2e8f0 !important;
                 padding-bottom: 20px !important; margin-bottom: 30px !important;
             }
-            .scorm-mode header img[src*="logo"] {
+            .scorm-mode header img {
                 position: static !important; transform: none !important;
                 height: 100px !important; flex-shrink: 0 !important;
             }
             .scorm-mode header div { flex-grow: 1 !important; text-align: left !important; }
             .scorm-mode .logo-text { font-size: 1.6rem !important; margin: 0 !important; }
-
             .scorm-mode #rulesBox {
                 height: auto !important; max-height: none !important;
                 overflow: visible !important; line-height: 1.7 !important;
             }
-            .validation-area {
-                background: #f8fafc !important; border: 1px solid #e2e8f0 !important;
-                padding: 30px !important; border-radius: 12px !important;
-                max-width: 700px !important; margin: 30px auto !important;
-            }
-            .navbar, .nav-right, .nav-left { display: none !important; }
+            .navbar, .nav-right, .nav-left, .btn-save-load { display: none !important; }
             .hidden { display: none !important; }
         `;
                 docClone.body.appendChild(styleSCORM);
@@ -819,17 +816,25 @@
                 propreHtml = propreHtml.replace('<body', '<body class="scorm-mode"');
 
                 const manifest = `<?xml version="1.0" encoding="UTF-8"?>
-            <manifest identifier="RI_AFTRAL" version="1.1" xmlns="http://www.imsproject.org/xsd/imscp_rootv1p1p2">
-                <metadata><schema>ADL SCORM</schema><schemaversion>1.2</schemaversion></metadata>
-                <organizations default="ORG-1"><organization identifier="ORG-1"><title>Règlement Intérieur</title>
-                <item identifier="ITEM-1" identifierref="RES-1"><title>Signature</title></item></organization></organizations>
-                <resources><resource identifier="RES-1" type="webcontent" adlcp:scormtype="sco" href="index.html" xmlns:adlcp="http://www.adlnet.org/xsd/adlcp_rootv1p2"><file href="index.html"/></resource></resources>
-            </manifest>`;
+<manifest identifier="RI_AFTRAL" version="1.1" xmlns="http://www.imsproject.org/xsd/imscp_rootv1p1p2">
+    <metadata><schema>ADL SCORM</schema><schemaversion>1.2</schemaversion></metadata>
+    <organizations default="ORG-1">
+        <organization identifier="ORG-1">
+            <title>Règlement Intérieur</title>
+            <item identifier="ITEM-1" identifierref="RES-1"><title>Signature</title></item>
+        </organization>
+    </organizations>
+    <resources>
+        <resource identifier="RES-1" type="webcontent" adlcp:scormtype="sco" href="index.html" xmlns:adlcp="http://www.adlnet.org/xsd/adlcp_rootv1p2">
+            <file href="index.html"/>
+        </resource>
+    </resources>
+</manifest>`;
 
                 zip.file("imsmanifest.xml", manifest);
                 zip.file("index.html", propreHtml);
 
-                zip.generateAsync({ type: "blob" }).then(content => {
+                zip.generateAsync({ type: "blob" }).then(function (content) {
                     const a = document.createElement("a");
                     a.href = URL.createObjectURL(content);
                     a.download = "SCORM_Reglement_Signe.zip";
@@ -837,7 +842,8 @@
                 });
 
             } catch (error) {
-                console.error("Erreur :", error);
+                console.error("Erreur complète :", error);
+                alert("Une erreur est survenue lors de la génération. Vérifiez la console (F12).");
             }
         }
 
