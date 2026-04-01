@@ -706,9 +706,23 @@
                     clonedCheck.setAttribute('onchange', "document.getElementById('btnSubmit').disabled = !this.checked");
                 }
 
-                
+                // --- ÉTAPES AJOUTÉES POUR DÉFINIR propreHtml ---
+
+                // 5. Suppression de la barre de navigation dans l'export
+                const navClone = docClone.querySelector('.navbar');
+                if (navClone) navClone.remove();
+
+                // 6. Conversion du clone en texte HTML
+                let propreHtml = "<!DOCTYPE html>\n" + docClone.outerHTML;
+
+                // 7. Nettoyage : Empêcher le SCORM d'essayer de charger le JSON externe
+                // (Puisque le texte est maintenant déjà injecté dans le HTML)
+                propreHtml = propreHtml.replace(/chargerReglement\s*\(\s*\)\s*;?/g, "// Contenu déjà présent");
+
+                // --- FIN DES AJOUTS ---
+
                 // 8. ZIP
-                const manifest = '<?xml version="1.0" encoding="UTF-8"?><manifest identifier="RI_AFTRAL" version="1.0" xmlns="http://www.imsproject.org/xsd/imscp_rootv1p1p2"><metadata><schema>ADL SCORM</schema><schemaversion>1.2</schemaversion></metadata><organizations default="org"><organization identifier="org"><title>Règlement Intérieur</title><item identifierref="res1"><title>Signature</title></item></organization></organizations><resources><resource identifier="res1" adlcp:scormtype="sco" href="index.html"></resource></resources></manifest>';
+                const manifest = '<?xml version="1.0" encoding="UTF-8"?><manifest identifier="RI_AFTRAL" version="1.0" xmlns="http://www.imsproject.org/xsd/imscp_rootv1p1p2"><metadata><schema>ADL SCORM</schema><schemaversion>1.2</schemaversion></metadata><organizations default="org"><organization identifier="org"><title>Règlement Intérieur</title><item identifierref="res1"><title>Signature</title></item></organization></organizations><resources><resource identifier="res1" adlcp:scormtype="sco" href="index.html" xmlns:adlcp="http://www.adlnet.org/xsd/adlcp_rootv1p2"></resource></resources></manifest>';
 
                 zip.file("index.html", propreHtml);
                 zip.file("imsmanifest.xml", manifest);
