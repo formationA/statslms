@@ -673,7 +673,7 @@
                 const contenuFixe = document.getElementById('rulesBox').innerHTML;
                 let docClone = document.documentElement.cloneNode(true);
 
-                // 2. Gestion du LOGO (Base64) - Conservé
+                // 2. Gestion du LOGO (Base64)
                 const logoOriginal = document.querySelector('img[src*="logo"]');
                 if (logoOriginal && logoOriginal.naturalWidth > 0) {
                     const canvas = document.createElement('canvas');
@@ -684,33 +684,17 @@
                     if (logoClone) logoClone.src = canvas.toDataURL("image/png");
                 }
 
-                // 3. Injection du contenu
+                // 3. Injection et nettoyage forcé des styles inline
                 const targetBox = docClone.querySelector('#rulesBox');
                 if (targetBox) {
                     targetBox.innerHTML = contenuFixe;
                     targetBox.setAttribute('contenteditable', 'false');
                     targetBox.style.userSelect = 'none';
+                    targetBox.style.height = 'auto'; // Force le clone à être extensible
+                    targetBox.style.maxHeight = 'none';
                 }
 
-                // 4. Configuration de l'interface
-                const clonedBtn = docClone.querySelector('#btnSubmit');
-                const clonedCheck = docClone.querySelector('#checkAgree');
-                const clonedAction = docClone.querySelector('#actionArea');
-                const clonedInfo = docClone.querySelector('#scrollInfo');
-
-                if (clonedAction) clonedAction.classList.add('hidden');
-                if (clonedInfo) clonedInfo.classList.remove('hidden');
-
-                if (clonedBtn) {
-                    clonedBtn.disabled = true;
-                    clonedBtn.setAttribute('onclick', "validerSignatureSCORM()");
-                }
-                if (clonedCheck) {
-                    clonedCheck.checked = false;
-                    clonedCheck.setAttribute('onchange', "document.getElementById('btnSubmit').disabled = !this.checked");
-                }
-
-                // 5. Script injecté (CORRIGÉ POUR SCROLL GLOBAL)
+                // 4. Script injecté (Mémoire LMS + Détection Scroll)
                 const scriptText = `
             var api = null;
             function findAPI(win) {
@@ -723,132 +707,124 @@
                 return win.API;
             }
 
+            function verifierStatutPrecedent() {
+                if (!api) return;
+                var status = api.LMSGetValue("cmi.core.lesson_status");
+                if (status === "passed" || status === "completed") {
+                    document.getElementById('actionArea').classList.add('hidden');
+                    document.getElementById('scrollInfo').classList.add('hidden');
+                    document.getElementById('msgSuccess').classList.remove('hidden');
+                    var dateMsg = api.LMSGetValue("cmi.comments") || "";
+                    document.getElementById('timestamp').innerText = "Document déjà " + dateMsg;
+                    return true;
+                }
+                return false;
+            }
+
             window.onload = function() {
                 api = findAPI(window);
                 if (!api && window.opener) api = findAPI(window.opener);
                 if (api) {
                     api.LMSInitialize("");
+                    if (verifierStatutPrecedent()) return; 
                     api.LMSSetValue("cmi.core.lesson_status", "incomplete");
                     api.LMSCommit("");
                 }
 
-                // DÉTECTION SUR LA PAGE ENTIÈRE
                 window.onscroll = function() {
                     var docHeight = document.documentElement.scrollHeight;
                     var winHeight = window.innerHeight;
                     var scrollPos = window.pageYOffset || document.documentElement.scrollTop;
-
-                    // Si on arrive en bas de la page (marge de 100px)
-                    if ((scrollPos + winHeight) >= (docHeight - 100)) {
-                        const info = document.getElementById('scrollInfo');
-                        const area = document.getElementById('actionArea');
-                        if(info) info.classList.add('hidden');
-                        if(area) area.classList.remove('hidden');
+                    if ((scrollPos + winHeight) >= (docHeight - 150)) {
+                        document.getElementById('scrollInfo')?.classList.add('hidden');
+                        document.getElementById('actionArea')?.classList.remove('hidden');
                     }
                 };
                 
-                // Sécurité : si le texte est très court
                 setTimeout(function() {
-                    if (document.documentElement.scrollHeight <= window.innerHeight) {
-                        document.getElementById('scrollInfo').classList.add('hidden');
-                        document.getElementById('actionArea').classList.remove('hidden');
+                    if (document.documentElement.scrollHeight <= window.innerHeight + 100) {
+                        document.getElementById('scrollInfo')?.classList.add('hidden');
+                        document.getElementById('actionArea')?.classList.remove('hidden');
                     }
-                }, 1000);
+                }, 1500);
             };
 
             function validerSignatureSCORM() {
-                const now = new Date();
-                const dateStr = now.toLocaleString('fr-FR');
+                const dateStr = new Date().toLocaleString('fr-FR');
                 if (api) {
                     api.LMSSetValue("cmi.core.score.raw", "100");
                     api.LMSSetValue("cmi.core.lesson_status", "passed");
-                    api.LMSSetValue("cmi.comments", "Signé le : " + dateStr);
+                    api.LMSSetValue("cmi.comments", "signé le : " + dateStr);
                     api.LMSCommit("");
                     api.LMSFinish("");
                 }
-                document.getElementById('btnSubmit').classList.add('hidden');
-                document.getElementById('checkAgree').disabled = true;
+                document.getElementById('actionArea').classList.add('hidden');
                 document.getElementById('timestamp').innerText = "Signé le " + dateStr;
                 document.getElementById('msgSuccess').classList.remove('hidden');
-                
-                }
-                `;
+            }
+        `;
 
                 const scriptElement = document.createElement('script');
-                scriptElement.textContent = scriptText.replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&');
-                const bodyClone = docClone.getElementsByTagName('body')[0] || docClone;
-                bodyClone.appendChild(scriptElement);
+                scriptElement.textContent = scriptText;
+                docClone.body.appendChild(scriptElement);
 
-                // 6. Style SCORM - CORRECTIF FINAL (Cible la carte blanche)
+                // 5. Style SCORM - ÉLARGISSEMENT ET FIX LOGO
                 const styleSCORM = document.createElement('style');
                 styleSCORM.textContent = `
-    html, body {
-        height: auto !important;
-        min-height: 100% !important;
-        overflow: visible !important; /* Désactive le scroll interne de l'iframe */
-        background-color: #f1f5f9 !important; /* Garde le fond gris clair */
-        margin: 0 !important;
-        padding: 0 !important;
-    }
+            html, body {
+                height: auto !important;
+                overflow: visible !important;
+                background-color: #f1f5f9 !important;
+                margin: 0 !important; padding: 0 !important;
+            }
+            .scorm-mode .document-card {
+                height: auto !important; max-height: none !important;
+                width: 95% !important; max-width: 1200px !important;
+                margin: 40px auto !important; padding: 50px !important;
+                background: white !important; border-radius: 12px !important;
+                box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
+                box-sizing: border-box !important;
+            }
+            /* FIX LOGO : Flexbox pour éviter le chevauchement */
+            .scorm-mode header {
+                display: flex !important; align-items: center !important;
+                gap: 40px !important; position: static !important;
+                text-align: left !important; border-bottom: 2px solid #e2e8f0 !important;
+                padding-bottom: 20px !important; margin-bottom: 30px !important;
+            }
+            .scorm-mode header img[src*="logo"] {
+                position: static !important; transform: none !important;
+                height: 100px !important; flex-shrink: 0 !important;
+            }
+            .scorm-mode header div { flex-grow: 1 !important; text-align: left !important; }
+            .scorm-mode .logo-text { font-size: 1.6rem !important; margin: 0 !important; }
 
-    /* CRUCIAL : C'est ici qu'on définit la carte blanche */
-    .scorm-mode .document-card {
-        height: auto !important;
-        max-height: none !important;
-        width: 95% !important;           /* Largeur responsive */
-        max-width: 1200px !important;    /* Largeur maximale pour grands écrans */
-        margin: 40px auto !important;
-        padding: 60px !important;        /* Plus d'espace intérieur pour le confort */
-        background: white !important;
-        border: 1px solid #e2e8f0 !important;
-        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1) !important;
-        border-radius: 12px !important;
-        display: block !important;
-        box-sizing: border-box !important;
-    }
+            .scorm-mode #rulesBox {
+                height: auto !important; max-height: none !important;
+                overflow: visible !important; line-height: 1.7 !important;
+            }
+            .validation-area {
+                background: #f8fafc !important; border: 1px solid #e2e8f0 !important;
+                padding: 30px !important; border-radius: 12px !important;
+                max-width: 700px !important; margin: 30px auto !important;
+            }
+            .navbar, .nav-right, .nav-left { display: none !important; }
+            .hidden { display: none !important; }
+        `;
+                docClone.body.appendChild(styleSCORM);
 
-    /* Le texte doit s'étaler sans limite de hauteur */
-    .scorm-mode #rulesBox {
-        height: auto !important;
-        max-height: none !important;
-        overflow: visible !important;
-        display: block !important;
-        margin-bottom: 30px !important;
-        padding: 0 !important;
-        background: transparent !important;
-        border: none !important;
-    }
-
-    .scorm-mode .main-container {
-        display: block !important;
-        height: auto !important;
-        padding: 0 !important;
-    }
-
-    .validation-area {
-        background: #f8fafc !important;
-        border: 1px solid #e2e8f0 !important;
-        border-radius: 12px !important;
-        padding: 25px !important;
-        margin-top: 20px !important;
-    }
-
-    .navbar, .nav-right, .nav-left { display: none !important; }
-    .hidden { display: none !important; }
-`;
-                bodyClone.appendChild(styleSCORM);
-
-                // 7. Nettoyage et Génération
+                // 6. Génération finale
                 let propreHtml = "<!DOCTYPE html>\n" + docClone.outerHTML;
-                propreHtml = propreHtml.replace(/chargerReglement\s*\(\s*\)\s*;?/g, '// Intégré');
+                propreHtml = propreHtml.replace(/chargerReglement\s*\(\s*\)\s*;?/g, '//');
                 propreHtml = propreHtml.replace('<body', '<body class="scorm-mode"');
 
                 const manifest = `<?xml version="1.0" encoding="UTF-8"?>
-                <manifest identifier="RI_AFTRAL_SCO" version="1.1" xmlns="http://www.imsproject.org/xsd/imscp_rootv1p1p2" xmlns:adlcp="http://www.adlnet.org/xsd/adlcp_rootv1p2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.imsproject.org/xsd/imscp_rootv1p1p2 imscp_rootv1p1p2.xsd http://www.adlnet.org/xsd/adlcp_rootv1p2 adlcp_rootv1p2.xsd">
+            <manifest identifier="RI_AFTRAL" version="1.1" xmlns="http://www.imsproject.org/xsd/imscp_rootv1p1p2">
                 <metadata><schema>ADL SCORM</schema><schemaversion>1.2</schemaversion></metadata>
-                <organizations default="ORG-1"><organization identifier="ORG-1"><title>Règlement Intérieur</title><item identifier="ITEM-1" identifierref="RES-1"><title>Signature</title></item></organization></organizations>
-                <resources><resource identifier="RES-1" type="webcontent" adlcp:scormtype="sco" href="index.html"><file href="index.html"/></resource></resources>
-                </manifest>`;
+                <organizations default="ORG-1"><organization identifier="ORG-1"><title>Règlement Intérieur</title>
+                <item identifier="ITEM-1" identifierref="RES-1"><title>Signature</title></item></organization></organizations>
+                <resources><resource identifier="RES-1" type="webcontent" adlcp:scormtype="sco" href="index.html" xmlns:adlcp="http://www.adlnet.org/xsd/adlcp_rootv1p2"><file href="index.html"/></resource></resources>
+            </manifest>`;
 
                 zip.file("imsmanifest.xml", manifest);
                 zip.file("index.html", propreHtml);
