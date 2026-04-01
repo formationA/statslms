@@ -770,13 +770,47 @@
                 // 6. Style SCORM - CSS FLEXBOX POUR FORCER LE CONTENEUR
                 const styleSCORM = document.createElement('style');
                 styleSCORM.textContent = `
-            html, body { height: 100% !important; margin: 0 !important; padding: 0 !important; overflow: hidden !important; }
-            .scorm-mode { display: flex !important; flex-direction: column !important; height: 100vh !important; width: 100vw !important; align-items: center; justify-content: center; background: #f0f0f0; }
-            .scorm-mode .container { display: flex !important; flex-direction: column !important; height: 90vh !important; width: 90% !important; background: white !important; padding: 20px !important; box-shadow: 0 0 15px rgba(0,0,0,0.1); border-radius: 8px; box-sizing: border-box; }
-            #rulesBox { flex: 1 1 auto !important; overflow-y: auto !important; border: 1px solid #ddd !important; margin: 15px 0 !important; padding: 10px !important; }
-            #actionArea, #scrollInfo { flex-shrink: 0 !important; padding: 10px 0 !important; }
-            .navbar { display: none !important; }
-        `;
+    html, body { height: 100% !important; margin: 0 !important; padding: 0 !important; overflow: hidden !important; }
+    
+    .scorm-mode { 
+        display: flex !important; 
+        flex-direction: column !important; 
+        height: 100vh !important; 
+        align-items: center; 
+        justify-content: center; 
+        background: #f0f0f0; 
+    }
+
+    .scorm-mode .container { 
+        display: flex !important; 
+        flex-direction: column !important; 
+        height: 85vh !important; /* On laisse un peu d'air autour */
+        width: 90% !important; 
+        background: white !important; 
+        padding: 20px !important; 
+        box-shadow: 0 0 15px rgba(0,0,0,0.1); 
+        border-radius: 8px; 
+        box-sizing: border-box; 
+    }
+
+    #rulesBox { 
+        flex: 1 1 auto !important; 
+        overflow-y: auto !important; 
+        border: 1px solid #ddd !important; 
+        margin: 15px 0 !important; 
+        padding: 10px !important;
+        /* AJOUT : Limitation de la hauteur pour réduire la zone */
+        max-height: 50vh !important; 
+    }
+
+    #actionArea, #scrollInfo { 
+        flex-shrink: 0 !important; 
+        padding: 10px 0 !important; 
+        border-top: 1px solid #eee;
+    }
+
+    .navbar { display: none !important; }
+`;
                 bodyClone.appendChild(styleSCORM);
 
                 // 7. Nettoyage et Génération
