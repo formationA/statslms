@@ -638,6 +638,7 @@
         }
 
         // --- GÉNÉRATION SCORM ZIP ---
+        // --- GÉNÉRATION SCORM ZIP ---
         function generateSCORM() {
             if (typeof JSZip === 'undefined') {
                 showModal("Erreur", "La bibliothèque JSZip n'est pas chargée.", true);
@@ -651,9 +652,10 @@
             // 2. On clone le document entier
             let docClone = document.documentElement.cloneNode(true);
 
-            // 3. Injection du contenu et Forçage de l'état "Signature Prête"
+            // 3. Injection du contenu
             docClone.querySelector('#rulesBox').innerHTML = contenuFixe;
 
+            // 4. Forçage de l'interface "Signature Prête"
             const clonedActionArea = docClone.querySelector('#actionArea');
             const clonedScrollInfo = docClone.querySelector('#scrollInfo');
             const clonedBtn = docClone.querySelector('#btnSubmit');
@@ -662,20 +664,53 @@
             if (clonedActionArea) clonedActionArea.classList.remove('hidden');
             if (clonedScrollInfo) clonedScrollInfo.classList.add('hidden');
 
-            // On débloque le bouton et on peut même cocher la case par défaut si on veut
-            if (clonedBtn) clonedBtn.disabled = false;
-            if (clonedCheck) clonedCheck.checked = true;
+            // ON RÉINITIALISE LE COMPORTEMENT DU BOUTON DIRECTEMENT DANS LE DOM CLONÉ
+            if (clonedBtn) {
+                clonedBtn.disabled = false;
+                clonedBtn.setAttribute('onclick', "validerSignatureSCORM()");
+            }
+            if (clonedCheck) {
+                clonedCheck.checked = true;
+                clonedCheck.setAttribute('onchange', "document.getElementById('btnSubmit').disabled = !this.checked");
+            }
 
-            // 4. Nettoyage de l'interface (suppression de la barre de configuration)
+            // 5. Injection du script de secours pour gérer le clic dans le SCORM
+            const scriptSecours = docClone.createElement('script');
+            scriptSecours.textContent = `
+                function validerSignatureSCORM() {
+                    const now = new Date();
+                    const dateStr = now.toLocaleDateString('fr-FR', {
+                        day: '2-digit', month: '2-digit', year: 'numeric',
+                        hour: '2-digit', minute: '2-digit', second: '2-digit'
+                    });
+                    // Appelle la fonction originale si elle existe
+                    if (typeof completeSCORM === 'function') {
+                        completeSCORM(dateStr);
+                    }
+                    const btn = document.getElementById('btnSubmit');
+                    const check = document.getElementById('checkAgree');
+                    if(btn) btn.classList.add('hidden');
+                    if(check) check.disabled = true;
+                    
+                    const ts = document.getElementById('timestamp');
+                    const msg = document.getElementById('msgSuccess');
+                    if(ts) ts.innerText = "Le " + dateStr;
+                    if(msg) msg.classList.remove('hidden');
+                    alert("Signature enregistrée avec succès.");
+                }
+            `;
+            docClone.body.appendChild(scriptSecours);
+
+            // 6. Nettoyage de l'interface (suppression de la barre de configuration)
             const nav = docClone.querySelector('.navbar');
             if (nav) nav.remove();
 
             let propreHtml = docClone.outerHTML;
 
-            // 5. Neutralisation de l'appel au fichier JSON externe
+            // 7. Neutralisation de l'appel au fichier JSON externe
             propreHtml = propreHtml.replace(/chargerReglement\s*\(\s*\)\s*;?/g, '// Contenu déjà intégré');
 
-            // 6. Ajout de la classe mode SCORM au body
+            // 8. Ajout de la classe mode SCORM au body
             propreHtml = propreHtml.replace('<body', '<body class="scorm-mode"');
 
             // --- Construction du Manifeste SCORM 1.2 ---
@@ -691,14 +726,13 @@
     <resources><resource identifier="res1" adlcp:scormtype="sco" href="index.html"></resource></resources>
 </manifest>`;
 
-            // 7. Création du ZIP (avec gestion du logo)
+            // 9. Création et génération du ZIP
             fetch('logo.png').then(res => res.blob()).then(blob => {
                 zip.file('logo.png', blob);
                 zip.file("index.html", propreHtml);
                 zip.file("imsmanifest.xml", manifest);
                 return zip.generateAsync({ type: "blob" });
             }).catch(() => {
-                // Si logo.png est introuvable, on génère quand même le reste
                 zip.file("index.html", propreHtml);
                 zip.file("imsmanifest.xml", manifest);
                 return zip.generateAsync({ type: "blob" });
@@ -707,7 +741,7 @@
                 a.href = URL.createObjectURL(content);
                 a.download = "SCORM_RI_Final.zip";
                 a.click();
-                showModal("Succès", "Le package SCORM est prêt et le bouton est activé.");
+                showModal("Succès", "Votre package SCORM est prêt !");
             });
         }
 
