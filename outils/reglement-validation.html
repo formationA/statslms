@@ -462,7 +462,7 @@
 
 
     <script>
-        // --- NOUVEAU : Chargement du fichier JSON externe ---
+        // --- CHARGEMENT DU JSON AVEC LOGO ---
         async function chargerReglement() {
             try {
                 const response = await fetch('reglement.json');
@@ -472,46 +472,44 @@
                 const box = document.getElementById('rulesBox');
                 let html = "";
 
-                // 1. En-tête
+                // Logo
+                if (data.logo) {
+                    html += `<div style="text-align:center; margin-bottom:20px;">
+                                <img src="${data.logo}" alt="Logo" style="max-width:200px; height:auto;">
+                             </div>`;
+                }
+
+                // En-tête
                 html += `<h1 style="text-align:center; color:#0055A4; margin-bottom:5px;">${data.titre_general}</h1>`;
                 html += `<p style="text-align:center; font-weight:bold; margin-top:0;">${data.sous_titre}</p>`;
                 html += `<p style="text-align:center; font-size:0.9rem; margin-bottom:20px;">${data.preambule}</p>`;
 
-                // 2. Boucle sur les Sections
+                // Sections
                 data.sections.forEach(section => {
                     html += `<h2 style="background:#2d3663; color:white; padding:12px; border-radius:4px; margin-top:40px;">
-                        Section ${section.id} : ${section.titre}
-                     </h2>`;
+                                Section ${section.id} : ${section.titre}
+                             </h2>`;
 
                     if (section.contenu_introductif) html += `<p><strong>${section.contenu_introductif}</strong></p>`;
                     if (section.objectifs) html += `<ul>${section.objectifs.map(o => `<li>${o}</li>`).join('')}</ul>`;
                     if (section.champ_application) html += `<p style="background:#f1f5f9; padding:10px; border-left:4px solid #38bdf8;">${section.champ_application}</p>`;
 
-                    // 3. Boucle sur les Articles
                     if (section.articles) {
                         section.articles.forEach(art => {
-                            html += `<div style="margin-top:25px; border-bottom: 1px solid #eee; padding-bottom:15px;">`;
+                            html += `<div style="margin-top:25px; border-bottom:1px solid #eee; padding-bottom:15px;">`;
                             html += `<h3 style="color:#0055A4;">Article ${art.num} : ${art.titre}</h3>`;
                             if (art.texte) html += `<p>${art.texte}</p>`;
 
-                            // --- Gestion des différents types de listes ---
-
-                            // Points classiques
                             if (art.points) html += `<ul>${art.points.map(p => `<li>${p}</li>`).join('')}</ul>`;
-
-                            // Sanctions spécifiques
                             if (art.sanctions) {
                                 html += `<div style="color:#b91c1c; font-weight:600; margin-top:10px;">🔴 Sanctions :</div>`;
                                 html += `<ul>${art.sanctions.map(s => `<li>${s}</li>`).join('')}</ul>`;
                             }
-
-                            // Cas d'ouverture (vestiaires)
                             if (art.cas_ouverture) {
                                 html += `<strong>Cas autorisant l'ouverture :</strong>`;
                                 html += `<ul>${art.cas_ouverture.map(c => `<li>${c}</li>`).join('')}</ul>`;
                             }
 
-                            // --- Gestion des Sous-Articles (ex: Article 7) ---
                             if (art.sous_articles) {
                                 art.sous_articles.forEach(sub => {
                                     html += `<div style="margin-left:20px; border-left:2px solid #e2e8f0; padding-left:15px; margin-top:15px;">`;
@@ -531,19 +529,19 @@
                     }
                 });
 
-                html += `<p style="text-align:center; margin-top:60px; color: #94a3b8;">*** Fin du document ***</p>`;
+                html += `<p style="text-align:center; margin-top:60px; color:#94a3b8;">*** Fin du document ***</p>`;
                 box.innerHTML = html;
 
             } catch (err) {
                 console.error(err);
                 document.getElementById('rulesBox').innerHTML = `<div style="color:red; text-align:center; padding:50px;">
-            <strong>Erreur critique :</strong> Impossible de lire le fichier JSON.<br>
-            Vérifiez qu'il est bien nommé <code>reglement.json</code> et qu'il ne manque aucune virgule.
-        </div>`;
+                    <strong>Erreur critique :</strong> Impossible de lire le fichier JSON.<br>
+                    Vérifiez qu'il est bien nommé <code>reglement.json</code> et qu'il ne manque aucune virgule.
+                </div>`;
             }
         }
 
-        // --- Système Popup ---
+        // --- POPUP ---
         function showModal(title, text, isError = false) {
             document.getElementById('modalTitle').innerText = title;
             document.getElementById('modalText').innerText = text;
@@ -557,7 +555,6 @@
             }
             document.getElementById('modalOverlay').classList.add('active');
         }
-
         function closeModal() { document.getElementById('modalOverlay').classList.remove('active'); }
 
         // --- SCORM 1.2 ---
@@ -578,13 +575,13 @@
             }
         }
 
-        // MODIFIÉ : On lance le chargement du JSON ET du SCORM au démarrage
+        // --- AU CHARGEMENT ---
         window.onload = function () {
             initSCORM();
             chargerReglement();
         };
 
-        // --- Logique Signature Verrouillée ---
+        // --- LOGIQUE SIGNATURE ---
         const rulesBox = document.getElementById('rulesBox');
         const scrollInfo = document.getElementById('scrollInfo');
         const actionArea = document.getElementById('actionArea');
@@ -612,7 +609,7 @@
             showModal("Signé !", "Votre émargement est verrouillé et enregistré.");
         };
 
-        // --- Sauvegarde / Import ---
+        // --- EXPORT / IMPORT CONFIG ---
         function exportConfig() {
             const config = { content: rulesBox.innerHTML };
             const blob = new Blob([JSON.stringify(config)], { type: 'application/json' });
@@ -640,60 +637,55 @@
             input.value = "";
         }
 
+        // --- GÉNÉRATION SCORM AVEC LOGO ---
         function generateSCORM() {
             const zip = new JSZip();
-
-            // 1. On récupère le contenu actuel de la box (celui généré par le JSON)
             const contenuFixe = document.getElementById('rulesBox').innerHTML;
-
-            // 2. On clone le document pour ne pas modifier la page actuelle
             let docClone = document.documentElement.cloneNode(true);
-
-            // 3. On remplace le contenu de la box par le texte fixe dans le clone
-            // Cela évite que le SCORM cherche le fichier JSON au lancement
             docClone.querySelector('#rulesBox').innerHTML = contenuFixe;
-
-            // 4. On désactive l'appel à chargerReglement() dans le clone pour éviter les erreurs
-            let scriptClone = docClone.querySelector('script');
             let propreHtml = docClone.outerHTML;
-
-            // On retire l'appel automatique au chargement du JSON dans le ZIP
             propreHtml = propreHtml.replace('chargerReglement();', '// contenu déjà chargé');
             propreHtml = propreHtml.replace('<body', '<body class="scorm-mode"');
 
-            // 5. Création du Manifest SCORM 1.2
+            // Manifest SCORM 1.2
             const manifest = `<?xml version="1.0" encoding="UTF-8"?>
 <manifest identifier="RI_AFTRAL" version="1.0" xmlns="http://www.imsproject.org/xsd/imscp_rootv1p1p2">
-    <metadata>
-        <schema>ADL SCORM</schema>
-        <schemaversion>1.2</schemaversion>
-    </metadata>
-    <organizations default="org">
-        <organization identifier="org">
-            <title>Règlement Intérieur AFTRAL</title>
-            <item identifier="item1" identifierref="res1">
-                <title>Signature du Règlement</title>
-            </item>
-        </organization>
-    </organizations>
-    <resources>
-        <resource identifier="res1" adlcp:scormtype="sco" href="index.html"></resource>
-    </resources>
+        <metadata>
+            <schema>ADL SCORM</schema>
+            <schemaversion>1.2</schemaversion>
+        </metadata>
+        <organizations default="org">
+            <organization identifier="org">
+                <title>Règlement Intérieur AFTRAL</title>
+                <item identifier="item1" identifierref="res1">
+                    <title>Signature du Règlement</title>
+                </item>
+            </organization>
+        </organizations>
+        <resources>
+            <resource identifier="res1" adlcp:scormtype="sco" href="index.html"></resource>
+        </resources>
 </manifest>`;
 
-            // 6. Ajout des fichiers au ZIP
-            zip.file("index.html", propreHtml);
-            zip.file("imsmanifest.xml", manifest);
+            // Ajouter le logo au ZIP et générer
+            fetch('logo.png')
+                .then(res => res.blob())
+                .then(blob => {
+                    zip.file('logo.png', blob);
+                    zip.file("index.html", propreHtml);
+                    zip.file("imsmanifest.xml", manifest);
 
-            // 7. Génération et téléchargement
-            zip.generateAsync({ type: "blob" }).then(function (content) {
-                const a = document.createElement("a");
-                a.href = URL.createObjectURL(content);
-                a.download = "SCORM_RI_Final.zip";
-                a.click();
-                showModal("SCORM Généré", "L'archive contient maintenant le texte complet du règlement.");
-            });
+                    zip.generateAsync({ type: "blob" }).then(function (content) {
+                        const a = document.createElement("a");
+                        a.href = URL.createObjectURL(content);
+                        a.download = "SCORM_RI_Final.zip";
+                        a.click();
+                        showModal("SCORM Généré", "L'archive contient maintenant le texte complet du règlement et le logo.");
+                    });
+                });
         }
     </script>
+
+
 </body>
 </html>
