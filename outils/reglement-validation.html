@@ -782,37 +782,37 @@
                 // 6. Style SCORM - CSS FIXÉ POUR S'ADAPTER AU TEXTE
                 const styleSCORM = document.createElement('style');
                 styleSCORM.textContent = `
-    html, body { 
-        height: auto !important; 
-        min-height: 100% !important; 
-        margin: 0 !important; 
-        padding: 0 !important; 
-        background: #f0f0f0 !important; 
-        overflow-y: auto !important; 
-    }
+   html, body {
+    height: auto !important;
+    /* "initial" est souvent plus efficace que "visible" pour annuler un scroll d'iframe */
+    overflow: initial !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #f0f0f0 !important;
+}
 
-    .scorm-mode .container { 
-        display: block !important; /* Block pour que la hauteur soit auto */
-        height: auto !important;
-        min-height: 90vh !important;
-        width: 90% !important;
-        max-width: 800px !important; 
-        margin: 40px auto !important; 
-        padding: 30px !important; 
-        background: white !important; 
-        box-shadow: 0 0 15px rgba(0,0,0,0.1); 
-        border-radius: 8px; 
-        box-sizing: border-box; 
-        min-height: 400px;
-    }
+.scorm-mode .container {
+    display: block !important;
+    height: auto !important;
+    width: 90% !important;
+    max-width: 800px !important;
+    /* Réduire la marge haute/basse évite de "pousser" le contenu hors de vue */
+    margin: 20px auto !important;
+    padding: 30px !important;
+    background: white !important;
+    box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    border-radius: 8px;
+    box-sizing: border-box;
+    /* Gardez une seule valeur de min-height cohérente */
+    min-height: 400px !important;
+}
 
-    #rulesBox { 
-        height: auto !important;
-        overflow: visible !important; /* On laisse le texte s'étaler */
-        border: none !important; 
-        margin-bottom: 20px !important;
-        display: block !important;
-    }
+#rulesBox {
+    height: auto !important;
+    overflow: visible !important;
+    display: block !important;
+    margin-bottom: 30px !important;
+}
 
     #actionArea, #scrollInfo { 
         padding: 20px 0 !important; 
