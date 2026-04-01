@@ -779,51 +779,64 @@
                 const bodyClone = docClone.getElementsByTagName('body')[0] || docClone;
                 bodyClone.appendChild(scriptElement);
 
-                // 6. Style SCORM - CSS FIXÉ POUR S'ADAPTER AU TEXTE
+                // 6. Style SCORM - CORRECTIF FINAL (Cible la carte blanche)
                 const styleSCORM = document.createElement('style');
                 styleSCORM.textContent = `
-                html, body {
-                    height: auto !important;
-                    overflow: visible !important; /* Un seul scroll (LMS) */
-                    margin: 0 !important;
-                    padding: 0 !important;
-                    background: #f1f5f9 !important; /* Couleur de fond d'origine */
-                }
+    html, body {
+        height: auto !important;
+        min-height: 100% !important;
+        overflow: visible !important; /* Désactive le scroll interne de l'iframe */
+        background-color: #f1f5f9 !important; /* Garde le fond gris clair */
+        margin: 0 !important;
+        padding: 0 !important;
+    }
 
-                .scorm-mode .document-card {
-                    display: block !important;
-                    height: auto !important; /* Crucial pour descendre jusqu'en bas */
-                    width: 90% !important;
-                    max-width: 800px !important;
-                    margin: 40px auto !important;
-                    padding: 40px !important;
-                    background: white !important;
-                    border: 1px solid #e2e8f0 !important;
-                    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
-                    border-radius: 12px !important;
-                    box-sizing: border-box !important;
-                }
+    /* CRUCIAL : C'est ici qu'on définit la carte blanche */
+    .scorm-mode .document-card {
+        height: auto !important; 
+        max-height: none !important;
+        min-height: 400px !important;
+        width: 90% !important;
+        max-width: 800px !important;
+        margin: 40px auto !important;
+        padding: 40px !important;
+        background: white !important;
+        border: 1px solid #e2e8f0 !important;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
+        border-radius: 12px !important;
+        display: block !important;
+        box-sizing: border-box !important;
+    }
 
-                #rulesBox {
-                    height: auto !important;
-                    max-height: none !important;
-                    overflow: visible !important;
-                    border: none !important;
-                    background: transparent !important;
-                    padding: 0 !important;
-                    margin-bottom: 30px !important;
-                }
+    /* Le texte doit s'étaler sans limite de hauteur */
+    .scorm-mode #rulesBox {
+        height: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
+        display: block !important;
+        margin-bottom: 30px !important;
+        padding: 0 !important;
+        background: transparent !important;
+        border: none !important;
+    }
 
-                .validation-area {
-                        background: #f8fafc !important;
-                        border: 1px solid #e2e8f0 !important;
-                        border-radius: 12px !important;
-                        padding: 25px !important;
-                    }
+    .scorm-mode .main-container {
+        display: block !important;
+        height: auto !important;
+        padding: 0 !important;
+    }
 
-                    .navbar, .nav-right, .nav-left { display: none !important; }
-                `;
+    .validation-area {
+        background: #f8fafc !important;
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 12px !important;
+        padding: 25px !important;
+        margin-top: 20px !important;
+    }
 
+    .navbar, .nav-right, .nav-left { display: none !important; }
+    .hidden { display: none !important; }
+`;
                 bodyClone.appendChild(styleSCORM);
 
                 // 7. Nettoyage et Génération
