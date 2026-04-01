@@ -184,6 +184,41 @@
             cursor: pointer;
         }
 
+        /* --- AMÉLIORATION VISUELLE DE LA CASE À COCHER --- */
+        #checkAgree {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            border: 3px solid #0055A4;
+            border-radius: 6px;
+            cursor: pointer;
+            position: relative;
+            background-color: white;
+            transition: var(--transition);
+        }
+
+            #checkAgree:checked {
+                background-color: #0055A4;
+            }
+
+                #checkAgree:checked::after {
+                    content: "\f00c";
+                    font-family: "Font Awesome 6 Free";
+                    font-weight: 900;
+                    color: white;
+                    font-size: 14px;
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                }
+
+            #checkAgree:focus {
+                outline: 2px solid #38bdf8;
+                outline-offset: 2px;
+            }
+
         button#btnSubmit {
             background: #0055A4;
             color: white;
@@ -291,17 +326,13 @@
         .scorm-mode .document-card {
             border: none;
             box-shadow: none;
-            /* On réduit légèrement le max-width pour laisser respirer sur grand écran */
             max-width: 70%;
-            max-height: 90vh; /* Hauteur maximale pour éviter de dépasser l'écran */
+            max-height: 90vh;
             width: 100%;
-            /* Centre la carte et ajoute 20px d'espace en haut/bas */
             margin: 20px auto;
-            /* Espace interne pour que le texte ne colle pas aux bords */
             padding: 25px;
             box-sizing: border-box;
         }
-
     </style>
 </head>
 <body>
@@ -342,7 +373,7 @@
                 </h2>
 
                 <small style="color: #94a3b8; display: block; margin-top: 10px;">
-                    
+
                 </small>
             </header>
 
@@ -361,7 +392,7 @@
                 <div id="actionArea" class="hidden">
                     <label class="checkbox-container">
                         <input type="checkbox" id="checkAgree">
-                        <span style="color: #1e293b; font-size: 0.9rem;">Je certifie avoir pris connaissance du règlement intérieur.</span>
+                        <span style="color: #1e293b; font-size: 0.9rem; font-weight: 600;">Je certifie avoir pris connaissance du règlement intérieur.</span>
                     </label>
                     <button id="btnSubmit" disabled>Valider et Signer</button>
                 </div>
@@ -402,8 +433,8 @@
                 // 2. Boucle sur les Sections
                 data.sections.forEach(section => {
                     html += `<h2 style="background:#2d3663; color:white; padding:12px; border-radius:4px; margin-top:40px;">
-                        Section ${section.id} : ${section.titre}
-                     </h2>`;
+                            Section ${section.id} : ${section.titre}
+                         </h2>`;
 
                     if (section.contenu_introductif) html += `<p><strong>${section.contenu_introductif}</strong></p>`;
                     if (section.objectifs) html += `<ul>${section.objectifs.map(o => `<li>${o}</li>`).join('')}</ul>`;
@@ -459,9 +490,9 @@
             } catch (err) {
                 console.error(err);
                 document.getElementById('rulesBox').innerHTML = `<div style="color:red; text-align:center; padding:50px;">
-            <strong>Erreur critique :</strong> Impossible de lire le fichier JSON.<br>
-            Vérifiez qu'il est bien nommé <code>reglement.json</code> et qu'il ne manque aucune virgule.
-        </div>`;
+                <strong>Erreur critique :</strong> Impossible de lire le fichier JSON.<br>
+                Vérifiez qu'il est bien nommé <code>reglement.json</code> et qu'il ne manque aucune virgule.
+            </div>`;
             }
         }
 
@@ -576,7 +607,7 @@
             docClone.querySelector('#rulesBox').innerHTML = contenuFixe;
 
             // 4. On désactive l'appel à chargerReglement() dans le clone pour éviter les erreurs
-            let scriptClone = docClone.querySelector('script');
+            // let scriptClone = docClone.querySelector('script'); // Non utilisé finalement
             let propreHtml = docClone.outerHTML;
 
             // On retire l'appel automatique au chargement du JSON dans le ZIP
@@ -586,21 +617,21 @@
             // 5. Création du Manifest SCORM 1.2
             const manifest = `<?xml version="1.0" encoding="UTF-8"?>
 <manifest identifier="RI_AFTRAL" version="1.0" xmlns="http://www.imsproject.org/xsd/imscp_rootv1p1p2">
-    <metadata>
-        <schema>ADL SCORM</schema>
-        <schemaversion>1.2</schemaversion>
-    </metadata>
-    <organizations default="org">
-        <organization identifier="org">
-            <title>Règlement Intérieur AFTRAL</title>
-            <item identifier="item1" identifierref="res1">
-                <title>Signature du Règlement</title>
-            </item>
-        </organization>
-    </organizations>
-    <resources>
-        <resource identifier="res1" adlcp:scormtype="sco" href="index.html"></resource>
-    </resources>
+        <metadata>
+            <schema>ADL SCORM</schema>
+            <schemaversion>1.2</schemaversion>
+        </metadata>
+        <organizations default="org">
+            <organization identifier="org">
+                <title>Règlement Intérieur AFTRAL</title>
+                <item identifier="item1" identifierref="res1">
+                    <title>Signature du Règlement</title>
+                </item>
+            </organization>
+        </organizations>
+        <resources>
+            <resource identifier="res1" adlcp:scormtype="sco" href="index.html"></resource>
+        </resources>
 </manifest>`;
 
             // 6. Ajout des fichiers au ZIP
