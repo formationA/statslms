@@ -669,9 +669,6 @@
 
                 // 1. Cloner le document actuel pour figer le contenu
                 const contenuFixe = document.getElementById('rulesBox').innerHTML;
-                const currentLogo = document.querySelector('#rulesBox img');
-                const logoSrc = currentLogo ? currentLogo.src : null;
-
                 let docClone = document.documentElement.cloneNode(true);
 
                 // 2. Injecter le contenu dans le clone
@@ -679,13 +676,6 @@
                 if (targetBox) {
                     targetBox.innerHTML = contenuFixe;
                     targetBox.setAttribute('contenteditable', 'false');
-
-                    // Sécurité supplémentaire : s'assurer que l'image dans le clone a bien le src Base64
-                    const clonedLogo = targetBox.querySelector('img');
-                    if (clonedLogo && logoSrc) {
-                        clonedLogo.src = logoSrc;
-                    }
-
                 }
 
                 // 3. Préparer les éléments interactifs
@@ -770,27 +760,12 @@
                 finalHtml = finalHtml.replace('<body', '<body class="scorm-mode"');
 
                 // 7. Manifeste SCORM 1.2 minimaliste
-                // 7. Manifeste SCORM 1.2 avec Mastery Score pour forcer la complétion
                 const manifest = `<?xml version="1.0" encoding="UTF-8"?>
 <manifest identifier="RI_AFTRAL_NOSCRIPT" version="1.0" xmlns="http://www.imsproject.org/xsd/imscp_rootv1p1p2" xmlns:adlcp="http://www.adlnet.org/xsd/adlcp_rootv1p2">
-  <metadata>
-    <schema>ADL SCORM</schema>
-    <schemaversion>1.2</schemaversion>
-  </metadata>
-  <organizations default="org">
-    <organization identifier="org">
-      <title>${finalName}</title>
-      <item identifier="item1" identifierref="res1">
-        <title>Émargement</title>
-        <adlcp:masteryscore>100</adlcp:masteryscore>
-      </item>
-    </organization>
-  </organizations>
-  <resources>
-    <resource identifier="res1" adlcp:scormtype="sco" href="index.html" type="webcontent">
-      <file href="index.html"/>
-    </resource>
-  </resources>
+  <metadata><schema>ADL SCORM</schema><schemaversion>1.2</schemaversion></metadata>
+  <organizations default="org"><organization identifier="org"><title>${finalName}</title>
+  <item identifier="item1" identifierref="res1"><title>Émargement</title></item></organization></organizations>
+  <resources><resource identifier="res1" adlcp:scormtype="sco" href="index.html" type="webcontent"><file href="index.html"/></resource></resources>
 </manifest>`;
 
                 // 8. Création du ZIP
