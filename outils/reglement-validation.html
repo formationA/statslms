@@ -746,27 +746,30 @@
                 const bodyClone = docClone.getElementsByTagName('body')[0] || docClone;
                 bodyClone.appendChild(scriptElement);
 
-                // 6bis. AJOUT DE STYLES FORCÉS POUR LA HAUTEUR (Correction Cadre Blanc)
+                // 6bis. STYLE FORCE POUR LE SCORM (Zéro scroll page, Full scroll texte)
                 const styleSCORM = document.createElement('style');
                 styleSCORM.textContent = `
-                    /* On force le container principal à prendre de la place */
+                    html, body { 
+                        height: 100vh !important; 
+                        overflow: hidden !important; 
+                    }
                     .scorm-mode .container {
-                        max-width: 95% !important;
-                        margin: 10px auto !important;
-                        padding: 15px !important;
+                        display: flex !important;
+                        flex-direction: column !important;
+                        height: 100vh !important;
+                        max-width: 98% !important;
+                        margin: 0 auto !important;
+                        padding: 10px !important;
                     }
-                    /* Le cadre blanc (rulesBox) s'adapte à la hauteur de l'écran */
                     #rulesBox {
-                        height: 65vh !important; /* 65% de la hauteur de fenêtre */
-                        min-height: 450px !important;
+                        flex: 1 !important; /* Remplit l'espace vide */
+                        overflow-y: auto !important; /* Le scroll est ici uniquement */
                         border: 1px solid #ddd !important;
-                        background: #fff !important;
-                        overflow-y: auto !important;
+                        margin-bottom: 15px !important;
                     }
-                    /* On ajuste le logo pour qu'il ne prenne pas trop de place */
-                    .scorm-mode .logo-container img {
-                        max-height: 80px !important;
-                        width: auto !important;
+                    #actionArea, #scrollInfo {
+                        flex-shrink: 0 !important; /* Empêche la zone de signature d'être écrasée */
+                        padding: 10px 0 !important;
                     }
                 `;
                 bodyClone.appendChild(styleSCORM);
