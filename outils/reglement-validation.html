@@ -596,22 +596,46 @@
         function closeModal() { document.getElementById('modalOverlay').classList.remove('active'); }
 
         // --- SCORM 1.2 ---
+        var api = null;
+
         function initSCORM() {
             var win = window;
             while ((win.API == null) && (win.parent != null) && (win.parent != win)) { win = win.parent; }
             api = win.API;
-            if (api) api.LMSInitialize("");
+
+            if (api) {
+                api.LMSInitialize("");
+                // CRITIQUE : Dire au LMS qu'on a commencé mais pas fini
+                api.LMSSetValue("cmi.core.lesson_status", "incomplete");
+                api.LMSCommit("");
+            }
         }
 
         function completeSCORM(timestampStr) {
             if (api) {
-                api.LMSSetValue("cmi.core.lesson_status", "completed");
+                // 1. On définit le statut comme réussi ET terminé
+                api.LMSSetValue("cmi.core.lesson_status", "passed");
+
+                // 2. On enregistre la date de signature
                 api.LMSSetValue("cmi.comments", "Signature le : " + timestampStr);
-                api.LMSCommit("");
-                api.LMSFinish("");
+
+                // 3. Optionnel : On met un score de 100 pour forcer la validation
+                api.LMSSetValue("cmi.core.score.raw", "100");
+                api.LMSSetValue("cmi.core.score.min", "0");
+                api.LMSSetValue("cmi.core.score.max", "100");
+
+                // 4. On enregistre (Commit) avant de fermer (Finish)
+                var success = api.LMSCommit("");
+                if (success === "true") {
+                    api.LMSFinish("");
+                    console.log("Données SCORM transmises avec succès.");
+                } else {
+                    console.error("Erreur lors du Commit SCORM");
+                }
+            } else {
+                console.error("API SCORM introuvable. Statut non enregistré.");
             }
         }
-
         // --- EXPORT / IMPORT CONFIG ---
         function exportConfig() {
             const blob = new Blob([JSON.stringify({ content: rulesBox.innerHTML })], { type: 'application/json' });
