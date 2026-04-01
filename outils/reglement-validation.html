@@ -532,7 +532,7 @@
                     }
                 });
 
-                html += `<p style="text-align:center; margin-top:60px; color:#94a3b8;">*** Fin du document ***</p>`;
+                html += `<p style="text-align:center; margin-top:30px; color:#94a3b8;">*** Fin du document ***</p>`;
                 rulesBox.innerHTML = html;
 
                 verifierScrollNecessaire();
@@ -793,9 +793,11 @@
 
     .scorm-mode .container { 
         display: block !important; /* Block pour que la hauteur soit auto */
-        width: 90% !important; 
+        height: auto !important;
+        min-height: 90vh !important;
+        width: 90% !important;
         max-width: 800px !important; 
-        margin: 20px auto !important; 
+        margin: 40px auto !important; 
         padding: 30px !important; 
         background: white !important; 
         box-shadow: 0 0 15px rgba(0,0,0,0.1); 
