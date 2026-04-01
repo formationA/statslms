@@ -675,7 +675,8 @@
                 }
 
                 // 5. Injection du script de validation pour le SCORM
-                const scriptSecours = docClone.createElement('script');
+                // Correction : On utilise document.createElement et on l'ajoute au clone
+                const scriptSecours = document.createElement('script');
                 scriptSecours.textContent = `
                     function validerSignatureSCORM() {
                         const now = new Date();
@@ -690,7 +691,7 @@
                         alert("Signature enregistrée avec succès.");
                     }
                 `;
-                docClone.body.appendChild(scriptSecours);
+                docClone.querySelector('body').appendChild(scriptSecours);
 
                 // 6. Nettoyage (Navbar)
                 const nav = docClone.querySelector('.navbar');
