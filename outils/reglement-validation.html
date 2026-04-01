@@ -662,6 +662,7 @@
             input.value = "";
         }
 
+        // --- GÉNÉRATION SCORM ZIP ---
         function generateSCORM() {
             try {
                 if (typeof JSZip === 'undefined') {
@@ -670,12 +671,12 @@
                 }
                 const zip = new JSZip();
 
-                // 1. Capture du contenu et clonage initial
-                const rulesContent = document.getElementById('rulesBox').innerHTML;
-                const logoOriginal = document.querySelector('img[src*="logo"]');
+                // 1. Capture et Clonage
+                const contenuFixe = document.getElementById('rulesBox').innerHTML;
                 let docClone = document.documentElement.cloneNode(true);
 
-                // 2. Traitement du Logo (Conversion en Base64 pour l'autonomie)
+                // 2. Logo Base64
+                const logoOriginal = document.querySelector('img[src*="logo"]');
                 if (logoOriginal && logoOriginal.naturalWidth > 0) {
                     const canvas = document.createElement('canvas');
                     canvas.width = logoOriginal.naturalWidth;
@@ -685,147 +686,45 @@
                     if (logoClone) logoClone.src = canvas.toDataURL("image/png");
                 }
 
-                // 3. Nettoyage du clone (Suppression UI inutile dans le SCORM)
-                const nav = docClone.querySelector('.navbar');
-                if (nav) nav.remove();
-                const btnGen = docClone.querySelector('button[onclick*="generateSCORM"]');
-                if (btnGen) btnGen.remove();
-
-                // 4. Utilisation du DOMParser pour une injection propre
-                const parser = new DOMParser();
-                const scormDoc = parser.parseFromString(docClone.outerHTML, 'text/html');
-
-                // 5. Injection du Contenu et Verrouillage
-                const targetBox = scormDoc.getElementById('rulesBox');
+                // 3. Injection et Verrouillage
+                const targetBox = docClone.querySelector('#rulesBox');
                 if (targetBox) {
-                    targetBox.innerHTML = rulesContent;
+                    targetBox.innerHTML = contenuFixe;
                     targetBox.setAttribute('contenteditable', 'false');
                     targetBox.style.userSelect = 'none';
-                    targetBox.style.webkitUserSelect = 'none';
                 }
 
-                // 6. Injection des Styles SCORM (Fixe la hauteur et le scroll)
-                const styleElement = scormDoc.createElement('style');
-                styleElement.textContent = `
-            html, body { height: 100vh !important; overflow: hidden !important; background: #f8f9fa !important; }
-            .container { 
-                display: flex !important; flex-direction: column !important; 
-                height: 100vh !important; max-width: 98% !important; 
-                margin: 0 auto !important; padding: 10px !important; 
-            }
-            #rulesBox { 
-                flex: 1 !important; overflow-y: auto !important; 
-                border: 1px solid #dee2e6 !important; background: #fff !important; 
-                padding: 25px !important; margin-bottom: 10px !important; 
-                border-radius: 4px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
-            }
-            #actionArea, #scrollInfo { flex-shrink: 0 !important; }
-            .hidden { display: none !important; }
-            .scorm-mode #btnSubmit { width: 100%; padding: 15px; font-weight: bold; }
-        `;
-                scormDoc.head.appendChild(styleElement);
-
-                // 7. Injection du Script Logique (Initialisation, Scroll et Signature)
-                const scriptElement = scormDoc.createElement('script');
-                scriptElement.text = `
-            var api = null;
-
-            function initSCORM() {
-                var win = window;
-                while ((win.API == null) && (win.parent != null) && (win.parent != win)) { win = win.parent; }
-                api = win.API;
-                if (!api && window.opener) {
-                    win = window.opener;
-                    while ((win.API == null) && (win.parent != null) && (win.parent != win)) { win = win.parent; }
-                    api = win.API;
+                // 4. Interface (Boutons)
+                const clonedBtn = docClone.querySelector('#btnSubmit');
+                const clonedCheck = docClone.querySelector('#checkAgree');
+                if (clonedBtn) {
+                    clonedBtn.disabled = true;
+                    clonedBtn.setAttribute('onclick', "validerSignatureSCORM()");
                 }
-                if (api) {
-                    api.LMSInitialize("");
-                    api.LMSSetValue("cmi.core.lesson_status", "incomplete");
-                    api.LMSCommit("");
+                if (clonedCheck) {
+                    clonedCheck.checked = false;
+                    clonedCheck.setAttribute('onchange', "document.getElementById('btnSubmit').disabled = !this.checked");
                 }
-            }
 
-            function completeSCORM(ts) {
-                if (api) {
-                    api.LMSSetValue("cmi.core.lesson_status", "passed");
-                    api.LMSSetValue("cmi.comments", "Signature le : " + ts);
-                    api.LMSSetValue("cmi.core.score.raw", "100");
-                    api.LMSCommit("");
-                    api.LMSFinish("");
-                }
-            }
-
-            function validerSignatureSCORM() {
-                const now = new Date();
-                const ts = now.toLocaleString('fr-FR');
-                completeSCORM(ts);
                 
-                if(document.getElementById('btnSubmit')) document.getElementById('btnSubmit').classList.add('hidden');
-                if(document.getElementById('checkAgree')) document.getElementById('checkAgree').disabled = true;
-                if(document.getElementById('timestamp')) document.getElementById('timestamp').innerText = "Signé le " + ts;
-                if(document.getElementById('msgSuccess')) document.getElementById('msgSuccess').classList.remove('hidden');
-                
-                alert("Votre émargement a été transmis avec succès au LMS.");
+                // 8. ZIP
+                const manifest = '<?xml version="1.0" encoding="UTF-8"?><manifest identifier="RI_AFTRAL" version="1.0" xmlns="http://www.imsproject.org/xsd/imscp_rootv1p1p2"><metadata><schema>ADL SCORM</schema><schemaversion>1.2</schemaversion></metadata><organizations default="org"><organization identifier="org"><title>Règlement Intérieur</title><item identifierref="res1"><title>Signature</title></item></organization></organizations><resources><resource identifier="res1" adlcp:scormtype="sco" href="index.html"></resource></resources></manifest>';
+
+                zip.file("index.html", propreHtml);
+                zip.file("imsmanifest.xml", manifest);
+
+                zip.generateAsync({ type: "blob" }).then(content => {
+                    const a = document.createElement("a");
+                    a.href = URL.createObjectURL(content);
+                    a.download = "SCORM_RI_Final.zip";
+                    a.click();
+                    showModal("Succès", "Le package SCORM est maintenant 100% autonome.");
+                });
+
+            } catch (error) {
+                showModal("Erreur", error.message, true);
             }
-
-            window.onload = function() {
-                initSCORM();
-                const box = document.getElementById('rulesBox');
-                if(box) {
-                    box.onscroll = function() {
-                        if (box.scrollHeight - box.scrollTop <= box.clientHeight + 50) {
-                            if(document.getElementById('scrollInfo')) document.getElementById('scrollInfo').classList.add('hidden');
-                            if(document.getElementById('actionArea')) document.getElementById('actionArea').classList.remove('hidden');
-                        }
-                    };
-                }
-            };
-        `;
-                scormDoc.body.appendChild(scriptElement);
-                scormDoc.body.classList.add('scorm-mode');
-
-                // 8. Finalisation du HTML (Nettoyage des appels de scripts d'origine)
-                let finalHtml = "<!DOCTYPE html>\n" + scormDoc.documentElement.outerHTML;
-                finalHtml = finalHtml.replace(/chargerReglement\s*\(\s*\)\s*;?/g, '// Bypass');
-
-                // 9. Création du Manifeste SCORM 1.2
-                const manifest = \`<?xml version="1.0" encoding="UTF-8"?>
-<manifest identifier="RI_AFTRAL" version="1.0" xmlns="http://www.imsproject.org/xsd/imscp_rootv1p1p2" xmlns:adlcp="http://www.adlnet.org/xsd/adlcp_rootv1p2">
-    <metadata>
-        <schema>ADL SCORM</schema>
-        <schemaversion>1.2</schemaversion>
-    </metadata>
-    <organizations default="org">
-        <organization identifier="org">
-            <title>Règlement Intérieur AFTRAL</title>
-            <item identifier="item1" identifierref="res1">
-                <title>Lecture et Signature</title>
-            </item>
-        </organization>
-    </organizations>
-    <resources>
-        <resource identifier="res1" adlcp:scormtype="sco" href="index.html"></resource>
-    </resources>
-</manifest>\`;
-
-        // 10. Assemblage du ZIP et téléchargement
-        zip.file("index.html", finalHtml);
-        zip.file("imsmanifest.xml", manifest);
-
-        zip.generateAsync({ type: "blob" }).then(content => {
-            const a = document.createElement("a");
-            a.href = URL.createObjectURL(content);
-            a.download = "SCORM_Signature_Aftral.zip";
-            a.click();
-            showModal("Succès", "Le package SCORM a été généré et optimisé pour votre LMS.");
-        });
-
-    } catch (error) {
-        console.error("Erreur de génération :", error);
-        showModal("Erreur", "Une erreur est survenue : " + error.message, true);
-    }
-}
+        }
 
         window.onload = function () {
             initSCORM();
