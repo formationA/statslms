@@ -781,62 +781,116 @@
 
                 // 6. Style SCORM - CORRECTIF FINAL (Cible la carte blanche)
                 const styleSCORM = document.createElement('style');
+                // 6. Style SCORM - CORRECTIF FINAL (Élargissement + Fix Position Logo)
+                const styleSCORM = document.createElement('style');
                 styleSCORM.textContent = `
     html, body {
         height: auto !important;
         min-height: 100% !important;
-        overflow: visible !important; /* Désactive le scroll interne de l'iframe */
-        background-color: #f1f5f9 !important; /* Garde le fond gris clair */
+        overflow-y: auto !important; 
+        background-color: #f1f5f9 !important;
         margin: 0 !important;
         padding: 0 !important;
     }
 
-    /* CRUCIAL : C'est ici qu'on définit la carte blanche */
     .scorm-mode .document-card {
         height: auto !important; 
         max-height: none !important;
-        min-height: 400px !important;
-        width: 90% !important;
-        max-width: 800px !important;
+        width: 95% !important;           /* Largeur responsive */
+        max-width: 1200px !important;    /* Largeur maximale pour grands écrans */
         margin: 40px auto !important;
-        padding: 40px !important;
+        padding: 60px !important;        /* Plus d'espace intérieur pour le confort */
         background: white !important;
         border: 1px solid #e2e8f0 !important;
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1) !important;
         border-radius: 12px !important;
         display: block !important;
         box-sizing: border-box !important;
     }
 
-    /* Le texte doit s'étaler sans limite de hauteur */
+    /* ======================================================= */
+    /* --- CORRECTIF POSITION LOGO ET TITRE (FLEXBOX) --- */
+    /* ======================================================= */
+    
+    .scorm-mode header {
+        display: flex !important;
+        align-items: center !important;  /* Centre verticalement logo et titre */
+        justify-content: flex-start !important; /* Aligne tout à gauche par défaut */
+        gap: 40px !important;            /* Espace de sécurité entre logo et titre */
+        position: static !important;      /* Annule le position: relative d'origine */
+        border-bottom: 2px solid #e2e8f0 !important;
+        padding: 0 0 30px 0 !important;  /* Padding bas uniquement pour la ligne */
+        margin-bottom: 40px !important;
+        text-align: left !important;      /* Aligne le texte à gauche pour suivre le logo */
+    }
+
+    /* On nettoie les styles inline du logo cloné */
+    .scorm-mode header img[src*="logo"] {
+        position: static !important;      /* Annule le position: absolute d'origine */
+        transform: none !important;      /* Annule le translateY(-50%) */
+        height: 100px !important;        /* Taille fixe du logo */
+        width: auto !important;
+        object-fit: contain !important;
+        flex-shrink: 0 !important;       /* Empêche le logo de rétrécir */
+        margin: 0 !important;
+    }
+
+    /* On nettoie le wrapper du texte pour qu'il prenne le reste de la place */
+    .scorm-mode header div {
+        flex-grow: 1 !important;         /* Prend toute la largeur restante */
+        text-align: left !important;      /* Aligne le texte à gauche */
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* Ajustement des tailles de police pour le header large */
+    .scorm-mode .logo-text {
+        font-size: 1.8rem !important;    /* Titre principal plus grand */
+        margin-bottom: 8px !important;
+    }
+
+    .scorm-mode header h2 {
+        font-size: 1.2rem !important;    /* Sous-titre légèrement plus grand */
+        color: #64748b !important;
+        margin: 0 !important;
+    }
+
+    /* ======================================================= */
+    /* --- FIN CORRECTIF LOGO --- */
+    /* ======================================================= */
+
     .scorm-mode #rulesBox {
         height: auto !important;
         max-height: none !important;
         overflow: visible !important;
         display: block !important;
-        margin-bottom: 30px !important;
-        padding: 0 !important;
-        background: transparent !important;
-        border: none !important;
+        margin-bottom: 50px !important;
+        font-size: 1.05rem;
+        line-height: 1.75 !important;    /* Lecture aérée */
+        color: #334155 !important;
     }
 
     .scorm-mode .main-container {
         display: block !important;
-        height: auto !important;
-        padding: 0 !important;
+        width: 100% !important;
     }
 
     .validation-area {
         background: #f8fafc !important;
         border: 1px solid #e2e8f0 !important;
         border-radius: 12px !important;
-        padding: 25px !important;
-        margin-top: 20px !important;
+        padding: 40px !important;
+        margin-top: 40px !important;
+        max-width: 800px !important;     /* Signature centrée et plus étroite */
+        margin-left: auto !important;
+        margin-right: auto !important;
     }
 
-    .navbar, .nav-right, .nav-left { display: none !important; }
+    .navbar, .nav-right, .nav-left, .btn-nav, button.btn-save-load { display: none !important; }
     .hidden { display: none !important; }
 `;
+
+
                 bodyClone.appendChild(styleSCORM);
 
                 // 7. Nettoyage et Génération
