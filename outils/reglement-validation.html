@@ -669,42 +669,56 @@
                 }
                 const zip = new JSZip();
 
-                // 1. Capture et clonage
-                const rulesBox = document.getElementById('rulesBox');
-                const contenuFixe = rulesBox.innerHTML;
+                // 1. Capture du contenu et clonage
+                const contenuFixe = document.getElementById('rulesBox').innerHTML;
                 let docClone = document.documentElement.cloneNode(true);
 
-                // 2. Gestion du LOGO
-                const logoOriginal = document.querySelector('header img');
+                // 2. Gestion du LOGO (Base64)
+                const logoOriginal = document.querySelector('img[src*="logo"]');
                 if (logoOriginal && logoOriginal.naturalWidth > 0) {
                     const canvas = document.createElement('canvas');
                     canvas.width = logoOriginal.naturalWidth;
                     canvas.height = logoOriginal.naturalHeight;
                     canvas.getContext('2d').drawImage(logoOriginal, 0, 0);
-                    const logoClone = docClone.querySelector('header img');
+                    const logoClone = docClone.querySelector('img[src*="logo"]');
                     if (logoClone) logoClone.src = canvas.toDataURL("image/png");
                 }
 
-                // 3. Nettoyage du clone
+                // 3. Injection et nettoyage forcé des styles inline
                 const targetBox = docClone.querySelector('#rulesBox');
                 if (targetBox) {
                     targetBox.innerHTML = contenuFixe;
                     targetBox.setAttribute('contenteditable', 'false');
-                    targetBox.style.height = 'auto';
+                    targetBox.style.userSelect = 'none';
+                    targetBox.style.height = 'auto'; // Force le clone à être extensible
                     targetBox.style.maxHeight = 'none';
                 }
 
-                // 4. RÉ-INJECTION DE TOUTES VOS FONCTIONS (Scroll + API)
-                const scriptElement = document.createElement('script');
-                scriptElement.textContent = `
+                // 4. Script injecté (Mémoire LMS + Détection Scroll)
+                const scriptText = `
             var api = null;
             function findAPI(win) {
-                var attempts = 0;
+                var findAttempts = 0;
                 while ((win.API == null) && (win.parent != null) && (win.parent != win)) {
-                    attempts++; if (attempts > 500) return null;
+                    findAttempts++;
+                    if (findAttempts > 500) return null;
                     win = win.parent;
                 }
                 return win.API;
+            }
+
+            function verifierStatutPrecedent() {
+                if (!api) return;
+                var status = api.LMSGetValue("cmi.core.lesson_status");
+                if (status === "passed" || status === "completed") {
+                    document.getElementById('actionArea').classList.add('hidden');
+                    document.getElementById('scrollInfo').classList.add('hidden');
+                    document.getElementById('msgSuccess').classList.remove('hidden');
+                    var dateMsg = api.LMSGetValue("cmi.comments") || "";
+                    document.getElementById('timestamp').innerText = "Document déjà " + dateMsg;
+                    return true;
+                }
+                return false;
             }
 
             window.onload = function() {
@@ -712,80 +726,120 @@
                 if (!api && window.opener) api = findAPI(window.opener);
                 if (api) {
                     api.LMSInitialize("");
-                    var status = api.LMSGetValue("cmi.core.lesson_status");
-                    if (status === "passed" || status === "completed") {
-                        document.getElementById("actionArea").classList.add("hidden");
-                        document.getElementById("msgSuccess").classList.remove("hidden");
-                        document.getElementById("timestamp").innerText = "Déjà signé " + (api.LMSGetValue("cmi.comments") || "");
-                    } else {
-                        api.LMSSetValue("cmi.core.lesson_status", "incomplete");
-                        api.LMSCommit("");
-                    }
+                    if (verifierStatutPrecedent()) return; 
+                    api.LMSSetValue("cmi.core.lesson_status", "incomplete");
+                    api.LMSCommit("");
                 }
 
-                // Logique de Scroll à l'intérieur du SCORM
                 window.onscroll = function() {
-                    var docH = document.documentElement.scrollHeight;
-                    var winH = window.innerHeight;
-                    var scrollP = window.pageYOffset || document.documentElement.scrollTop;
-                    if ((scrollP + winH) >= (docH - 150)) {
-                        document.getElementById("scrollInfo")?.classList.add("hidden");
-                        document.getElementById("actionArea")?.classList.remove("hidden");
+                    var docHeight = document.documentElement.scrollHeight;
+                    var winHeight = window.innerHeight;
+                    var scrollPos = window.pageYOffset || document.documentElement.scrollTop;
+                    if ((scrollPos + winHeight) >= (docHeight - 150)) {
+                        document.getElementById('scrollInfo')?.classList.add('hidden');
+                        document.getElementById('actionArea')?.classList.remove('hidden');
                     }
                 };
+                
+                setTimeout(function() {
+                    if (document.documentElement.scrollHeight <= window.innerHeight + 100) {
+                        document.getElementById('scrollInfo')?.classList.add('hidden');
+                        document.getElementById('actionArea')?.classList.remove('hidden');
+                    }
+                }, 1500);
             };
 
             function validerSignatureSCORM() {
-                var d = new Date().toLocaleString('fr-FR');
+                const dateStr = new Date().toLocaleString('fr-FR');
                 if (api) {
                     api.LMSSetValue("cmi.core.score.raw", "100");
                     api.LMSSetValue("cmi.core.lesson_status", "passed");
-                    api.LMSSetValue("cmi.comments", "le " + d);
+                    api.LMSSetValue("cmi.comments", "signé le : " + dateStr);
                     api.LMSCommit("");
                     api.LMSFinish("");
                 }
-                document.getElementById("actionArea").classList.add("hidden");
-                document.getElementById("msgSuccess").classList.remove("hidden");
-                document.getElementById("timestamp").innerText = "Signé le " + d;
+                document.getElementById('actionArea').classList.add('hidden');
+                document.getElementById('timestamp').innerText = "Signé le " + dateStr;
+                document.getElementById('msgSuccess').classList.remove('hidden');
             }
         `;
+
+                const scriptElement = document.createElement('script');
+                scriptElement.textContent = scriptText;
                 docClone.body.appendChild(scriptElement);
 
-                // 5. Styles SCORM (pour l'affichage plein écran)
+                // 5. Style SCORM - ÉLARGISSEMENT ET FIX LOGO
                 const styleSCORM = document.createElement('style');
                 styleSCORM.textContent = `
-            .scorm-mode .document-card { width: 95% !important; max-width: 1200px !important; margin: 20px auto !important; padding: 40px !important; }
-            .scorm-mode header { display: flex !important; align-items: center !important; gap: 30px !important; position: static !important; }
-            .scorm-mode header img { position: static !important; transform: none !important; height: 90px !important; }
-            .navbar, .btn-save-load { display: none !important; }
+            html, body {
+                height: auto !important;
+                overflow: visible !important;
+                background-color: #f1f5f9 !important;
+                margin: 0 !important; padding: 0 !important;
+            }
+            .scorm-mode .document-card {
+                height: auto !important; max-height: none !important;
+                width: 95% !important; max-width: 1200px !important;
+                margin: 40px auto !important; padding: 50px !important;
+                background: white !important; border-radius: 12px !important;
+                box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
+                box-sizing: border-box !important;
+            }
+            /* FIX LOGO : Flexbox pour éviter le chevauchement */
+            .scorm-mode header {
+                display: flex !important; align-items: center !important;
+                gap: 40px !important; position: static !important;
+                text-align: left !important; border-bottom: 2px solid #e2e8f0 !important;
+                padding-bottom: 20px !important; margin-bottom: 30px !important;
+            }
+            .scorm-mode header img[src*="logo"] {
+                position: static !important; transform: none !important;
+                height: 100px !important; flex-shrink: 0 !important;
+            }
+            .scorm-mode header div { flex-grow: 1 !important; text-align: left !important; }
+            .scorm-mode .logo-text { font-size: 1.6rem !important; margin: 0 !important; }
+
+            .scorm-mode #rulesBox {
+                height: auto !important; max-height: none !important;
+                overflow: visible !important; line-height: 1.7 !important;
+            }
+            .validation-area {
+                background: #f8fafc !important; border: 1px solid #e2e8f0 !important;
+                padding: 30px !important; border-radius: 12px !important;
+                max-width: 700px !important; margin: 30px auto !important;
+            }
+            .navbar, .nav-right, .nav-left { display: none !important; }
             .hidden { display: none !important; }
         `;
                 docClone.body.appendChild(styleSCORM);
 
-                // 6. Finalisation du ZIP
-                let propreHtml = "<!DOCTYPE html>\\n" + docClone.outerHTML;
-                propreHtml = propreHtml.replace(/chargerReglement\\s*\\(\\s*\\)\\s*;?/g, '//');
+                // 6. Génération finale
+                let propreHtml = "<!DOCTYPE html>\n" + docClone.outerHTML;
+                propreHtml = propreHtml.replace(/chargerReglement\s*\(\s*\)\s*;?/g, '//');
                 propreHtml = propreHtml.replace('<body', '<body class="scorm-mode"');
 
-                zip.file("imsmanifest.xml", \`<?xml version="1.0" encoding="UTF-8"?>
+                const manifest = `<?xml version="1.0" encoding="UTF-8"?>
             <manifest identifier="RI_AFTRAL" version="1.1" xmlns="http://www.imsproject.org/xsd/imscp_rootv1p1p2">
                 <metadata><schema>ADL SCORM</schema><schemaversion>1.2</schemaversion></metadata>
+                <organizations default="ORG-1"><organization identifier="ORG-1"><title>Règlement Intérieur</title>
+                <item identifier="ITEM-1" identifierref="RES-1"><title>Signature</title></item></organization></organizations>
                 <resources><resource identifier="RES-1" type="webcontent" adlcp:scormtype="sco" href="index.html" xmlns:adlcp="http://www.adlnet.org/xsd/adlcp_rootv1p2"><file href="index.html"/></resource></resources>
-            </manifest>\`);
-        
-        zip.file("index.html", propreHtml);
+            </manifest>`;
 
-        zip.generateAsync({ type: "blob" }).then(function(content) {
-            const a = document.createElement("a");
-            a.href = URL.createObjectURL(content);
-            a.download = "SCORM_Reglement_Signe.zip";
-            a.click();
-        });
+                zip.file("imsmanifest.xml", manifest);
+                zip.file("index.html", propreHtml);
 
-    } catch (error) {
-        console.error("Erreur :", error);
-    }
-}
+                zip.generateAsync({ type: "blob" }).then(content => {
+                    const a = document.createElement("a");
+                    a.href = URL.createObjectURL(content);
+                    a.download = "SCORM_Reglement_Signe.zip";
+                    a.click();
+                });
+
+            } catch (error) {
+                console.error("Erreur :", error);
+            }
+        }
 
         window.onload = function () {
             initSCORM();
