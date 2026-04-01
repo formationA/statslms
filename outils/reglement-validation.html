@@ -746,6 +746,32 @@
                 const bodyClone = docClone.getElementsByTagName('body')[0] || docClone;
                 bodyClone.appendChild(scriptElement);
 
+                // 6bis. AJOUT DE STYLES FORCÉS POUR LA HAUTEUR (Correction Cadre Blanc)
+                const styleSCORM = document.createElement('style');
+                styleSCORM.textContent = `
+                    /* On force le container principal à prendre de la place */
+                    .scorm-mode .container {
+                        max-width: 95% !important;
+                        margin: 10px auto !important;
+                        padding: 15px !important;
+                    }
+                    /* Le cadre blanc (rulesBox) s'adapte à la hauteur de l'écran */
+                    #rulesBox {
+                        height: 65vh !important; /* 65% de la hauteur de fenêtre */
+                        min-height: 450px !important;
+                        border: 1px solid #ddd !important;
+                        background: #fff !important;
+                        overflow-y: auto !important;
+                    }
+                    /* On ajuste le logo pour qu'il ne prenne pas trop de place */
+                    .scorm-mode .logo-container img {
+                        max-height: 80px !important;
+                        width: auto !important;
+                    }
+                `;
+                bodyClone.appendChild(styleSCORM);
+
+
                 // 7. Nettoyage et Export
                 const nav = docClone.querySelector('.navbar');
                 if (nav) nav.remove();
