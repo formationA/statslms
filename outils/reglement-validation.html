@@ -613,14 +613,13 @@
 
         function completeSCORM(timestampStr) {
             if (api) {
-               
-                // 1. On valide le score (100/100) pour déclencher la complétion
+                // 1. On dit au LMS que c'est fini et réussi
+                api.LMSSetValue("cmi.core.lesson_status", "passed");
+
+                // 2. On valide le score (100/100) pour déclencher la complétion
                 api.LMSSetValue("cmi.core.score.raw", "100");
                 api.LMSSetValue("cmi.core.score.min", "0");
                 api.LMSSetValue("cmi.core.score.max", "100");
-
-                // 2. On dit au LMS que c'est fini et réussi
-                api.LMSSetValue("cmi.core.lesson_status", "passed");
 
                 // 3. On ajoute le commentaire de signature
                 api.LMSSetValue("cmi.comments", "Signé le : " + timestampStr);
@@ -738,7 +737,8 @@
                     '  document.getElementById("checkAgree").disabled = true;',
                     '  document.getElementById("timestamp").innerText = "Signe le " + dateStr;',
                     '  document.getElementById("msgSuccess").classList.remove("hidden");',
-                      '}'
+                    '  alert("Signature transmise au LMS.");',
+                    '}'
                 ].join('\n');
 
                 // 5. Injection propre via document.createElement
@@ -775,7 +775,7 @@
                 zip.generateAsync({ type: "blob" }).then(content => {
                     const a = document.createElement("a");
                     a.href = URL.createObjectURL(content);
-                    a.download = "SCORM_Reglement_Signe.zip";
+                    a.download = "SCORM_Autonome.zip";
                     a.click();
                 });
 
