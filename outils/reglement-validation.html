@@ -185,18 +185,24 @@
         }
 
         button#btnSubmit {
-            background: #0055A4;
+            background: var(--aftral-blue); /* bleu AFTRAL */
             color: white;
             border: none;
             padding: 14px 40px;
-            border-radius: 6px;
+            border-radius: 8px;
             font-weight: 700;
             cursor: pointer;
             transition: var(--transition);
         }
 
+            button#btnSubmit:hover:not(:disabled) {
+                background: #1e254a; /* bleu foncé au hover */
+                transform: translateY(-2px);
+            }
+
             button#btnSubmit:disabled {
-                background: #cbd5e1;
+                background: #cbd5e1; /* gris doux */
+                color: #94a3b8;
                 cursor: not-allowed;
             }
 
@@ -302,68 +308,30 @@
             box-sizing: border-box;
         }
 
-        /* --- CHECKBOX MODERNE AVEC VRAIE COCHE --- */
-
+        /* CASE À COCHER PERSONNALISÉE */
         .checkbox-container {
             display: flex;
             align-items: center;
-            justify-content: center;
             gap: 12px;
             cursor: pointer;
-            position: relative;
+            user-select: none;
+            font-size: 0.95rem;
+            color: #1e293b;
         }
 
-            /* cacher la checkbox native */
+            /* Cacher la checkbox originale */
             .checkbox-container input[type="checkbox"] {
-                position: absolute;
-                opacity: 0;
+                display: none;
             }
 
-            /* carré */
+            /* Créer la coche stylisée */
             .checkbox-container span::before {
-                content: "";
-                display: inline-block;
-                width: 22px;
-                height: 22px;
-                border: 2px solid #94a3b8;
-                border-radius: 6px;
-                margin-right: 10px;
-                vertical-align: middle;
-                background: white;
-                transition: all 0.25s ease;
+                border: 2px solid var(--aftral-blue); /* bordure bleue AFTRAL */
             }
 
-            /* coche dessinée */
-            .checkbox-container span::after {
-                content: "";
-                position: absolute;
-                left: 6px;
-                top: 50%;
-                width: 6px;
-                height: 12px;
-                border: solid white;
-                border-width: 0 2px 2px 0;
-                transform: translateY(-60%) rotate(45deg) scale(0);
-                opacity: 0;
-                transition: all 0.2s ease;
-            }
-
-            /* état coché */
             .checkbox-container input[type="checkbox"]:checked + span::before {
-                background: #38bdf8;
-                border-color: #38bdf8;
-            }
-
-            /* apparition de la coche */
-            .checkbox-container input[type="checkbox"]:checked + span::after {
-                opacity: 1;
-                transform: translateY(-60%) rotate(45deg) scale(1);
-            }
-
-            /* hover */
-            .checkbox-container:hover span::before {
-                border-color: #38bdf8;
-                box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
+                background-color: var(--aftral-blue); /* coche remplie bleu AFTRAL */
+                border-color: var(--aftral-blue);
             }
 
     </style>
