@@ -803,11 +803,11 @@
                 propreHtml = propreHtml.replace(/chargerReglement\s*\(\s*\)\s*;?/g, '// Intégré');
                 propreHtml = propreHtml.replace('<body', '<body class="scorm-mode"');
 
-                // Manifeste avec Namespace adlcp pour la compatibilité
-                const manifest = '<?xml version="1.0" encoding="UTF-8"?><manifest identifier="RI_AFTRAL" version="1.0" xmlns="http://www.imsproject.org/xsd/imscp_rootv1p1p2" xmlns:adlcp="http://www.adlnet.org/xsd/adlcp_rootv1p2"><metadata><schema>ADL SCORM</schema><schemaversion>1.2</schemaversion></metadata><organizations default="org"><organization identifier="org"><title>Règlement Intérieur</title><item identifier="item1" identifierref="res1"><title>Signature</title></item></organization></organizations><resources><resource identifier="res1" adlcp:scormtype="sco" href="index.html"></resource></resources></manifest>';
-
+                
+                // Manifeste SCORM
+                zip.file("imsmanifest.xml", '<?xml version="1.0" encoding="UTF-8"?><manifest identifier="MANIFEST-1" version="1.2" xmlns="http://www.imsproject.org/xsd/imscp_rootv1p1p2"><organizations default="ORG-1"><organization identifier="ORG-1"><title>' + finalName + '</title><item identifierRef="RES-1" identifier="ITEM-1"><title>Quiz</title></item></organization></organizations><resources><resource identifier="RES-1" type="webcontent" href="index.html"><file href="index.html"/><file href="SCORM_API_wrapper.js"/></resource></resources></manifest>');
                 zip.file("index.html", propreHtml);
-                zip.file("imsmanifest.xml", manifest);
+              
 
                 zip.generateAsync({ type: "blob" }).then(content => {
                     const a = document.createElement("a");
