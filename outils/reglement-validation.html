@@ -613,13 +613,14 @@
 
         function completeSCORM(timestampStr) {
             if (api) {
-                // 1. On dit au LMS que c'est fini et réussi
-                api.LMSSetValue("cmi.core.lesson_status", "passed");
-
-                // 2. On valide le score (100/100) pour déclencher la complétion
+               
+                // 1. On valide le score (100/100) pour déclencher la complétion
                 api.LMSSetValue("cmi.core.score.raw", "100");
                 api.LMSSetValue("cmi.core.score.min", "0");
                 api.LMSSetValue("cmi.core.score.max", "100");
+
+                // 2. On dit au LMS que c'est fini et réussi
+                api.LMSSetValue("cmi.core.lesson_status", "passed");
 
                 // 3. On ajoute le commentaire de signature
                 api.LMSSetValue("cmi.comments", "Signé le : " + timestampStr);
@@ -759,12 +760,27 @@
                 finalHtml = finalHtml.replace('<body', '<body class="scorm-mode"');
 
                 // 7. Manifeste SCORM 1.2 minimaliste
+                // 7. Manifeste SCORM 1.2 avec Mastery Score pour forcer la complétion
                 const manifest = `<?xml version="1.0" encoding="UTF-8"?>
 <manifest identifier="RI_AFTRAL_NOSCRIPT" version="1.0" xmlns="http://www.imsproject.org/xsd/imscp_rootv1p1p2" xmlns:adlcp="http://www.adlnet.org/xsd/adlcp_rootv1p2">
-  <metadata><schema>ADL SCORM</schema><schemaversion>1.2</schemaversion></metadata>
-  <organizations default="org"><organization identifier="org"><title>${finalName}</title>
-  <item identifier="item1" identifierref="res1"><title>Émargement</title></item></organization></organizations>
-  <resources><resource identifier="res1" adlcp:scormtype="sco" href="index.html" type="webcontent"><file href="index.html"/></resource></resources>
+  <metadata>
+    <schema>ADL SCORM</schema>
+    <schemaversion>1.2</schemaversion>
+  </metadata>
+  <organizations default="org">
+    <organization identifier="org">
+      <title>${finalName}</title>
+      <item identifier="item1" identifierref="res1">
+        <title>Émargement</title>
+        <adlcp:masteryscore>100</adlcp:masteryscore>
+      </item>
+    </organization>
+  </organizations>
+  <resources>
+    <resource identifier="res1" adlcp:scormtype="sco" href="index.html" type="webcontent">
+      <file href="index.html"/>
+    </resource>
+  </resources>
 </manifest>`;
 
                 // 8. Création du ZIP
@@ -774,7 +790,7 @@
                 zip.generateAsync({ type: "blob" }).then(content => {
                     const a = document.createElement("a");
                     a.href = URL.createObjectURL(content);
-                    a.download = "SCORM_Autonome.zip";
+                    a.download = "SCORM_Reglement_Signe.zip";
                     a.click();
                 });
 
