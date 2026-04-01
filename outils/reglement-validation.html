@@ -302,7 +302,7 @@
             box-sizing: border-box;
         }
 
-        /* --- CHECKBOX MODERNE (SAFE avec ton HTML actuel) --- */
+        /* --- CHECKBOX MODERNE AVEC VRAIE COCHE --- */
 
         .checkbox-container {
             display: flex;
@@ -313,11 +313,10 @@
             position: relative;
         }
 
-            /* cacher checkbox native */
+            /* cacher la checkbox native */
             .checkbox-container input[type="checkbox"] {
                 position: absolute;
                 opacity: 0;
-                cursor: pointer;
             }
 
             /* carré */
@@ -330,19 +329,21 @@
                 border-radius: 6px;
                 margin-right: 10px;
                 vertical-align: middle;
+                background: white;
                 transition: all 0.25s ease;
-                background: #fff;
             }
 
-            /* coche */
+            /* coche dessinée */
             .checkbox-container span::after {
-                content: "✔";
+                content: "";
                 position: absolute;
-                left: 4px;
+                left: 6px;
                 top: 50%;
-                transform: translateY(-50%) scale(0.5);
-                font-size: 14px;
-                color: white;
+                width: 6px;
+                height: 12px;
+                border: solid white;
+                border-width: 0 2px 2px 0;
+                transform: translateY(-60%) rotate(45deg) scale(0);
                 opacity: 0;
                 transition: all 0.2s ease;
             }
@@ -353,10 +354,10 @@
                 border-color: #38bdf8;
             }
 
-            /* afficher coche */
+            /* apparition de la coche */
             .checkbox-container input[type="checkbox"]:checked + span::after {
                 opacity: 1;
-                transform: translateY(-50%) scale(1);
+                transform: translateY(-60%) rotate(45deg) scale(1);
             }
 
             /* hover */
