@@ -771,8 +771,8 @@
                 document.getElementById('timestamp').innerText = "Signé le " + dateStr;
                 document.getElementById('msgSuccess').classList.remove('hidden');
                 
-            }
-        `;
+                }
+                `;
 
                 const scriptElement = document.createElement('script');
                 scriptElement.textContent = scriptText.replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&');
@@ -782,47 +782,48 @@
                 // 6. Style SCORM - CSS FIXÉ POUR S'ADAPTER AU TEXTE
                 const styleSCORM = document.createElement('style');
                 styleSCORM.textContent = `
-   html, body {
-    height: auto !important;
-    /* "initial" est souvent plus efficace que "visible" pour annuler un scroll d'iframe */
-    overflow: initial !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    background: #f0f0f0 !important;
-}
+                html, body {
+                height: auto !important;
+                /* "initial" est souvent plus efficace que "visible" pour annuler un scroll d'iframe */
+                overflow: initial !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                background: #f0f0f0 !important;
+                }
 
-.scorm-mode .container {
-    display: block !important;
-    height: auto !important;
-    width: 90% !important;
-    max-width: 800px !important;
-    /* Réduire la marge haute/basse évite de "pousser" le contenu hors de vue */
-    margin: 20px auto !important;
-    padding: 30px !important;
-    background: white !important;
-    box-shadow: 0 0 15px rgba(0,0,0,0.1);
-    border-radius: 8px;
-    box-sizing: border-box;
-    /* Gardez une seule valeur de min-height cohérente */
-    min-height: 400px !important;
-}
+                .scorm-mode .container {
+                display: block !important;
+                height: auto !important;
+                width: 90% !important;
+                max-width: 800px !important;
+                /* Réduire la marge haute/basse évite de "pousser" le contenu hors de vue */
+                margin: 20px auto !important;
+                padding: 30px !important;
+                background: white !important;
+                box-shadow: 0 0 15px rgba(0,0,0,0.1);
+                border-radius: 8px;
+                box-sizing: border-box;
+                /* Gardez une seule valeur de min-height cohérente */
+                min-height: 400px !important;
+                }
 
-#rulesBox {
-    height: auto !important;
-    overflow: visible !important;
-    display: block !important;
-    margin-bottom: 30px !important;
-}
+                #rulesBox {
+                height: auto !important;
+                overflow: visible !important;
+                display: block !important;
+                margin-bottom: 30px !important;
+                }
 
-    #actionArea, #scrollInfo { 
-        padding: 20px 0 !important; 
-        border-top: 1px solid #eee;
-        text-align: center;
-    }
+                #actionArea, #scrollInfo { 
+                padding: 20px 0 !important; 
+                border-top: 1px solid #eee;
+                text-align: center;
+                }
 
-    .hidden { display: none !important; }
-    .navbar { display: none !important; }
-`;
+                .hidden { display: none !important; }
+                .navbar { display: none !important; }
+                `;
+
                 bodyClone.appendChild(styleSCORM);
 
                 // 7. Nettoyage et Génération
@@ -831,11 +832,11 @@
                 propreHtml = propreHtml.replace('<body', '<body class="scorm-mode"');
 
                 const manifest = `<?xml version="1.0" encoding="UTF-8"?>
-<manifest identifier="RI_AFTRAL_SCO" version="1.1" xmlns="http://www.imsproject.org/xsd/imscp_rootv1p1p2" xmlns:adlcp="http://www.adlnet.org/xsd/adlcp_rootv1p2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.imsproject.org/xsd/imscp_rootv1p1p2 imscp_rootv1p1p2.xsd http://www.adlnet.org/xsd/adlcp_rootv1p2 adlcp_rootv1p2.xsd">
-  <metadata><schema>ADL SCORM</schema><schemaversion>1.2</schemaversion></metadata>
-  <organizations default="ORG-1"><organization identifier="ORG-1"><title>Règlement Intérieur</title><item identifier="ITEM-1" identifierref="RES-1"><title>Signature</title></item></organization></organizations>
-  <resources><resource identifier="RES-1" type="webcontent" adlcp:scormtype="sco" href="index.html"><file href="index.html"/></resource></resources>
-</manifest>`;
+                <manifest identifier="RI_AFTRAL_SCO" version="1.1" xmlns="http://www.imsproject.org/xsd/imscp_rootv1p1p2" xmlns:adlcp="http://www.adlnet.org/xsd/adlcp_rootv1p2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.imsproject.org/xsd/imscp_rootv1p1p2 imscp_rootv1p1p2.xsd http://www.adlnet.org/xsd/adlcp_rootv1p2 adlcp_rootv1p2.xsd">
+                <metadata><schema>ADL SCORM</schema><schemaversion>1.2</schemaversion></metadata>
+                <organizations default="ORG-1"><organization identifier="ORG-1"><title>Règlement Intérieur</title><item identifier="ITEM-1" identifierref="RES-1"><title>Signature</title></item></organization></organizations>
+                <resources><resource identifier="RES-1" type="webcontent" adlcp:scormtype="sco" href="index.html"><file href="index.html"/></resource></resources>
+                </manifest>`;
 
                 zip.file("imsmanifest.xml", manifest);
                 zip.file("index.html", propreHtml);
