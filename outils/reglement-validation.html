@@ -460,9 +460,16 @@
     </div>
 
 
-
     <script>
-        // --- CHARGEMENT DU JSON AVEC LOGO ---
+        // --- VARIABLES GLOBALES ET ÉLÉMENTS ---
+        var api = null;
+        const rulesBox = document.getElementById('rulesBox');
+        const scrollInfo = document.getElementById('scrollInfo');
+        const actionArea = document.getElementById('actionArea');
+        const btnSubmit = document.getElementById('btnSubmit');
+        const checkAgree = document.getElementById('checkAgree');
+
+        // --- CHARGEMENT DU JSON ---
         async function chargerReglement() {
             try {
                 const response = await fetch('reglement.json');
@@ -475,8 +482,8 @@
                 // Logo
                 if (data.logo) {
                     html += `<div style="text-align:center; margin-bottom:20px;">
-                                <img src="${data.logo}" alt="Logo" style="max-width:200px; height:auto;">
-                             </div>`;
+                                    <img src="${data.logo}" alt="Logo" style="max-width:200px; height:auto;">
+                                 </div>`;
                 }
 
                 // En-tête
@@ -487,8 +494,8 @@
                 // Sections
                 data.sections.forEach(section => {
                     html += `<h2 style="background:#2d3663; color:white; padding:12px; border-radius:4px; margin-top:40px;">
-                                Section ${section.id} : ${section.titre}
-                             </h2>`;
+                                    Section ${section.id} : ${section.titre}
+                                 </h2>`;
 
                     if (section.contenu_introductif) html += `<p><strong>${section.contenu_introductif}</strong></p>`;
                     if (section.objectifs) html += `<ul>${section.objectifs.map(o => `<li>${o}</li>`).join('')}</ul>`;
@@ -499,7 +506,6 @@
                             html += `<div style="margin-top:25px; border-bottom:1px solid #eee; padding-bottom:15px;">`;
                             html += `<h3 style="color:#0055A4;">Article ${art.num} : ${art.titre}</h3>`;
                             if (art.texte) html += `<p>${art.texte}</p>`;
-
                             if (art.points) html += `<ul>${art.points.map(p => `<li>${p}</li>`).join('')}</ul>`;
                             if (art.sanctions) {
                                 html += `<div style="color:#b91c1c; font-weight:600; margin-top:10px;">🔴 Sanctions :</div>`;
@@ -509,7 +515,6 @@
                                 html += `<strong>Cas autorisant l'ouverture :</strong>`;
                                 html += `<ul>${art.cas_ouverture.map(c => `<li>${c}</li>`).join('')}</ul>`;
                             }
-
                             if (art.sous_articles) {
                                 art.sous_articles.forEach(sub => {
                                     html += `<div style="margin-left:20px; border-left:2px solid #e2e8f0; padding-left:15px; margin-top:15px;">`;
@@ -523,7 +528,6 @@
                                     html += `</div>`;
                                 });
                             }
-
                             html += `</div>`;
                         });
                     }
@@ -532,16 +536,60 @@
                 html += `<p style="text-align:center; margin-top:60px; color:#94a3b8;">*** Fin du document ***</p>`;
                 box.innerHTML = html;
 
+                // Vérification si le contenu est court (pas besoin de scroll)
+                verifierScrollNecessaire();
+
             } catch (err) {
                 console.error(err);
                 document.getElementById('rulesBox').innerHTML = `<div style="color:red; text-align:center; padding:50px;">
-                    <strong>Erreur critique :</strong> Impossible de lire le fichier JSON.<br>
-                    Vérifiez qu'il est bien nommé <code>reglement.json</code> et qu'il ne manque aucune virgule.
-                </div>`;
+                        <strong>Erreur critique :</strong> Impossible de lire le fichier JSON.<br>
+                        Vérifiez qu'il est bien nommé <code>reglement.json</code>.
+                    </div>`;
             }
         }
 
-        // --- POPUP ---
+        // --- LOGIQUE DE SCROLL ET SIGNATURE ---
+        function verifierScrollNecessaire() {
+            // Un petit délai pour s'assurer que le rendu navigateur est fini
+            setTimeout(() => {
+                if (rulesBox.scrollHeight <= rulesBox.clientHeight + 10) {
+                    scrollInfo.classList.add('hidden');
+                    actionArea.classList.remove('hidden');
+                }
+            }, 500);
+        }
+
+        rulesBox.onscroll = function () {
+            // Se déclenche quand on arrive à 10px du bas ou moins
+            const position = rulesBox.scrollHeight - rulesBox.scrollTop;
+            const hauteurVisible = rulesBox.clientHeight;
+
+            if (position <= hauteurVisible + 10) {
+                scrollInfo.classList.add('hidden');
+                actionArea.classList.remove('hidden');
+            }
+        };
+
+        checkAgree.onchange = function () {
+            btnSubmit.disabled = !this.checked;
+        };
+
+        btnSubmit.onclick = function () {
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('fr-FR', {
+                day: '2-digit', month: '2-digit', year: 'numeric',
+                hour: '2-digit', minute: '2-digit', second: '2-digit'
+            });
+            completeSCORM(dateStr);
+            checkAgree.disabled = true;
+            btnSubmit.classList.add('hidden');
+            rulesBox.contentEditable = "false";
+            document.getElementById('timestamp').innerText = "Le " + dateStr;
+            document.getElementById('msgSuccess').classList.remove('hidden');
+            showModal("Signé !", "Votre émargement est verrouillé et enregistré.");
+        };
+
+        // --- POPUP MODAL ---
         function showModal(title, text, isError = false) {
             document.getElementById('modalTitle').innerText = title;
             document.getElementById('modalText').innerText = text;
@@ -558,7 +606,6 @@
         function closeModal() { document.getElementById('modalOverlay').classList.remove('active'); }
 
         // --- SCORM 1.2 ---
-        var api = null;
         function initSCORM() {
             var win = window;
             while ((win.API == null) && (win.parent != null) && (win.parent != win)) { win = win.parent; }
@@ -574,40 +621,6 @@
                 api.LMSFinish("");
             }
         }
-
-        // --- AU CHARGEMENT ---
-        window.onload = function () {
-            initSCORM();
-            chargerReglement();
-        };
-
-        // --- LOGIQUE SIGNATURE ---
-        const rulesBox = document.getElementById('rulesBox');
-        const scrollInfo = document.getElementById('scrollInfo');
-        const actionArea = document.getElementById('actionArea');
-        const btnSubmit = document.getElementById('btnSubmit');
-        const checkAgree = document.getElementById('checkAgree');
-
-        rulesBox.onscroll = function () {
-            if (rulesBox.scrollHeight - rulesBox.scrollTop <= rulesBox.clientHeight + 40) {
-                scrollInfo.classList.add('hidden');
-                actionArea.classList.remove('hidden');
-            }
-        };
-
-        checkAgree.onchange = function () { btnSubmit.disabled = !this.checked; };
-
-        btnSubmit.onclick = function () {
-            const now = new Date();
-            const dateStr = now.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            completeSCORM(dateStr);
-            checkAgree.disabled = true;
-            btnSubmit.classList.add('hidden');
-            rulesBox.contentEditable = "false";
-            document.getElementById('timestamp').innerText = "Le " + dateStr;
-            document.getElementById('msgSuccess').classList.remove('hidden');
-            showModal("Signé !", "Votre émargement est verrouillé et enregistré.");
-        };
 
         // --- EXPORT / IMPORT CONFIG ---
         function exportConfig() {
@@ -629,6 +642,7 @@
                     const config = JSON.parse(e.target.result);
                     rulesBox.innerHTML = config.content;
                     showModal("Import Réussi", "Contenu chargé.");
+                    verifierScrollNecessaire();
                 } catch (err) {
                     showModal("Erreur", "Fichier invalide.", true);
                 }
@@ -637,53 +651,62 @@
             input.value = "";
         }
 
-        // --- GÉNÉRATION SCORM AVEC LOGO ---
+        // --- GÉNÉRATION SCORM ZIP ---
         function generateSCORM() {
+            if (typeof JSZip === 'undefined') {
+                showModal("Erreur", "La bibliothèque JSZip n'est pas chargée.", true);
+                return;
+            }
             const zip = new JSZip();
             const contenuFixe = document.getElementById('rulesBox').innerHTML;
             let docClone = document.documentElement.cloneNode(true);
             docClone.querySelector('#rulesBox').innerHTML = contenuFixe;
+
             let propreHtml = docClone.outerHTML;
-            propreHtml = propreHtml.replace('chargerReglement();', '// contenu déjà chargé');
+            propreHtml = propreHtml.replace('chargerReglement();', '// contenu déjà injecté');
             propreHtml = propreHtml.replace('<body', '<body class="scorm-mode"');
 
-            // Manifest SCORM 1.2
             const manifest = `<?xml version="1.0" encoding="UTF-8"?>
 <manifest identifier="RI_AFTRAL" version="1.0" xmlns="http://www.imsproject.org/xsd/imscp_rootv1p1p2">
-        <metadata>
-            <schema>ADL SCORM</schema>
-            <schemaversion>1.2</schemaversion>
-        </metadata>
+        <metadata><schema>ADL SCORM</schema><schemaversion>1.2</schemaversion></metadata>
         <organizations default="org">
             <organization identifier="org">
-                <title>Règlement Intérieur AFTRAL</title>
-                <item identifier="item1" identifierref="res1">
-                    <title>Signature du Règlement</title>
-                </item>
+                <title>Règlement Intérieur</title>
+                <item identifier="item1" identifierref="res1"><title>Signature du Règlement</title></item>
             </organization>
         </organizations>
-        <resources>
-            <resource identifier="res1" adlcp:scormtype="sco" href="index.html"></resource>
-        </resources>
+        <resources><resource identifier="res1" adlcp:scormtype="sco" href="index.html"></resource></resources>
 </manifest>`;
 
-            // Ajouter le logo au ZIP et générer
-            fetch('logo.png')
-                .then(res => res.blob())
-                .then(blob => {
-                    zip.file('logo.png', blob);
-                    zip.file("index.html", propreHtml);
-                    zip.file("imsmanifest.xml", manifest);
-
-                    zip.generateAsync({ type: "blob" }).then(function (content) {
-                        const a = document.createElement("a");
-                        a.href = URL.createObjectURL(content);
-                        a.download = "SCORM_RI_Final.zip";
-                        a.click();
-                        showModal("SCORM Généré", "L'archive contient maintenant le texte complet du règlement et le logo.");
-                    });
+            fetch('logo.png').then(res => res.blob()).then(blob => {
+                zip.file('logo.png', blob);
+                zip.file("index.html", propreHtml);
+                zip.file("imsmanifest.xml", manifest);
+                zip.generateAsync({ type: "blob" }).then(function (content) {
+                    const a = document.createElement("a");
+                    a.href = URL.createObjectURL(content);
+                    a.download = "SCORM_RI_Final.zip";
+                    a.click();
+                    showModal("SCORM Généré", "L'archive est prête.");
                 });
+            }).catch(() => {
+                // Si logo.png absent, générer sans logo
+                zip.file("index.html", propreHtml);
+                zip.file("imsmanifest.xml", manifest);
+                zip.generateAsync({ type: "blob" }).then(content => {
+                    const a = document.createElement("a");
+                    a.href = URL.createObjectURL(content);
+                    a.download = "SCORM_RI_Final.zip";
+                    a.click();
+                });
+            });
         }
+
+        // --- INITIALISATION ---
+        window.onload = function () {
+            initSCORM();
+            chargerReglement();
+        };
     </script>
 
 
