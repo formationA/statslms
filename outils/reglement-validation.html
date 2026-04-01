@@ -669,11 +669,11 @@
                 }
                 const zip = new JSZip();
 
-                // 1. Capture du contenu et clonage
+                // 1. Capture et clonage
                 const contenuFixe = document.getElementById('rulesBox').innerHTML;
                 let docClone = document.documentElement.cloneNode(true);
 
-                // 2. Gestion du LOGO (Base64) - Conservé
+                // 2. Logo (Base64)
                 const logoOriginal = document.querySelector('img[src*="logo"]');
                 if (logoOriginal && logoOriginal.naturalWidth > 0) {
                     const canvas = document.createElement('canvas');
@@ -684,33 +684,15 @@
                     if (logoClone) logoClone.src = canvas.toDataURL("image/png");
                 }
 
-                // 3. Injection du contenu
+                // 3. Injection du contenu (On enlève les limites de hauteur ici)
                 const targetBox = docClone.querySelector('#rulesBox');
                 if (targetBox) {
                     targetBox.innerHTML = contenuFixe;
-                    targetBox.setAttribute('contenteditable', 'false');
-                    targetBox.style.userSelect = 'none';
+                    targetBox.style.height = "auto";
+                    targetBox.style.overflow = "visible";
                 }
 
-                // 4. Configuration de l'interface
-                const clonedBtn = docClone.querySelector('#btnSubmit');
-                const clonedCheck = docClone.querySelector('#checkAgree');
-                const clonedAction = docClone.querySelector('#actionArea');
-                const clonedInfo = docClone.querySelector('#scrollInfo');
-
-                if (clonedAction) clonedAction.classList.add('hidden');
-                if (clonedInfo) clonedInfo.classList.remove('hidden');
-
-                if (clonedBtn) {
-                    clonedBtn.disabled = true;
-                    clonedBtn.setAttribute('onclick', "validerSignatureSCORM()");
-                }
-                if (clonedCheck) {
-                    clonedCheck.checked = false;
-                    clonedCheck.setAttribute('onchange', "document.getElementById('btnSubmit').disabled = !this.checked");
-                }
-
-                // 5. Script injecté (Logique de signature + Scroll)
+                // 4. Script injecté : Détection du scroll sur la PAGE ENTIÈRE
                 const scriptText = `
             var api = null;
             function findAPI(win) {
@@ -731,17 +713,17 @@
                     api.LMSSetValue("cmi.core.lesson_status", "incomplete");
                     api.LMSCommit("");
                 }
-                const box = document.getElementById('rulesBox');
-                if(box) {
-                    box.onscroll = function() {
-                        if (box.scrollHeight - box.scrollTop <= box.clientHeight + 100) {
-                            const info = document.getElementById('scrollInfo');
-                            const area = document.getElementById('actionArea');
-                            if(info) info.classList.add('hidden');
-                            if(area) area.classList.remove('hidden');
-                        }
-                    };
-                }
+
+                // Détection du scroll sur la fenêtre globale
+                window.onscroll = function() {
+                    // On vérifie si on est arrivé en bas de la page (marge de 50px)
+                    if ((window.innerHeight + window.pageYOffset) >= document.body.offsetHeight - 50) {
+                        const info = document.getElementById('scrollInfo');
+                        const area = document.getElementById('actionArea');
+                        if(info) info.classList.add('hidden');
+                        if(area) area.classList.remove('hidden');
+                    }
+                };
             };
 
             function validerSignatureSCORM() {
@@ -758,88 +740,74 @@
                 document.getElementById('checkAgree').disabled = true;
                 document.getElementById('timestamp').innerText = "Signé le " + dateStr;
                 document.getElementById('msgSuccess').classList.remove('hidden');
-                
+                alert("Document signé et validé !");
             }
         `;
 
                 const scriptElement = document.createElement('script');
-                scriptElement.textContent = scriptText.replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&');
+                scriptElement.textContent = scriptText;
                 const bodyClone = docClone.getElementsByTagName('body')[0] || docClone;
                 bodyClone.appendChild(scriptElement);
 
-                // 6. Style SCORM - CSS FLEXBOX POUR FORCER LE CONTENEUR
+                // 5. STYLE : Scroll sur la carte entière
                 const styleSCORM = document.createElement('style');
                 styleSCORM.textContent = `
-    /* 1. On autorise le scroll sur toute la page */
-    html, body { 
-        height: auto !important; 
-        min-height: 100% !important; 
-        margin: 0 !important; 
-        padding: 20px !important; 
-        background: #f0f0f0 !important; 
-        overflow-y: auto !important; /* C'est ici que le scroll global est activé */
-    }
-
-    /* 2. La carte s'adapte à son contenu sans hauteur forcée */
-    .scorm-mode .container { 
-        display: flex !important; 
-        flex-direction: column !important; 
-        height: auto !important; /* Auto permet à la carte de grandir avec le texte */
-        min-height: 80vh !important;
-        width: 90% !important; 
-        max-width: 800px !important; 
-        margin: 0 auto !important; 
-        padding: 20px !important; 
-        background: white !important; 
-        box-shadow: 0 0 15px rgba(0,0,0,0.1); 
-        border-radius: 8px; 
-        box-sizing: border-box; 
-    }
-
-    /* 3. Le texte ne restreint plus l'affichage */
-    #rulesBox { 
-        flex: 1 1 auto !important; 
-        overflow-y: visible !important; /* Pas de scroll interne */
-        border: none !important; 
-        margin-bottom: 20px !important;
-    }
-
-    /* 4. Le bouton reste en bas de la carte */
-    #actionArea, #scrollInfo { 
-        padding: 20px 0 !important; 
-        border-top: 1px solid #eee;
-    }
-
-    .navbar { display: none !important; }
-`;
+            html, body { 
+                height: auto !important; 
+                min-height: 100% !important; 
+                margin: 0 !important; 
+                padding: 0 !important; 
+                overflow-x: hidden !important;
+                overflow-y: auto !important; /* Scroll global activé */
+                background: #f4f4f4 !important;
+            }
+            .scorm-mode .container { 
+                display: block !important; 
+                width: 95% !important; 
+                max-width: 850px !important; 
+                margin: 20px auto !important; 
+                padding: 30px !important; 
+                background: white !important; 
+                box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
+                border-radius: 8px; 
+                min-height: 500px;
+            }
+            #rulesBox { 
+                margin: 20px 0 !important; 
+                line-height: 1.6;
+                font-size: 14px;
+            }
+            #actionArea, #scrollInfo { 
+                text-align: center;
+                padding: 20px 0;
+                border-top: 1px solid #eee;
+                margin-top: 20px;
+            }
+            .hidden { display: none !important; }
+            .navbar, .no-print { display: none !important; }
+        `;
                 bodyClone.appendChild(styleSCORM);
 
-                // 7. Nettoyage et Génération
+                // 6. Finalisation
                 let propreHtml = "<!DOCTYPE html>\n" + docClone.outerHTML;
-                propreHtml = propreHtml.replace(/chargerReglement\s*\(\s*\)\s*;?/g, '// Intégré');
                 propreHtml = propreHtml.replace('<body', '<body class="scorm-mode"');
 
-                const manifest = `<?xml version="1.0" encoding="UTF-8"?>
-<manifest identifier="RI_AFTRAL_SCO" version="1.1" xmlns="http://www.imsproject.org/xsd/imscp_rootv1p1p2" xmlns:adlcp="http://www.adlnet.org/xsd/adlcp_rootv1p2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.imsproject.org/xsd/imscp_rootv1p1p2 imscp_rootv1p1p2.xsd http://www.adlnet.org/xsd/adlcp_rootv1p2 adlcp_rootv1p2.xsd">
-  <metadata><schema>ADL SCORM</schema><schemaversion>1.2</schemaversion></metadata>
-  <organizations default="ORG-1"><organization identifier="ORG-1"><title>Règlement Intérieur</title><item identifier="ITEM-1" identifierref="RES-1"><title>Signature</title></item></organization></organizations>
-  <resources><resource identifier="RES-1" type="webcontent" adlcp:scormtype="sco" href="index.html"><file href="index.html"/></resource></resources>
-</manifest>`;
-
-                zip.file("imsmanifest.xml", manifest);
+                zip.file("imsmanifest.xml", `<?xml version="1.0" encoding="UTF-8"?>
+<manifest identifier="RI_AFTRAL_SCO" version="1.1" xmlns="http://www.imsproject.org/xsd/imscp_rootv1p1p2">
+  <organizations default="ORG-1"><organization identifier="ORG-1"><title>Règlement</title><item identifier="ITEM-1" identifierref="RES-1"><title>Signature</title></item></organization></organizations>
+  <resources><resource identifier="RES-1" type="webcontent" adlcp:scormtype="sco" href="index.html" xmlns:adlcp="http://www.adlnet.org/xsd/adlcp_rootv1p2"><file href="index.html"/></resource></resources>
+</manifest>`);
                 zip.file("index.html", propreHtml);
 
                 zip.generateAsync({ type: "blob" }).then(content => {
                     const a = document.createElement("a");
                     a.href = URL.createObjectURL(content);
-                    a.download = "SCORM_Reglement_Signe.zip";
+                    a.download = "SCORM_Reglement_FullScroll.zip";
                     a.click();
-                    showModal("Succès", "Le pack SCORM est prêt et optimisé pour l'affichage !");
                 });
 
             } catch (error) {
-                console.error("Erreur :", error);
-                showModal("Erreur", error.message, true);
+                console.error(error);
             }
         }
 
