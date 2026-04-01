@@ -661,67 +661,80 @@
                     if (logoClone) logoClone.src = canvas.toDataURL("image/png");
                 }
 
-                // 3. Injection du contenu
+                // 3. Injection du contenu figé
                 const targetBox = docClone.querySelector('#rulesBox');
                 if (targetBox) targetBox.innerHTML = contenuFixe;
 
-                // 4. RÉINITIALISATION DE L'ÉTAT (On cache tout pour forcer le scroll dans le SCORM)
+                // 4. RÉINITIALISATION ET LIEN ÉVÉNEMENT (Correction ici)
                 const clonedActionArea = docClone.querySelector('#actionArea');
                 const clonedScrollInfo = docClone.querySelector('#scrollInfo');
                 const clonedBtn = docClone.querySelector('#btnSubmit');
                 const clonedCheck = docClone.querySelector('#checkAgree');
 
-                if (clonedActionArea) clonedActionArea.classList.add('hidden'); // Caché au début
-                if (clonedScrollInfo) clonedScrollInfo.classList.remove('hidden'); // "Scrollez pour signer" visible
-                if (clonedBtn) clonedBtn.disabled = true;
+                if (clonedActionArea) clonedActionArea.classList.add('hidden');
+                if (clonedScrollInfo) clonedScrollInfo.classList.remove('hidden');
+
+                if (clonedBtn) {
+                    clonedBtn.disabled = true;
+                    // On force l'attribut onclick en texte pour qu'il survive au clone
+                    clonedBtn.setAttribute('onclick', "validerSignatureSCORM()");
+                }
                 if (clonedCheck) {
                     clonedCheck.checked = false;
                     clonedCheck.setAttribute('onchange', "document.getElementById('btnSubmit').disabled = !this.checked");
                 }
 
-                // 5. INJECTION DU SCRIPT DE LOGIQUE SCORM (Scroll + Modal)
+                // 5. INJECTION DU SCRIPT DE LOGIQUE (Fonctions globales pour le SCORM)
                 const scriptSCORM = document.createElement('script');
                 scriptSCORM.textContent = `
-            // Gestion du scroll dans le SCORM
+            // Détection du scroll
             const box = document.getElementById('rulesBox');
-            box.onscroll = function() {
-                if (box.scrollHeight - box.scrollTop <= box.clientHeight + 20) {
-                    document.getElementById('scrollInfo').classList.add('hidden');
-                    document.getElementById('actionArea').classList.remove('hidden');
-                }
-            };
+            if(box) {
+                box.onscroll = function() {
+                    if (box.scrollHeight - box.scrollTop <= box.clientHeight + 30) {
+                        document.getElementById('scrollInfo').classList.add('hidden');
+                        document.getElementById('actionArea').classList.remove('hidden');
+                    }
+                };
+            }
 
+            // Fonction de validation appelée par le onclick
             function validerSignatureSCORM() {
                 const now = new Date();
                 const dateStr = now.toLocaleString('fr-FR');
                 
+                // Envoi au LMS
                 if (typeof completeSCORM === 'function') {
                     completeSCORM(dateStr);
                 }
 
-                // UI Update
-                document.getElementById('btnSubmit').classList.add('hidden');
-                document.getElementById('checkAgree').disabled = true;
+                // Mise à jour visuelle
+                const btn = document.getElementById('btnSubmit');
+                const chk = document.getElementById('checkAgree');
+                if(btn) btn.classList.add('hidden');
+                if(chk) chk.disabled = true;
+                
                 document.getElementById('timestamp').innerText = "Le " + dateStr;
                 document.getElementById('msgSuccess').classList.remove('hidden');
                 
-                // Utilisation de votre MODAL au lieu de alert()
+                // Appel de la modale existante dans le document
                 if (typeof showModal === 'function') {
                     showModal("Signé !", "Votre émargement a été enregistré avec succès.");
                 }
             }
         `;
-                docClone.querySelector('body').appendChild(scriptSCORM);
+                docClone.body.appendChild(scriptSCORM);
 
                 // 6. Nettoyage Interface
                 const nav = docClone.querySelector('.navbar');
                 if (nav) nav.remove();
 
                 let propreHtml = docClone.outerHTML;
+                // On s'assure que chargerReglement ne s'exécute pas au lancement du SCORM
                 propreHtml = propreHtml.replace(/chargerReglement\s*\(\s*\)\s*;?/g, '// Intégré');
                 propreHtml = propreHtml.replace('<body', '<body class="scorm-mode"');
 
-                // 7. Manifeste & ZIP
+                // 7. Manifeste
                 const manifest = '<?xml version="1.0" encoding="UTF-8"?><manifest identifier="RI_AFTRAL" version="1.0" xmlns="http://www.imsproject.org/xsd/imscp_rootv1p1p2"><metadata><schema>ADL SCORM</schema><schemaversion>1.2</schemaversion></metadata><organizations default="org"><organization identifier="org"><title>Règlement Intérieur</title><item identifier="item1" identifierref="res1"><title>Signature</title></item></organization></organizations><resources><resource identifier="res1" adlcp:scormtype="sco" href="index.html"></resource></resources></manifest>';
 
                 zip.file("index.html", propreHtml);
@@ -732,10 +745,11 @@
                     a.href = URL.createObjectURL(content);
                     a.download = "SCORM_RI_Final.zip";
                     a.click();
-                    showModal("Succès", "SCORM généré avec scroll obligatoire.");
+                    showModal("Succès", "SCORM généré. Testez le bouton dans le ZIP !");
                 });
 
             } catch (error) {
+                console.error(error);
                 showModal("Erreur", error.message, true);
             }
         }
