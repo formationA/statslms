@@ -706,62 +706,62 @@
                     clonedCheck.setAttribute('onchange', "document.getElementById('btnSubmit').disabled = !this.checked");
                 }
 
-                // 5. SCRIPTS DE COMMUNICATION (Le moteur SCORM interne)
+                // 5. SCRIPTS DE COMMUNICATION (Nettoyés de tout caractère HTML)
                 const scormLogicScript = document.createElement('script');
-                scormLogicScript.text = `
-            var api = null;
 
-            function initSCORM() {
-                var win = window;
-                while ((win.API == null) && (win.parent != null) && (win.parent != win)) { win = win.parent; }
-                api = win.API;
-                if (!api && window.opener) {
-                    win = window.opener;
-                    while ((win.API == null) && (win.parent != null) && (win.parent != win)) { win = win.parent; }
-                    api = win.API;
-                }
-                if (api) {
-                    api.LMSInitialize("");
-                    api.LMSSetValue("cmi.core.lesson_status", "incomplete");
-                    api.LMSCommit("");
-                }
-            }
+                // On définit le code dans une variable propre
+                const codeJS = [
+                    'var api = null;',
+                    'function initSCORM() {',
+                    '    var win = window;',
+                    '    while ((win.API == null) && (win.parent != null) && (win.parent != win)) { win = win.parent; }',
+                    '    api = win.API;',
+                    '    if (!api && window.opener) {',
+                    '        win = window.opener;',
+                    '        while ((win.API == null) && (win.parent != null) && (win.parent != win)) { win = win.parent; }',
+                    '        api = win.API;',
+                    '    }',
+                    '    if (api) {',
+                    '        api.LMSInitialize("");',
+                    '        api.LMSSetValue("cmi.core.lesson_status", "incomplete");',
+                    '        api.LMSCommit("");',
+                    '    }',
+                    '}',
+                    'function completeSCORM(timestampStr) {',
+                    '    if (api) {',
+                    '        api.LMSSetValue("cmi.core.lesson_status", "passed");',
+                    '        api.LMSSetValue("cmi.comments", "Signature le : " + timestampStr);',
+                    '        api.LMSSetValue("cmi.core.score.raw", "100");',
+                    '        api.LMSCommit("");',
+                    '        api.LMSFinish("");',
+                    '    }',
+                    '}',
+                    'function validerSignatureSCORM() {',
+                    '    const now = new Date();',
+                    '    const dateStr = now.toLocaleString("fr-FR");',
+                    '    completeSCORM(dateStr);',
+                    '    if(document.getElementById("btnSubmit")) document.getElementById("btnSubmit").classList.add("hidden");',
+                    '    if(document.getElementById("checkAgree")) document.getElementById("checkAgree").disabled = true;',
+                    '    if(document.getElementById("timestamp")) document.getElementById("timestamp").innerText = "Le " + dateStr;',
+                    '    if(document.getElementById("msgSuccess")) document.getElementById("msgSuccess").classList.remove("hidden");',
+                    '    if (typeof showModal === "function") { showModal("Signé !", "Votre émargement a été enregistré."); }',
+                    '}',
+                    'window.onload = function() {',
+                    '    initSCORM();',
+                    '    const box = document.getElementById("rulesBox");',
+                    '    if(box) {',
+                    '        box.onscroll = function() {',
+                    '            if (box.scrollHeight - box.scrollTop <= box.clientHeight + 60) {',
+                    '                if(document.getElementById("scrollInfo")) document.getElementById("scrollInfo").classList.add("hidden");',
+                    '                if(document.getElementById("actionArea")) document.getElementById("actionArea").classList.remove("hidden");',
+                    '            }',
+                    '        };',
+                    '    }',
+                    '};'
+                ].join('\n');
 
-            function completeSCORM(timestampStr) {
-                if (api) {
-                    api.LMSSetValue("cmi.core.lesson_status", "passed");
-                    api.LMSSetValue("cmi.comments", "Signature le : " + timestampStr);
-                    api.LMSSetValue("cmi.core.score.raw", "100");
-                    api.LMSCommit("");
-                    api.LMSFinish("");
-                }
-            }
-
-            function validerSignatureSCORM() {
-                const now = new Date();
-                const dateStr = now.toLocaleString('fr-FR');
-                completeSCORM(dateStr);
-
-                document.getElementById('btnSubmit').classList.add('hidden');
-                document.getElementById('checkAgree').disabled = true;
-                document.getElementById('timestamp').innerText = "Le " + dateStr;
-                document.getElementById('msgSuccess').classList.remove('hidden');
-                
-                if (typeof showModal === 'function') {
-                    showModal("Signé !", "Votre émargement a été enregistré avec succès.");
-                }
-            }
-
-            const box = document.getElementById('rulesBox');
-            if(box) {
-                box.onscroll = function() {
-                    if (box.scrollHeight - box.scrollTop <= box.clientHeight + 40) {
-                        if(document.getElementById('scrollInfo')) document.getElementById('scrollInfo').classList.add('hidden');
-                        if(document.getElementById('actionArea')) document.getElementById('actionArea').classList.remove('hidden');
-                    }
-                };
-            }
-        `;
+                // IMPORTANT : Utiliser .text pour éviter toute conversion de symboles en entités HTML
+                scormLogicScript.text = codeJS;
 
                 // 6. Injection Styles et Scripts
                 const styleSCORM = document.createElement('style');
