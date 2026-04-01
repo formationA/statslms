@@ -355,6 +355,24 @@
             transform: translateY(-50%) scale(1) rotate(45deg);
         }
 
+        .checkbox-container input[type="checkbox"] {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .checkbox-container {
+            position: relative;
+        }
+
+        .checkbox-container:hover span::before {
+             box-shadow: 0 0 0 3px rgba(45, 54, 99, 0.15);
+        }
+
+        .checkbox-container {
+            cursor: pointer;
+        }
+
     </style>
 </head>
 <body>
