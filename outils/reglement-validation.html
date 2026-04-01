@@ -16,32 +16,27 @@
             --doc-dim: #64748b;
             --doc-border: #e2e8f0;
             --page-bg: #f1f5f9;
-            --aftral-blue: #0055A4;
-            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --aftral-blue: #0055A4; /* Le bleu demandé */
         }
 
         body {
             margin: 0;
-            font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+            font-family: 'Segoe UI', sans-serif;
             background-color: var(--page-bg);
             color: var(--doc-text);
-            min-height: 100vh;
         }
 
-        /* --- NAVBAR --- */
+        /* --- NAVBAR (Style Original Conservé) --- */
         .navbar {
-            width: 100%;
             display: flex;
             align-items: center;
             justify-content: space-between;
             padding: 15px 30px;
-            background: rgba(30, 41, 59, 0.95);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            background: var(--nav-bg);
+            color: var(--text-nav);
             position: sticky;
             top: 0;
             z-index: 1000;
-            box-sizing: border-box;
         }
 
         .nav-left {
@@ -50,157 +45,94 @@
             gap: 20px;
         }
 
-        .nav-right {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .nav-back-link {
-            color: #38bdf8;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
         .nav-brand-title {
-            font-size: 1.1rem;
+            font-size: 1.2rem;
             margin: 0;
-            color: white;
-            border-left: 1px solid rgba(255,255,255,0.2);
-            padding-left: 20px;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
         }
 
-        .logo-aftral-tag {
-            background: white;
+        /* Logo AFTRAL dans la nav */
+        .logo-aftral-nav {
             color: var(--aftral-blue);
-            font-weight: 900;
-            padding: 2px 6px;
+            background: white;
+            padding: 2px 8px;
             border-radius: 4px;
-            font-size: 0.8rem;
+            font-weight: 900;
+            font-size: 0.9rem;
         }
 
         .btn-nav {
-            background: rgba(56, 189, 248, 0.05);
+            background: transparent;
             color: var(--blue);
-            border: 1px solid rgba(56, 189, 248, 0.3);
-            padding: 6px 12px;
-            border-radius: 6px;
+            border: 1px solid var(--blue);
+            padding: 8px 15px;
+            border-radius: 5px;
             cursor: pointer;
-            font-weight: 600;
-            font-size: 0.8rem;
-            transition: var(--transition);
+            margin-left: 10px;
         }
-
-            .btn-nav:hover {
-                background: var(--blue);
-                color: #0f172a;
-                transform: translateY(-1px);
-            }
 
         /* --- DOCUMENT --- */
         .main-container {
             display: flex;
-            justify-content: center;
-            padding: 20px;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
         }
 
         .document-card {
             background: var(--doc-bg);
-            max-width: 1000px;
+            max-width: 900px;
             width: 100%;
-            border-radius: 12px;
-            padding: 30px 40px;
+            padding: 50px;
             border: 1px solid var(--doc-border);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-        }
-
-        header {
-            text-align: center;
-            margin-bottom: 25px;
-            border-bottom: 2px solid var(--page-bg);
-            padding-bottom: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
         }
 
         .content-scroll {
-            background: #fafafa;
             height: 500px;
             overflow-y: auto;
-            padding: 25px 35px;
-            border-radius: 8px;
             border: 1px solid var(--doc-border);
-            margin-bottom: 25px;
-            line-height: 1.6;
-            outline: none;
+            padding: 20px;
+            margin-bottom: 30px;
+            background: #fff;
         }
 
-        /* --- CASE À COCHER AMÉLIORÉE --- */
+        /* --- CHECKBOX AGRANDIE --- */
         .checkbox-container {
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 15px;
-            margin-bottom: 20px;
-            cursor: pointer;
+            margin: 20px 0;
         }
 
         #checkAgree {
-            appearance: none;
-            -webkit-appearance: none;
-            width: 28px;
-            height: 28px;
-            border: 3px solid var(--aftral-blue);
-            border-radius: 6px;
+            width: 25px;
+            height: 25px;
             cursor: pointer;
-            position: relative;
-            background-color: white;
-            transition: var(--transition);
-            flex-shrink: 0;
+            accent-color: var(--aftral-blue);
         }
-
-            #checkAgree:checked {
-                background-color: var(--aftral-blue);
-            }
-
-                #checkAgree:checked::after {
-                    content: "\f00c";
-                    font-family: "Font Awesome 6 Free";
-                    font-weight: 900;
-                    color: white;
-                    font-size: 16px;
-                    position: absolute;
-                    top: 50%;
-                    left: 50%;
-                    transform: translate(-50%, -50%);
-                }
 
         .validation-area {
             text-align: center;
-            padding: 25px;
-            background: #f8fafc;
-            border-radius: 12px;
-            border: 1px solid var(--doc-border);
+            border-top: 1px solid var(--doc-border);
+            padding-top: 20px;
         }
 
-        button#btnSubmit {
+        #btnSubmit {
             background: var(--aftral-blue);
             color: white;
             border: none;
-            padding: 14px 40px;
-            border-radius: 6px;
-            font-weight: 700;
+            padding: 15px 30px;
+            border-radius: 5px;
+            font-weight: bold;
             cursor: pointer;
-            transition: var(--transition);
         }
 
-            button#btnSubmit:disabled {
-                background: #cbd5e1;
+            #btnSubmit:disabled {
+                background: #ccc;
                 cursor: not-allowed;
             }
 
@@ -208,137 +140,77 @@
             display: none;
         }
 
-        /* --- MODAL --- */
+        /* Modal simple */
         .modal-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(15, 23, 42, 0.6);
-            backdrop-filter: blur(8px);
+            background: rgba(0,0,0,0.5);
             display: flex;
             justify-content: center;
             align-items: center;
             z-index: 2000;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease;
-        }
-
-            .modal-overlay.active {
-                opacity: 1;
-                visibility: visible;
-            }
-
-        .modal-content {
-            background: white;
-            padding: 40px;
-            border-radius: 24px;
-            width: 350px;
-            text-align: center;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
     </style>
 </head>
 <body>
 
-    <nav class="navbar" id="topNav">
+    <nav class="navbar">
         <div class="nav-left">
-            <a href="../outils-hub.html" class="nav-back-link">
-                <i class="fas fa-chevron-left"></i> Retour
-            </a>
-            <h1 class="nav-brand-title">
-                <span class="logo-aftral-tag">AFTRAL</span> IT PÉDAGOGIE
-            </h1>
+            <span class="logo-aftral-nav">AFTRAL</span>
+            <h1 class="nav-brand-title">IT PÉDAGOGIE</h1>
         </div>
-
         <div class="nav-right">
-            <button class="btn-nav" onclick="exportConfig()"><i class="fas fa-download"></i> Sauver Config</button>
-            <button class="btn-nav" onclick="document.getElementById('importFile').click()"><i class="fas fa-upload"></i> Charger Config</button>
-            <button class="btn-nav" onclick="generateSCORM()"><i class="fas fa-file-zipper"></i> Générer SCORM</button>
+            <button class="btn-nav" onclick="exportConfig()">Exporter JSON</button>
+            <button class="btn-nav" onclick="document.getElementById('importFile').click()">Importer JSON</button>
+            <button class="btn-nav" onclick="generateSCORM()">Générer SCORM</button>
+            <input type="file" id="importFile" class="hidden" onchange="importConfig(this)">
         </div>
-        <input type="file" id="importFile" style="display:none" accept=".json" onchange="importConfig(this)">
     </nav>
 
     <div class="main-container">
         <div class="document-card">
-            <header>
-                <div style="margin-bottom: 10px;">
-                    <span style="font-size: 2.8rem; font-weight: 900; color: #0055A4; letter-spacing: -1px;">AFTRAL</span>
-                </div>
-                <div style="font-size: 1.3rem; font-weight: 800; color: #0055A4; text-transform: uppercase;">
-                    RÈGLEMENT INTÉRIEUR GÉNÉRAL DES APPRENANTS
-                </div>
-                <div style="color: #64748b; font-weight: 600; margin-top: 5px;">
-                    Organisme de formation et Centre de Formation d'Apprentis (CFA)
-                </div>
+            <header style="text-align: center; margin-bottom: 40px;">
+                <h1 style="color: var(--aftral-blue); font-size: 2.5rem; margin: 0;">AFTRAL</h1>
+                <h2 style="color: var(--aftral-blue); text-transform: uppercase;">Règlement Intérieur</h2>
             </header>
 
             <div class="content-scroll" id="rulesBox" contenteditable="true">
-                <p style="text-align:center; padding:20px; color:#64748b;">
-                    <i class="fas fa-spinner fa-spin"></i> Chargement des articles...
-                </p>
             </div>
 
             <div class="validation-area">
-                <div id="scrollInfo">
-                    <i class="fas fa-chevron-down"></i>
-                    <span style="font-weight: 600; color: var(--aftral-blue);">Faites défiler jusqu'au bout pour pouvoir signer</span>
-                    <i class="fas fa-chevron-down"></i>
+                <div id="scrollInfo" style="color: var(--aftral-blue); font-weight: bold;">
+                    <i class="fas fa-arrow-down"></i> Veuillez lire l'intégralité du document pour signer.
                 </div>
 
                 <div id="actionArea" class="hidden">
-                    <label class="checkbox-container">
+                    <div class="checkbox-container">
                         <input type="checkbox" id="checkAgree">
-                        <span style="color: #1e293b; font-size: 1rem; font-weight: 600;">Je certifie avoir pris connaissance du règlement intérieur.</span>
-                    </label>
-                    <button id="btnSubmit" disabled>Valider et Signer l'émargement</button>
+                        <label for="checkAgree">Je certifie avoir lu et accepté le règlement intérieur.</label>
+                    </div>
+                    <button id="btnSubmit" disabled>Valider la signature</button>
                 </div>
 
-                <div id="msgSuccess" class="hidden" style="color: #16a34a; font-weight: 700; font-size: 1.1rem;">
-                    <i class="fas fa-check-circle"></i> Signature enregistrée avec succès.
-                    <div id="timestamp" style="font-size: 0.8rem; font-weight: normal; margin-top: 5px; color: #64748b;"></div>
+                <div id="msgSuccess" class="hidden">
+                    <h3 style="color: green;"><i class="fas fa-check"></i> Signature enregistrée</h3>
+                    <p id="timestamp"></p>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="modal-overlay" id="modalOverlay">
-        <div class="modal-content">
-            <div style="font-size: 3rem; color: #10b981; margin-bottom: 15px;"><i class="fas fa-check-circle"></i></div>
-            <h3 id="modalTitle" style="color: var(--aftral-blue); margin-bottom: 10px;">Succès</h3>
-            <p id="modalText" style="color: #64748b; margin-bottom: 20px;"></p>
-            <button onclick="closeModal()" style="background: var(--aftral-blue); color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold;">Continuer</button>
+    <div id="modalOverlay" class="modal-overlay hidden">
+        <div style="background: white; padding: 30px; border-radius: 10px; text-align: center;">
+            <h3 id="modalTitle"></h3>
+            <p id="modalText"></p>
+            <button class="btn-nav" style="background: var(--aftral-blue); color: white;" onclick="closeModal()">Fermer</button>
         </div>
     </div>
 
     <script>
-        // --- CHARGEMENT DU JSON ---
-        async function chargerReglement() {
-            try {
-                const response = await fetch('reglement.json');
-                if (!response.ok) throw new Error();
-                const data = await response.json();
-                const box = document.getElementById('rulesBox');
-                let html = `<h1 style="text-align:center; color:#0055A4;">${data.titre_general}</h1>`;
-                html += `<p style="text-align:center; font-weight:bold;">${data.sous_titre}</p>`;
-
-                data.sections.forEach(section => {
-                    html += `<h2 style="background:#0055A4; color:white; padding:12px; border-radius:4px; margin-top:30px;">Section ${section.id} : ${section.titre}</h2>`;
-                    if (section.articles) {
-                        section.articles.forEach(art => {
-                            html += `<div style="margin-top:20px;"><h3>Article ${art.num} : ${art.titre}</h3><p>${art.texte || ''}</p></div>`;
-                        });
-                    }
-                });
-                box.innerHTML = html;
-            } catch (err) {
-                document.getElementById('rulesBox').innerHTML = "<p style='color:red; text-align:center; padding:50px;'>Erreur de chargement du fichier reglement.json.</p>";
-            }
-        }
-
-        // --- SCORM 1.2 ---
+        // --- FONCTIONS SCORM ET LOGIQUE (CONSERVÉES) ---
         var api = null;
         function initSCORM() {
             var win = window;
@@ -347,82 +219,81 @@
             if (api) api.LMSInitialize("");
         }
 
-        window.onload = function () {
-            initSCORM();
-            chargerReglement();
-        };
+        async function chargerReglement() {
+            try {
+                const response = await fetch('reglement.json');
+                const data = await response.json();
+                const box = document.getElementById('rulesBox');
+                let html = "";
+                data.sections.forEach(s => {
+                    html += `<h2 style="color: var(--aftral-blue)">${s.titre}</h2>`;
+                    s.articles.forEach(a => {
+                        html += `<h3>Article ${a.num}</h3><p>${a.texte}</p>`;
+                    });
+                });
+                box.innerHTML = html;
+            } catch (e) { console.error("Erreur JSON"); }
+        }
 
-        // --- LOGIQUE DE SÉCURITÉ SCROLL ---
+        // Sécurité de défilement
         const rulesBox = document.getElementById('rulesBox');
-        const scrollInfo = document.getElementById('scrollInfo');
-        const actionArea = document.getElementById('actionArea');
-
         rulesBox.onscroll = function () {
-            // Détection de la fin du document
-            if (rulesBox.scrollHeight - rulesBox.scrollTop <= rulesBox.clientHeight + 60) {
-                scrollInfo.classList.add('hidden');
-                actionArea.classList.remove('hidden');
+            if (rulesBox.scrollHeight - rulesBox.scrollTop <= rulesBox.clientHeight + 50) {
+                document.getElementById('scrollInfo').classList.add('hidden');
+                document.getElementById('actionArea').classList.remove('hidden');
             }
         };
 
-        // --- VALIDATION ---
-        const checkAgree = document.getElementById('checkAgree');
-        const btnSubmit = document.getElementById('btnSubmit');
-
-        checkAgree.onchange = function () {
-            btnSubmit.disabled = !this.checked;
+        document.getElementById('checkAgree').onchange = function () {
+            document.getElementById('btnSubmit').disabled = !this.checked;
         };
 
-        btnSubmit.onclick = function () {
-            const dateStr = new Date().toLocaleString('fr-FR');
+        document.getElementById('btnSubmit').onclick = function () {
+            const now = new Date().toLocaleString();
             if (api) {
                 api.LMSSetValue("cmi.core.lesson_status", "completed");
                 api.LMSCommit("");
             }
-            checkAgree.disabled = true;
-            btnSubmit.classList.add('hidden');
-            document.getElementById('timestamp').innerText = "Fait le : " + dateStr;
+            document.getElementById('actionArea').classList.add('hidden');
             document.getElementById('msgSuccess').classList.remove('hidden');
-            showModal("Signé !", "Votre émargement a été enregistré.");
+            document.getElementById('timestamp').innerText = "Signé le : " + now;
+            showModal("Succès", "Votre signature a été transmise.");
         };
 
-        // --- FONCTIONS UTILITAIRES ---
-        function showModal(title, text) {
-            document.getElementById('modalTitle').innerText = title;
-            document.getElementById('modalText').innerText = text;
-            document.getElementById('modalOverlay').classList.add('active');
+        // Fonctions techniques
+        function showModal(t, txt) {
+            document.getElementById('modalTitle').innerText = t;
+            document.getElementById('modalText').innerText = txt;
+            document.getElementById('modalOverlay').classList.remove('hidden');
         }
-        function closeModal() { document.getElementById('modalOverlay').classList.remove('active'); }
+        function closeModal() { document.getElementById('modalOverlay').classList.add('hidden'); }
 
         function exportConfig() {
-            const config = { content: rulesBox.innerHTML };
-            const blob = new Blob([JSON.stringify(config)], { type: 'application/json' });
+            const blob = new Blob([JSON.stringify({ html: rulesBox.innerHTML })], { type: 'application/json' });
             const a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
-            a.download = "CONFIG_Reglement.json";
+            a.download = "config.json";
             a.click();
         }
 
         function importConfig(input) {
-            const file = input.files[0];
-            if (!file) return;
             const reader = new FileReader();
-            reader.onload = function (e) {
-                rulesBox.innerHTML = JSON.parse(e.target.result).content;
-            };
-            reader.readAsText(file);
+            reader.onload = (e) => { rulesBox.innerHTML = JSON.parse(e.target.result).html; };
+            reader.readAsText(input.files[0]);
         }
 
         function generateSCORM() {
             const zip = new JSZip();
             zip.file("index.html", document.documentElement.outerHTML);
-            zip.generateAsync({ type: "blob" }).then(content => {
+            zip.generateAsync({ type: "blob" }).then(c => {
                 const a = document.createElement("a");
-                a.href = URL.createObjectURL(content);
-                a.download = "SCORM_AFTRAL.zip";
+                a.href = URL.createObjectURL(c);
+                a.download = "scorm_aftral.zip";
                 a.click();
             });
         }
+
+        window.onload = function () { initSCORM(); chargerReglement(); };
     </script>
 </body>
 </html>
