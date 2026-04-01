@@ -669,6 +669,9 @@
 
                 // 1. Cloner le document actuel pour figer le contenu
                 const contenuFixe = document.getElementById('rulesBox').innerHTML;
+                const currentLogo = document.querySelector('#rulesBox img');
+                const logoSrc = currentLogo ? currentLogo.src : null;
+
                 let docClone = document.documentElement.cloneNode(true);
 
                 // 2. Injecter le contenu dans le clone
@@ -676,6 +679,13 @@
                 if (targetBox) {
                     targetBox.innerHTML = contenuFixe;
                     targetBox.setAttribute('contenteditable', 'false');
+
+                    // Sécurité supplémentaire : s'assurer que l'image dans le clone a bien le src Base64
+                    const clonedLogo = targetBox.querySelector('img');
+                    if (clonedLogo && logoSrc) {
+                        clonedLogo.src = logoSrc;
+                    }
+
                 }
 
                 // 3. Préparer les éléments interactifs
