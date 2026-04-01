@@ -774,48 +774,41 @@
                 const bodyClone = docClone.getElementsByTagName('body')[0] || docClone;
                 bodyClone.appendChild(scriptElement);
 
-                // Style SCORM
                 // Style SCORM optimisé
                 const styleSCORM = document.createElement('style');
                 styleSCORM.textContent = `
-                    /* On utilise 100% au lieu de 100vh pour mieux s'adapter à l'iFrame du LMS */
-                    html, body { 
-                        height: 100% !important; 
-                        margin: 0 !important; 
-                        padding: 0 !important; 
-                        overflow: hidden !important; 
-                    }
-                    .scorm-mode {
-                        display: flex !important;
-                        flex-direction: column !important;
-                        height: 100% !important;
-                    }
-                    .scorm-mode .container { 
-                        display: flex !important; 
-                        flex-direction: column !important; 
-                        height: 100% !important; 
-                        width: 100% !important;
-                        max-width: 95% !important; 
-                        margin: 0 auto !important; 
-                        padding: 10px !important;
-                        box-sizing: border-box !important;
-                    }
-                    /* Le secret est ici : le rulesBox prend tout l'espace disponible (flex: 1) 
-                       et force le bouton à rester en bas de l'écran */
-                    #rulesBox { 
-                        flex: 1 1 auto !important; 
-                        overflow-y: auto !important; 
-                        border: 1px solid #ddd !important; 
-                        margin-bottom: 10px !important;
-                        -webkit-overflow-scrolling: touch; /* Fluidité sur mobile */
-                    }
-                    #actionArea, #scrollInfo { 
-                        flex: 0 0 auto !important; 
-                        padding: 10px 0 !important;
-                        background: white; /* Pour être sûr qu'il soit visible au-dessus du reste */
-                        border-top: 1px solid #eee;
-                    }
-                `;
+    html, body { 
+        height: 100% !important; 
+        margin: 0 !important; 
+        padding: 0 !important; 
+        overflow: hidden !important; 
+    }
+    .scorm-mode {
+        display: flex !important;
+        flex-direction: column !important;
+        height: 100vh !important; /* On contraint à la hauteur de la fenêtre */
+    }
+    .scorm-mode .container { 
+        display: flex !important; 
+        flex-direction: column !important; 
+        height: 100% !important; 
+        padding: 10px !important;
+        box-sizing: border-box !important;
+    }
+    #rulesBox { 
+        flex: 1 1 auto !important; /* Le bloc prend l'espace restant */
+        overflow-y: auto !important; 
+        border: 1px solid #ddd !important; 
+        margin-bottom: 10px !important;
+        padding: 15px !important;
+        /* AJOUT : Limitation de la hauteur pour garantir la visibilité du bas */
+        max-height: 70vh !important; 
+    }
+    #actionArea, #scrollInfo { 
+        flex-shrink: 0 !important; /* Empêche le rétrécissement du bouton */
+        padding: 10px 0 !important;
+    }
+`;
 
                 bodyClone.appendChild(styleSCORM);
 
@@ -828,29 +821,29 @@
 
                 // 7. GÉNÉRATION DU MANIFESTE (CORRIGÉ)
                 const manifest = `<?xml version="1.0" encoding="UTF-8"?>
-<manifest identifier="RI_AFTRAL_SCO" version="1.1" 
-          xmlns="http://www.imsproject.org/xsd/imscp_rootv1p1p2" 
-          xmlns:adlcp="http://www.adlnet.org/xsd/adlcp_rootv1p2" 
-          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-          xsi:schemaLocation="http://www.imsproject.org/xsd/imscp_rootv1p1p2 imscp_rootv1p1p2.xsd http://www.adlnet.org/xsd/adlcp_rootv1p2 adlcp_rootv1p2.xsd">
-  <metadata>
-    <schema>ADL SCORM</schema>
-    <schemaversion>1.2</schemaversion>
-  </metadata>
-  <organizations default="ORG-1">
-    <organization identifier="ORG-1">
-      <title>Règlement Intérieur AFTRAL</title>
-      <item identifier="ITEM-1" identifierref="RES-1">
-        <title>Signature du Règlement</title>
-      </item>
-    </organization>
-  </organizations>
-  <resources>
-    <resource identifier="RES-1" type="webcontent" adlcp:scormtype="sco" href="index.html">
-      <file href="index.html"/>
-    </resource>
-  </resources>
-</manifest>`;
+                <manifest identifier="RI_AFTRAL_SCO" version="1.1" 
+                          xmlns="http://www.imsproject.org/xsd/imscp_rootv1p1p2" 
+                          xmlns:adlcp="http://www.adlnet.org/xsd/adlcp_rootv1p2" 
+                          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+                          xsi:schemaLocation="http://www.imsproject.org/xsd/imscp_rootv1p1p2 imscp_rootv1p1p2.xsd http://www.adlnet.org/xsd/adlcp_rootv1p2 adlcp_rootv1p2.xsd">
+                  <metadata>
+                    <schema>ADL SCORM</schema>
+                    <schemaversion>1.2</schemaversion>
+                  </metadata>
+                  <organizations default="ORG-1">
+                    <organization identifier="ORG-1">
+                      <title>Règlement Intérieur AFTRAL</title>
+                      <item identifier="ITEM-1" identifierref="RES-1">
+                        <title>Signature du Règlement</title>
+                      </item>
+                    </organization>
+                  </organizations>
+                  <resources>
+                    <resource identifier="RES-1" type="webcontent" adlcp:scormtype="sco" href="index.html">
+                      <file href="index.html"/>
+                    </resource>
+                  </resources>
+                </manifest>`;
 
                 zip.file("imsmanifest.xml", manifest);
                 zip.file("index.html", propreHtml);
