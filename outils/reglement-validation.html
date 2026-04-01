@@ -668,6 +668,7 @@
                     return;
                 }
                 const zip = new JSZip();
+                const finalName = "Signature Reglement Interieur";
 
                 // 1. Capture du contenu et clonage
                 const contenuFixe = document.getElementById('rulesBox').innerHTML;
@@ -767,7 +768,9 @@
         `;
 
                 const scriptElement = document.createElement('script');
-                scriptElement.textContent = scriptText;
+                let cleanScript = scriptText.replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&');
+                scriptElement.textContent = cleanScript;
+
                 const bodyClone = docClone.getElementsByTagName('body')[0] || docClone;
                 bodyClone.appendChild(scriptElement);
 
