@@ -664,16 +664,14 @@
         function generateSCORM() {
             try {
                 if (typeof JSZip === 'undefined') {
-                    showModal("Erreur", "La bibliothèque JSZip n'est pas chargée.", true);
+                    showModal("Erreur", "JSZip non chargé.", true);
                     return;
                 }
                 const zip = new JSZip();
-
-                // 1. Capture et clonage
                 const contenuFixe = document.getElementById('rulesBox').innerHTML;
                 let docClone = document.documentElement.cloneNode(true);
 
-                // 2. Logo (Base64)
+                // Gestion Logo
                 const logoOriginal = document.querySelector('img[src*="logo"]');
                 if (logoOriginal && logoOriginal.naturalWidth > 0) {
                     const canvas = document.createElement('canvas');
@@ -684,131 +682,95 @@
                     if (logoClone) logoClone.src = canvas.toDataURL("image/png");
                 }
 
-                // 3. Injection du contenu (On enlève les limites de hauteur ici)
-                const targetBox = docClone.querySelector('#rulesBox');
-                if (targetBox) {
-                    targetBox.innerHTML = contenuFixe;
-                    targetBox.style.height = "auto";
-                    targetBox.style.overflow = "visible";
-                }
-
-                // 4. Script injecté : Détection du scroll sur la PAGE ENTIÈRE
+                // Script injecté avec détection de scroll ultra-souple
                 const scriptText = `
             var api = null;
             function findAPI(win) {
                 var findAttempts = 0;
                 while ((win.API == null) && (win.parent != null) && (win.parent != win)) {
-                    findAttempts++;
-                    if (findAttempts > 500) return null;
+                    findAttempts++; if (findAttempts > 500) return null;
                     win = win.parent;
                 }
                 return win.API;
             }
 
+            function checkScroll() {
+                var docHeight = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
+                var winHeight = window.innerHeight || document.documentElement.clientHeight;
+                var scrollPos = window.pageYOffset || document.documentElement.scrollTop;
+
+                // Si on est à moins de 100px du bas, ou si le document est plus petit que l'écran
+                if ((scrollPos + winHeight) >= (docHeight - 100) || docHeight <= winHeight) {
+                    var info = document.getElementById('scrollInfo');
+                    var area = document.getElementById('actionArea');
+                    if(info) info.style.display = 'none';
+                    if(area) area.classList.remove('hidden');
+                    if(area) area.style.display = 'block';
+                }
+            }
+
             window.onload = function() {
                 api = findAPI(window);
                 if (!api && window.opener) api = findAPI(window.opener);
-                if (api) {
-                    api.LMSInitialize("");
-                    api.LMSSetValue("cmi.core.lesson_status", "incomplete");
-                    api.LMSCommit("");
-                }
-
-                // Détection du scroll sur la fenêtre globale
-                window.onscroll = function() {
-                    // On vérifie si on est arrivé en bas de la page (marge de 50px)
-                    if ((window.innerHeight + window.pageYOffset) >= document.body.offsetHeight - 50) {
-                        const info = document.getElementById('scrollInfo');
-                        const area = document.getElementById('actionArea');
-                        if(info) info.classList.add('hidden');
-                        if(area) area.classList.remove('hidden');
-                    }
-                };
+                if (api) { api.LMSInitialize(""); api.LMSSetValue("cmi.core.lesson_status", "incomplete"); api.LMSCommit(""); }
+                
+                window.onscroll = checkScroll;
+                window.onresize = checkScroll;
+                setTimeout(checkScroll, 1000); // Vérification automatique après 1s
             };
 
             function validerSignatureSCORM() {
-                const now = new Date();
-                const dateStr = now.toLocaleString('fr-FR');
+                const dateStr = new Date().toLocaleString('fr-FR');
                 if (api) {
                     api.LMSSetValue("cmi.core.score.raw", "100");
                     api.LMSSetValue("cmi.core.lesson_status", "passed");
                     api.LMSSetValue("cmi.comments", "Signé le : " + dateStr);
-                    api.LMSCommit("");
-                    api.LMSFinish("");
+                    api.LMSCommit(""); api.LMSFinish("");
                 }
-                document.getElementById('btnSubmit').classList.add('hidden');
-                document.getElementById('checkAgree').disabled = true;
+                document.getElementById('btnSubmit').style.display = 'none';
                 document.getElementById('timestamp').innerText = "Signé le " + dateStr;
                 document.getElementById('msgSuccess').classList.remove('hidden');
-                alert("Document signé et validé !");
+                alert("Validé !");
             }
         `;
 
                 const scriptElement = document.createElement('script');
                 scriptElement.textContent = scriptText;
-                const bodyClone = docClone.getElementsByTagName('body')[0] || docClone;
-                bodyClone.appendChild(scriptElement);
+                (docClone.getElementsByTagName('body')[0] || docClone).appendChild(scriptElement);
 
-                // 5. STYLE : Scroll sur la carte entière
+                // Style CSS pour forcer l'affichage en bas de carte
                 const styleSCORM = document.createElement('style');
                 styleSCORM.textContent = `
-            html, body { 
-                height: auto !important; 
-                min-height: 100% !important; 
-                margin: 0 !important; 
-                padding: 0 !important; 
-                overflow-x: hidden !important;
-                overflow-y: auto !important; /* Scroll global activé */
-                background: #f4f4f4 !important;
-            }
+            html, body { height: auto !important; overflow-y: auto !important; background: #f0f0f0 !important; margin:0; padding:0; }
             .scorm-mode .container { 
                 display: block !important; 
-                width: 95% !important; 
-                max-width: 850px !important; 
+                width: 90% !important; 
+                max-width: 800px !important; 
                 margin: 20px auto !important; 
                 padding: 30px !important; 
                 background: white !important; 
                 box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
-                border-radius: 8px; 
-                min-height: 500px;
+                border-radius: 8px;
             }
-            #rulesBox { 
-                margin: 20px 0 !important; 
-                line-height: 1.6;
-                font-size: 14px;
-            }
-            #actionArea, #scrollInfo { 
-                text-align: center;
-                padding: 20px 0;
-                border-top: 1px solid #eee;
-                margin-top: 20px;
-            }
+            #rulesBox { height: auto !important; overflow: visible !important; margin-bottom: 30px !important; }
+            #actionArea { min-height: 100px; text-align: center; }
             .hidden { display: none !important; }
-            .navbar, .no-print { display: none !important; }
+            .navbar { display: none !important; }
         `;
-                bodyClone.appendChild(styleSCORM);
+                (docClone.getElementsByTagName('body')[0] || docClone).appendChild(styleSCORM);
 
-                // 6. Finalisation
                 let propreHtml = "<!DOCTYPE html>\n" + docClone.outerHTML;
                 propreHtml = propreHtml.replace('<body', '<body class="scorm-mode"');
 
-                zip.file("imsmanifest.xml", `<?xml version="1.0" encoding="UTF-8"?>
-<manifest identifier="RI_AFTRAL_SCO" version="1.1" xmlns="http://www.imsproject.org/xsd/imscp_rootv1p1p2">
-  <organizations default="ORG-1"><organization identifier="ORG-1"><title>Règlement</title><item identifier="ITEM-1" identifierref="RES-1"><title>Signature</title></item></organization></organizations>
-  <resources><resource identifier="RES-1" type="webcontent" adlcp:scormtype="sco" href="index.html" xmlns:adlcp="http://www.adlnet.org/xsd/adlcp_rootv1p2"><file href="index.html"/></resource></resources>
-</manifest>`);
+                zip.file("imsmanifest.xml", `<?xml version="1.0" encoding="UTF-8"?><manifest identifier="RI_AFTRAL"><organizations default="ORG-1"><organization identifier="ORG-1"><title>Reglement</title><item identifier="ITEM-1" identifierref="RES-1"><title>Signature</title></item></organization></organizations><resources><resource identifier="RES-1" type="webcontent" adlcp:scormtype="sco" href="index.html" xmlns:adlcp="http://www.adlnet.org/xsd/adlcp_rootv1p2"><file href="index.html"/></resource></resources></manifest>`);
                 zip.file("index.html", propreHtml);
-
                 zip.generateAsync({ type: "blob" }).then(content => {
                     const a = document.createElement("a");
                     a.href = URL.createObjectURL(content);
-                    a.download = "SCORM_Reglement_FullScroll.zip";
+                    a.download = "SCORM_FINAL.zip";
                     a.click();
                 });
-
-            } catch (error) {
-                console.error(error);
-            }
+            } catch (e) { console.error(e); }
         }
 
         window.onload = function () {
