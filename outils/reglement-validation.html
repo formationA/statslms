@@ -678,16 +678,19 @@
                 const contenuFixe = rulesBox.innerHTML;
                 let docClone = document.documentElement.cloneNode(true);
 
-                // 2. Gestion du LOGO (Base64)
-                const logoOriginal = document.querySelector('img[src*="logo"]') || document.querySelector('header img');
-                if (logoOriginal && logoOriginal.naturalWidth > 0) {
-                    const canvas = document.createElement('canvas');
-                    canvas.width = logoOriginal.naturalWidth;
-                    canvas.height = logoOriginal.naturalHeight;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(logoOriginal, 0, 0);
-                    const logoClone = docClone.querySelector('img[src*="logo"]') || docClone.querySelector('header img');
-                    if (logoClone) logoClone.src = canvas.toDataURL("image/png");
+                // 2. Gestion du LOGO (Version sécurisée)
+                try {
+                    const logoOriginal = document.querySelector('header img');
+                    if (logoOriginal && logoOriginal.complete && logoOriginal.naturalWidth > 0) {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = logoOriginal.naturalWidth;
+                        canvas.height = logoOriginal.naturalHeight;
+                        canvas.getContext('2d').drawImage(logoOriginal, 0, 0);
+                        const logoClone = docClone.querySelector('header img');
+                        if (logoClone) logoClone.src = canvas.toDataURL("image/png");
+                    }
+                } catch (e) {
+                    console.warn("Logo ignoré car l'image est protégée ou inaccessible :", e);
                 }
 
                 // 3. Injection et nettoyage du clone
