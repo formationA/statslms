@@ -476,7 +476,6 @@
                 if (!response.ok) throw new Error("Fichier introuvable");
 
                 const data = await response.json();
-                const box = document.getElementById('rulesBox');
                 let html = "";
 
                 // Logo
@@ -488,12 +487,12 @@
 
                 // En-tête
                 html += `<h1 style="text-align:center; color:#0055A4; margin-bottom:5px;">${data.titre_general}</h1>`;
-                html += `<p style="text-align:center; font-weight:bold; margin-top:0;">${data.sous_titre}</p>`;
+                html += `<p style="text-align:center; font-weight:bold; margin-top:0; border:none;">${data.sous_titre}</p>`;
                 html += `<p style="text-align:center; font-size:0.9rem; margin-bottom:20px;">${data.preambule}</p>`;
 
                 // Sections
                 data.sections.forEach(section => {
-                    html += `<h2 style="background:#2d3663; color:white; padding:12px; border-radius:4px; margin-top:40px;">
+                    html += `<h2 style="background:#2d3663; color:white; padding:12px; border-radius:4px; margin-top:40px; border:none;">
                                     Section ${section.id} : ${section.titre}
                                  </h2>`;
 
@@ -534,37 +533,31 @@
                 });
 
                 html += `<p style="text-align:center; margin-top:60px; color:#94a3b8;">*** Fin du document ***</p>`;
-                box.innerHTML = html;
+                rulesBox.innerHTML = html;
 
-                // Vérification si le contenu est court (pas besoin de scroll)
                 verifierScrollNecessaire();
 
             } catch (err) {
                 console.error(err);
-                document.getElementById('rulesBox').innerHTML = `<div style="color:red; text-align:center; padding:50px;">
-                        <strong>Erreur critique :</strong> Impossible de lire le fichier JSON.<br>
-                        Vérifiez qu'il est bien nommé <code>reglement.json</code>.
-                    </div>`;
+                rulesBox.innerHTML = `<div style="color:red; text-align:center; padding:50px;">
+                            <strong>Erreur critique :</strong> Impossible de lire le fichier JSON.<br>
+                            Vérifiez qu'il est bien nommé <code>reglement.json</code>.
+                        </div>`;
             }
         }
 
         // --- LOGIQUE DE SCROLL ET SIGNATURE ---
         function verifierScrollNecessaire() {
-            // Un petit délai pour s'assurer que le rendu navigateur est fini
             setTimeout(() => {
-                if (rulesBox.scrollHeight <= rulesBox.clientHeight + 10) {
+                if (rulesBox.scrollHeight <= rulesBox.clientHeight + 15) {
                     scrollInfo.classList.add('hidden');
                     actionArea.classList.remove('hidden');
                 }
-            }, 500);
+            }, 600);
         }
 
         rulesBox.onscroll = function () {
-            // Se déclenche quand on arrive à 10px du bas ou moins
-            const position = rulesBox.scrollHeight - rulesBox.scrollTop;
-            const hauteurVisible = rulesBox.clientHeight;
-
-            if (position <= hauteurVisible + 10) {
+            if (rulesBox.scrollHeight - rulesBox.scrollTop <= rulesBox.clientHeight + 15) {
                 scrollInfo.classList.add('hidden');
                 actionArea.classList.remove('hidden');
             }
@@ -576,17 +569,14 @@
 
         btnSubmit.onclick = function () {
             const now = new Date();
-            const dateStr = now.toLocaleDateString('fr-FR', {
-                day: '2-digit', month: '2-digit', year: 'numeric',
-                hour: '2-digit', minute: '2-digit', second: '2-digit'
-            });
+            const dateStr = now.toLocaleString('fr-FR');
             completeSCORM(dateStr);
             checkAgree.disabled = true;
             btnSubmit.classList.add('hidden');
             rulesBox.contentEditable = "false";
             document.getElementById('timestamp').innerText = "Le " + dateStr;
             document.getElementById('msgSuccess').classList.remove('hidden');
-            showModal("Signé !", "Votre émargement est verrouillé et enregistré.");
+            showModal("Signé !", "Votre émargement est enregistré.");
         };
 
         // --- POPUP MODAL ---
@@ -616,7 +606,7 @@
         function completeSCORM(timestampStr) {
             if (api) {
                 api.LMSSetValue("cmi.core.lesson_status", "completed");
-                api.LMSSetValue("cmi.comments", "Signature effectuée le : " + timestampStr);
+                api.LMSSetValue("cmi.comments", "Signature le : " + timestampStr);
                 api.LMSCommit("");
                 api.LMSFinish("");
             }
@@ -624,13 +614,11 @@
 
         // --- EXPORT / IMPORT CONFIG ---
         function exportConfig() {
-            const config = { content: rulesBox.innerHTML };
-            const blob = new Blob([JSON.stringify(config)], { type: 'application/json' });
+            const blob = new Blob([JSON.stringify({ content: rulesBox.innerHTML })], { type: 'application/json' });
             const a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
             a.download = "CONFIG_Reglement.json";
             a.click();
-            showModal("Sauvegarde", "Configuration exportée.");
         }
 
         function importConfig(input) {
@@ -641,11 +629,9 @@
                 try {
                     const config = JSON.parse(e.target.result);
                     rulesBox.innerHTML = config.content;
-                    showModal("Import Réussi", "Contenu chargé.");
                     verifierScrollNecessaire();
-                } catch (err) {
-                    showModal("Erreur", "Fichier invalide.", true);
-                }
+                    showModal("Succès", "Configuration chargée.");
+                } catch (err) { showModal("Erreur", "Fichier invalide.", true); }
             };
             reader.readAsText(file);
             input.value = "";
@@ -654,16 +640,22 @@
         // --- GÉNÉRATION SCORM ZIP ---
         function generateSCORM() {
             if (typeof JSZip === 'undefined') {
-                showModal("Erreur", "La bibliothèque JSZip n'est pas chargée.", true);
+                showModal("Erreur", "JSZip non trouvé.", true);
                 return;
             }
             const zip = new JSZip();
-            const contenuFixe = document.getElementById('rulesBox').innerHTML;
+            const contenuFixe = rulesBox.innerHTML;
             let docClone = document.documentElement.cloneNode(true);
+
+            // On fige le contenu et on nettoie l'interface
             docClone.querySelector('#rulesBox').innerHTML = contenuFixe;
+            const nav = docClone.querySelector('.navbar');
+            if (nav) nav.remove();
 
             let propreHtml = docClone.outerHTML;
-            propreHtml = propreHtml.replace('chargerReglement();', '// contenu déjà injecté');
+
+            // NETTOYAGE ROBUSTE : On neutralise l'appel au JSON (insensible aux espaces/tab)
+            propreHtml = propreHtml.replace(/chargerReglement\s*\(\s*\)\s*;?/g, '// Contenu déjà intégré');
             propreHtml = propreHtml.replace('<body', '<body class="scorm-mode"');
 
             const manifest = `<?xml version="1.0" encoding="UTF-8"?>
@@ -682,27 +674,19 @@
                 zip.file('logo.png', blob);
                 zip.file("index.html", propreHtml);
                 zip.file("imsmanifest.xml", manifest);
-                zip.generateAsync({ type: "blob" }).then(function (content) {
-                    const a = document.createElement("a");
-                    a.href = URL.createObjectURL(content);
-                    a.download = "SCORM_RI_Final.zip";
-                    a.click();
-                    showModal("SCORM Généré", "L'archive est prête.");
-                });
+                return zip.generateAsync({ type: "blob" });
             }).catch(() => {
-                // Si logo.png absent, générer sans logo
                 zip.file("index.html", propreHtml);
                 zip.file("imsmanifest.xml", manifest);
-                zip.generateAsync({ type: "blob" }).then(content => {
-                    const a = document.createElement("a");
-                    a.href = URL.createObjectURL(content);
-                    a.download = "SCORM_RI_Final.zip";
-                    a.click();
-                });
+                return zip.generateAsync({ type: "blob" });
+            }).then(content => {
+                const a = document.createElement("a");
+                a.href = URL.createObjectURL(content);
+                a.download = "SCORM_RI_Final.zip";
+                a.click();
             });
         }
 
-        // --- INITIALISATION ---
         window.onload = function () {
             initSCORM();
             chargerReglement();
