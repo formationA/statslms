@@ -461,28 +461,32 @@
 
 
     <script>
-        // --- VARIABLES GLOBALES ET ÉLÉMENTS ---
+        // --- VARIABLES GLOBALES ---
         var api = null;
-        const rulesBox = document.getElementById('rulesBox');
-        const scrollInfo = document.getElementById('scrollInfo');
-        const actionArea = document.getElementById('actionArea');
-        const btnSubmit = document.getElementById('btnSubmit');
-        const checkAgree = document.getElementById('checkAgree');
+
+        // --- INITIALISATION AU CHARGEMENT ---
+        window.onload = function () {
+            initSCORM();
+            chargerReglement();
+        };
 
         // --- CHARGEMENT DU JSON ---
         async function chargerReglement() {
+            const rulesBox = document.getElementById('rulesBox');
+            if (!rulesBox) return;
+
             try {
                 const response = await fetch('reglement.json');
-                if (!response.ok) throw new Error("Fichier introuvable");
+                if (!response.ok) throw new Error("Fichier reglement.json introuvable");
 
                 const data = await response.json();
                 let html = "";
 
-                // Logo
+                // Logo dynamique
                 if (data.logo) {
                     html += `<div style="text-align:center; margin-bottom:20px;">
-                                    <img src="${data.logo}" alt="Logo" style="max-width:200px; height:auto;">
-                                 </div>`;
+                                <img src="${data.logo}" alt="Logo" style="max-width:200px; height:auto;">
+                             </div>`;
                 }
 
                 // En-tête
@@ -490,11 +494,11 @@
                 html += `<p style="text-align:center; font-weight:bold; margin-top:0; border:none;">${data.sous_titre}</p>`;
                 html += `<p style="text-align:center; font-size:0.9rem; margin-bottom:20px;">${data.preambule}</p>`;
 
-                // Sections
+                // Sections et Articles
                 data.sections.forEach(section => {
                     html += `<h2 style="background:#2d3663; color:white; padding:12px; border-radius:4px; margin-top:40px; border:none;">
-                                    Section ${section.id} : ${section.titre}
-                                 </h2>`;
+                                Section ${section.id} : ${section.titre}
+                             </h2>`;
 
                     if (section.contenu_introductif) html += `<p><strong>${section.contenu_introductif}</strong></p>`;
                     if (section.objectifs) html += `<ul>${section.objectifs.map(o => `<li>${o}</li>`).join('')}</ul>`;
@@ -506,14 +510,17 @@
                             html += `<h3 style="color:#0055A4;">Article ${art.num} : ${art.titre}</h3>`;
                             if (art.texte) html += `<p>${art.texte}</p>`;
                             if (art.points) html += `<ul>${art.points.map(p => `<li>${p}</li>`).join('')}</ul>`;
+
                             if (art.sanctions) {
                                 html += `<div style="color:#b91c1c; font-weight:600; margin-top:10px;">🔴 Sanctions :</div>`;
                                 html += `<ul>${art.sanctions.map(s => `<li>${s}</li>`).join('')}</ul>`;
                             }
+
                             if (art.cas_ouverture) {
                                 html += `<strong>Cas autorisant l'ouverture :</strong>`;
                                 html += `<ul>${art.cas_ouverture.map(c => `<li>${c}</li>`).join('')}</ul>`;
                             }
+
                             if (art.sous_articles) {
                                 art.sous_articles.forEach(sub => {
                                     html += `<div style="margin-left:20px; border-left:2px solid #e2e8f0; padding-left:15px; margin-top:15px;">`;
@@ -535,77 +542,74 @@
                 html += `<p style="text-align:center; margin-top:30px; color:#94a3b8;">*** Fin du document ***</p>`;
                 rulesBox.innerHTML = html;
 
+                // Une fois le contenu chargé, on vérifie si le scroll est nécessaire
                 verifierScrollNecessaire();
 
             } catch (err) {
                 console.error(err);
-                rulesBox.innerHTML = `<div style="color:red; text-align:center; padding:50px;">
-                            <strong>Erreur critique :</strong> Impossible de lire le fichier JSON.<br>
-                            Vérifiez qu'il est bien nommé <code>reglement.json</code>.
-                        </div>`;
+                rulesBox.innerHTML = `<div style="color:red; text-align:center; padding:50px;">Erreur critique : Impossible de charger reglement.json</div>`;
             }
         }
 
-        // --- LOGIQUE DE SCROLL ET SIGNATURE ---
+        // --- LOGIQUE DE SCROLL ---
         function verifierScrollNecessaire() {
+            const rb = document.getElementById('rulesBox');
+            if (!rb) return;
             setTimeout(() => {
-                if (rulesBox.scrollHeight <= rulesBox.clientHeight + 15) {
-                    scrollInfo.classList.add('hidden');
-                    actionArea.classList.remove('hidden');
+                if (rb.scrollHeight <= rb.clientHeight + 20) {
+                    document.getElementById('scrollInfo')?.classList.add('hidden');
+                    document.getElementById('actionArea')?.classList.remove('hidden');
                 }
-            }, 600);
+            }, 800);
         }
 
-        rulesBox.onscroll = function () {
-            if (rulesBox.scrollHeight - rulesBox.scrollTop <= rulesBox.clientHeight + 15) {
-                scrollInfo.classList.add('hidden');
-                actionArea.classList.remove('hidden');
+        document.getElementById('rulesBox').onscroll = function () {
+            if (this.scrollHeight - this.scrollTop <= this.clientHeight + 20) {
+                document.getElementById('scrollInfo')?.classList.add('hidden');
+                document.getElementById('actionArea')?.classList.remove('hidden');
             }
         };
 
-        checkAgree.onchange = function () {
-            btnSubmit.disabled = !this.checked;
+        // --- SIGNATURE ET ÉMARGEMENT ---
+        document.getElementById('checkAgree').onchange = function () {
+            document.getElementById('btnSubmit').disabled = !this.checked;
         };
 
-        btnSubmit.onclick = function () {
-            const now = new Date();
-            const dateStr = now.toLocaleString('fr-FR');
-            completeSCORM(dateStr);
-            checkAgree.disabled = true;
-            btnSubmit.classList.add('hidden');
-            rulesBox.contentEditable = "false";
+        document.getElementById('btnSubmit').onclick = function () {
+            const dateStr = new Date().toLocaleString('fr-FR');
+            completeSCORM(dateStr); // Envoi au LMS
+
+            this.classList.add('hidden');
+            document.getElementById('checkAgree').disabled = true;
             document.getElementById('timestamp').innerText = "Le " + dateStr;
             document.getElementById('msgSuccess').classList.remove('hidden');
-            showModal("Signé !", "Votre émargement est enregistré.");
+            showModal("Signé !", "Votre émargement a été enregistré avec succès.");
         };
 
         // --- POPUP MODAL ---
         function showModal(title, text, isError = false) {
             document.getElementById('modalTitle').innerText = title;
             document.getElementById('modalText').innerText = text;
-            const iconWrapper = document.querySelector('.modal-icon-wrapper');
+            const wrapper = document.querySelector('.modal-icon-wrapper');
+            const icon = document.getElementById('modalIcon');
             if (isError) {
-                iconWrapper.style.background = "#fee2e2"; iconWrapper.style.color = "#ef4444";
-                document.getElementById('modalIcon').className = "fas fa-times";
+                wrapper.style.background = "#fee2e2"; wrapper.style.color = "#ef4444";
+                icon.className = "fas fa-times";
             } else {
-                iconWrapper.style.background = "#ecfdf5"; iconWrapper.style.color = "#10b981";
-                document.getElementById('modalIcon').className = "fas fa-check";
+                wrapper.style.background = "#ecfdf5"; wrapper.style.color = "#10b981";
+                icon.className = "fas fa-check";
             }
             document.getElementById('modalOverlay').classList.add('active');
         }
         function closeModal() { document.getElementById('modalOverlay').classList.remove('active'); }
 
-        // --- SCORM 1.2 ---
-        var api = null;
-
+        // --- SCORM 1.2 (LOGIQUE RUNTIME) ---
         function initSCORM() {
             var win = window;
             while ((win.API == null) && (win.parent != null) && (win.parent != win)) { win = win.parent; }
             api = win.API;
-
             if (api) {
                 api.LMSInitialize("");
-                // CRITIQUE : Dire au LMS qu'on a commencé mais pas fini
                 api.LMSSetValue("cmi.core.lesson_status", "incomplete");
                 api.LMSCommit("");
             }
@@ -613,247 +617,103 @@
 
         function completeSCORM(timestampStr) {
             if (api) {
-                // 1. On dit au LMS que c'est fini et réussi
                 api.LMSSetValue("cmi.core.lesson_status", "passed");
-
-                // 2. On valide le score (100/100) pour déclencher la complétion
                 api.LMSSetValue("cmi.core.score.raw", "100");
-                api.LMSSetValue("cmi.core.score.min", "0");
-                api.LMSSetValue("cmi.core.score.max", "100");
-
-                // 3. On ajoute le commentaire de signature
-                api.LMSSetValue("cmi.comments", "Signé le : " + timestampStr);
-
-                // 4. TRÈS IMPORTANT : On force l'enregistrement immédiat
+                api.LMSSetValue("cmi.comments", "Signé numériquement le : " + timestampStr);
                 api.LMSCommit("");
-
-                // 5. On ferme la session proprement
                 api.LMSFinish("");
-                console.log("Données SCORM transmises.");
-            } else {
-                console.error("API SCORM non trouvée.");
             }
         }
 
-        // --- EXPORT / IMPORT CONFIG ---
-        function exportConfig() {
-            const blob = new Blob([JSON.stringify({ content: rulesBox.innerHTML })], { type: 'application/json' });
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = "CONFIG_Reglement.json";
-            a.click();
-        }
-
-        function importConfig(input) {
-            const file = input.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                try {
-                    const config = JSON.parse(e.target.result);
-                    rulesBox.innerHTML = config.content;
-                    verifierScrollNecessaire();
-                    showModal("Succès", "Configuration chargée.");
-                } catch (err) { showModal("Erreur", "Fichier invalide.", true); }
-            };
-            reader.readAsText(file);
-            input.value = "";
-        }
-
-        // --- GÉNÉRATION SCORM ZIP ---
+        // --- GÉNÉRATION DU PACKAGE SCORM ZIP ---
         function generateSCORM() {
             try {
                 if (typeof JSZip === 'undefined') {
-                    alert("La bibliothèque JSZip n'est pas chargée.");
+                    alert("JSZip n'est pas chargé. Vérifiez votre connexion.");
                     return;
                 }
                 const zip = new JSZip();
+                const rulesContent = document.getElementById('rulesBox').innerHTML;
 
-                // 1. Capture du contenu et clonage
-                const rulesBox = document.getElementById('rulesBox');
-                if (!rulesBox) {
-                    alert("Erreur : #rulesBox introuvable");
-                    return;
-                }
-                const contenuFixe = rulesBox.innerHTML;
+                // Clonage sécurisé pour l'export
                 let docClone = document.documentElement.cloneNode(true);
+                let bodyClone = docClone.querySelector('body') || docClone;
 
-                // 2. Gestion du LOGO (Version sécurisée)
+                // Fix du Logo en Base64 pour l'export
                 try {
-                    const logoOriginal = document.querySelector('header img');
-                    if (logoOriginal && logoOriginal.complete && logoOriginal.naturalWidth > 0) {
+                    const logo = document.querySelector('header img') || document.querySelector('img');
+                    if (logo && logo.naturalWidth > 0) {
                         const canvas = document.createElement('canvas');
-                        canvas.width = logoOriginal.naturalWidth;
-                        canvas.height = logoOriginal.naturalHeight;
-                        canvas.getContext('2d').drawImage(logoOriginal, 0, 0);
-                        const logoClone = docClone.querySelector('header img');
-                        if (logoClone) logoClone.src = canvas.toDataURL("image/png");
+                        canvas.width = logo.naturalWidth;
+                        canvas.height = logo.naturalHeight;
+                        canvas.getContext('2d').drawImage(logo, 0, 0);
+                        const cloneImg = docClone.querySelector('header img') || docClone.querySelector('img');
+                        if (cloneImg) cloneImg.src = canvas.toDataURL("image/png");
                     }
-                } catch (e) {
-                    console.warn("Logo ignoré car l'image est protégée ou inaccessible :", e);
+                } catch (e) { console.warn("Logo non exporté (CORS)"); }
+
+                // Nettoyage de l'interface dans le clone
+                const target = docClone.querySelector('#rulesBox');
+                if (target) {
+                    target.innerHTML = rulesContent;
+                    target.style.height = 'auto';
+                    target.style.maxHeight = 'none';
+                    target.style.overflow = 'visible';
                 }
 
-                // 3. Injection et nettoyage du clone
-                const targetBox = docClone.querySelector('#rulesBox');
-                if (targetBox) {
-                    targetBox.innerHTML = contenuFixe;
-                    targetBox.setAttribute('contenteditable', 'false');
-                    targetBox.style.userSelect = 'none';
-                    targetBox.style.height = 'auto';
-                    targetBox.style.maxHeight = 'none';
-                }
-
-                // 4. Script injecté (Mémoire LMS + Détection Scroll)
-                const scriptElement = document.createElement('script');
-                scriptElement.textContent = `
-            var api = null;
-            function findAPI(win) {
-                var findAttempts = 0;
-                while ((win.API == null) && (win.parent != null) && (win.parent != win)) {
-                    findAttempts++;
-                    if (findAttempts > 500) return null;
-                    win = win.parent;
-                }
-                return win.API;
-            }
-
-            function verifierStatutPrecedent() {
-                if (!api) return false;
-                var status = api.LMSGetValue("cmi.core.lesson_status");
-                if (status === "passed" || status === "completed") {
-                    document.getElementById('actionArea').classList.add('hidden');
-                    document.getElementById('scrollInfo').classList.add('hidden');
-                    document.getElementById('msgSuccess').classList.remove('hidden');
-                    var dateMsg = api.LMSGetValue("cmi.comments") || "";
-                    document.getElementById('timestamp').innerText = "Document déjà " + dateMsg;
-                    return true;
-                }
-                return false;
-            }
-
-            window.onload = function() {
-                api = findAPI(window);
-                if (!api && window.opener) api = findAPI(window.opener);
-                if (api) {
-                    api.LMSInitialize("");
-                    if (verifierStatutPrecedent()) return; 
-                    api.LMSSetValue("cmi.core.lesson_status", "incomplete");
-                    api.LMSCommit("");
-                }
-
-                window.onscroll = function() {
-                    var docHeight = document.documentElement.scrollHeight;
-                    var winHeight = window.innerHeight;
-                    var scrollPos = window.pageYOffset || document.documentElement.scrollTop;
-                    if ((scrollPos + winHeight) >= (docHeight - 150)) {
-                        document.getElementById('scrollInfo')?.classList.add('hidden');
-                        document.getElementById('actionArea')?.classList.remove('hidden');
+                // Injection du script de lecture SCORM pour le ZIP
+                const scormScript = document.createElement('script');
+                scormScript.textContent = `
+                    var api = null;
+                    function findAPI(win) {
+                        while ((win.API == null) && (win.parent != null) && (win.parent != win)) { win = win.parent; }
+                        return win.API;
                     }
-                };
-                
-                setTimeout(function() {
-                    if (document.documentElement.scrollHeight <= window.innerHeight + 100) {
-                        document.getElementById('scrollInfo')?.classList.add('hidden');
-                        document.getElementById('actionArea')?.classList.remove('hidden');
+                    window.onload = function() {
+                        api = findAPI(window);
+                        if (api) {
+                            api.LMSInitialize("");
+                            var status = api.LMSGetValue("cmi.core.lesson_status");
+                            if(status === "passed" || status === "completed") {
+                                document.getElementById('actionArea').style.display = 'none';
+                                document.getElementById('msgSuccess').classList.remove('hidden');
+                            }
+                        }
+                    };
+                    function validerSignatureSCORM() {
+                        if (api) {
+                            api.LMSSetValue("cmi.core.lesson_status", "passed");
+                            api.LMSCommit(""); api.LMSFinish("");
+                        }
+                        document.getElementById('msgSuccess').classList.remove('hidden');
                     }
-                }, 1500);
-            };
+                `;
+                bodyClone.appendChild(scormScript);
 
-            function validerSignatureSCORM() {
-                var dateStr = new Date().toLocaleString('fr-FR');
-                if (api) {
-                    api.LMSSetValue("cmi.core.score.raw", "100");
-                    api.LMSSetValue("cmi.core.lesson_status", "passed");
-                    api.LMSSetValue("cmi.comments", "signé le : " + dateStr);
-                    api.LMSCommit("");
-                    api.LMSFinish("");
-                }
-                document.getElementById('actionArea').classList.add('hidden');
-                document.getElementById('timestamp').innerText = "Signé le " + dateStr;
-                document.getElementById('msgSuccess').classList.remove('hidden');
-            }
-        `;
-                docClone.body.appendChild(scriptElement);
-
-                // 5. Style SCORM - ÉLARGISSEMENT ET FIX LOGO
-                const styleSCORM = document.createElement('style');
-                styleSCORM.textContent = `
-            html, body {
-                height: auto !important;
-                overflow: visible !important;
-                background-color: #f1f5f9 !important;
-                margin: 0 !important; padding: 0 !important;
-            }
-            .scorm-mode .document-card {
-                height: auto !important; max-height: none !important;
-                width: 95% !important; max-width: 1200px !important;
-                margin: 40px auto !important; padding: 50px !important;
-                background: white !important; border-radius: 12px !important;
-                box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
-                box-sizing: border-box !important;
-            }
-            .scorm-mode header {
-                display: flex !important; align-items: center !important;
-                gap: 40px !important; position: static !important;
-                text-align: left !important; border-bottom: 2px solid #e2e8f0 !important;
-                padding-bottom: 20px !important; margin-bottom: 30px !important;
-            }
-            .scorm-mode header img {
-                position: static !important; transform: none !important;
-                height: 100px !important; flex-shrink: 0 !important;
-            }
-            .scorm-mode header div { flex-grow: 1 !important; text-align: left !important; }
-            .scorm-mode .logo-text { font-size: 1.6rem !important; margin: 0 !important; }
-            .scorm-mode #rulesBox {
-                height: auto !important; max-height: none !important;
-                overflow: visible !important; line-height: 1.7 !important;
-            }
-            .navbar, .nav-right, .nav-left, .btn-save-load { display: none !important; }
-            .hidden { display: none !important; }
-        `;
-                docClone.body.appendChild(styleSCORM);
-
-                // 6. Génération finale
-                let propreHtml = "<!DOCTYPE html>\n" + docClone.outerHTML;
-                propreHtml = propreHtml.replace(/chargerReglement\s*\(\s*\)\s*;?/g, '//');
-                propreHtml = propreHtml.replace('<body', '<body class="scorm-mode"');
-
+                // Manifest SCORM 1.2
                 const manifest = `<?xml version="1.0" encoding="UTF-8"?>
-<manifest identifier="RI_AFTRAL" version="1.1" xmlns="http://www.imsproject.org/xsd/imscp_rootv1p1p2">
-    <metadata><schema>ADL SCORM</schema><schemaversion>1.2</schemaversion></metadata>
-    <organizations default="ORG-1">
-        <organization identifier="ORG-1">
-            <title>Règlement Intérieur</title>
-            <item identifier="ITEM-1" identifierref="RES-1"><title>Signature</title></item>
-        </organization>
-    </organizations>
-    <resources>
-        <resource identifier="RES-1" type="webcontent" adlcp:scormtype="sco" href="index.html" xmlns:adlcp="http://www.adlnet.org/xsd/adlcp_rootv1p2">
-            <file href="index.html"/>
-        </resource>
-    </resources>
+<manifest identifier="RI_EXPORT" version="1.1" xmlns="http://www.imsproject.org/xsd/imscp_rootv1p1p2">
+        <metadata><schema>ADL SCORM</schema><schemaversion>1.2</schemaversion></metadata>
+        <organizations default="ORG-1"><organization identifier="ORG-1"><title>Reglement</title><item identifier="ITEM-1" identifierref="RES-1"><title>Document</title></item></organization></organizations>
+        <resources><resource identifier="RES-1" type="webcontent" adlcp:scormtype="sco" href="index.html" xmlns:adlcp="http://www.adlnet.org/xsd/adlcp_rootv1p2"><file href="index.html"/></resource></resources>
 </manifest>`;
 
+                // Ajout au ZIP
                 zip.file("imsmanifest.xml", manifest);
-                zip.file("index.html", propreHtml);
+                zip.file("index.html", "<!DOCTYPE html>\n" + docClone.outerHTML.replace('<body', '<body class="scorm-mode"'));
 
-                zip.generateAsync({ type: "blob" }).then(function (content) {
+                zip.generateAsync({ type: "blob" }).then(content => {
                     const a = document.createElement("a");
                     a.href = URL.createObjectURL(content);
-                    a.download = "SCORM_Reglement_Signe.zip";
+                    a.download = "SCORM_Reglement_Final.zip";
                     a.click();
                 });
 
             } catch (error) {
-                console.error("Erreur complète :", error);
-                alert("Une erreur est survenue lors de la génération. Vérifiez la console (F12).");
+                console.error(error);
+                alert("Erreur de génération du ZIP. Voir console.");
             }
         }
-
-        window.onload = function () {
-            initSCORM();
-            chargerReglement();
-        };
     </script>
 
 
