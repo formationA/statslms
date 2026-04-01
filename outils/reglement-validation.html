@@ -710,69 +710,73 @@
                 }
 
                 // 5. Création du script de secours (AUTO-INITIALISÉ)
+                // 5. Création du script de secours (AUTO-INITIALISÉ)
                 const scriptText = `
-            var api = null;
+    var api = null;
 
-            // Fonction pour trouver l'API SCORM dans les frames parentes
-            function findAPI(win) {
-                var findAttempts = 0;
-                while ((win.API == null) && (win.parent != null) && (win.parent != win)) {
-                    findAttempts++;
-                    if (findAttempts > 500) return null;
-                    win = win.parent;
-                }
-                return win.API;
-            }
+    function findAPI(win) {
+        var findAttempts = 0;
+        while ((win.API == null) && (win.parent != null) && (win.parent != win)) {
+            findAttempts++;
+            if (findAttempts > 500) return null;
+            win = win.parent;
+        }
+        return win.API;
+    }
 
-            // Initialisation au chargement de la page
-            window.onload = function() {
-                api = findAPI(window);
-                if (!api && window.opener) api = findAPI(window.opener);
+    window.onload = function() {
+        api = findAPI(window);
+        if (!api && window.opener) api = findAPI(window.opener);
 
-                if (api) {
-                    api.LMSInitialize("");
-                    api.LMSSetValue("cmi.core.lesson_status", "incomplete");
-                    api.LMSCommit("");
-                }
+        if (api) {
+            api.LMSInitialize("");
+            api.LMSSetValue("cmi.core.lesson_status", "incomplete");
+            api.LMSCommit("");
+        }
 
-                // Logique de scroll
-                const box = document.getElementById('rulesBox');
-                if(box) {
-                    box.onscroll = function() {
-                        if (box.scrollHeight - box.scrollTop <= box.clientHeight + 40) {
-                            const info = document.getElementById('scrollInfo');
-                            const area = document.getElementById('actionArea');
-                            if(info) info.classList.add('hidden');
-                            if(area) area.classList.remove('hidden');
-                        }
-                    };
+        const box = document.getElementById('rulesBox');
+        if(box) {
+            box.onscroll = function() {
+                if (box.scrollHeight - box.scrollTop <= box.clientHeight + 40) {
+                    const info = document.getElementById('scrollInfo');
+                    const area = document.getElementById('actionArea');
+                    if(info) info.classList.add('hidden');
+                    if(area) area.classList.remove('hidden');
                 }
             };
+        }
+    };
 
-            function validerSignatureSCORM() {
-                const now = new Date();
-                const dateStr = now.toLocaleString('fr-FR');
+    function validerSignatureSCORM() {
+        const now = new Date();
+        const dateStr = now.toLocaleString('fr-FR');
 
-                if (api) {
-                    // Passage en "completed" pour enlever le "Unknown"
-                    api.LMSSetValue("cmi.core.lesson_status", "completed");
-                    api.LMSSetValue("cmi.comments", "Signature règlement intérieur effectuée le : " + dateStr);
-                    api.LMSCommit("");
-                    api.LMSFinish("");
-                }
+        if (api) {
+            // --- LOGIQUE 100% SUCCÈS ---
+            api.LMSSetValue("cmi.core.score.min", "0");
+            api.LMSSetValue("cmi.core.score.max", "100");
+            api.LMSSetValue("cmi.core.score.raw", "100"); // On définit le score à 100
+            
+            // On définit le statut sur 'passed' (réussite) ou 'completed'
+            api.LMSSetValue("cmi.core.lesson_status", "passed"); 
+            
+            api.LMSSetValue("cmi.comments", "Signature règlement intérieur effectuée le : " + dateStr);
+            
+            api.LMSCommit("");
+            api.LMSFinish("");
+        }
 
-                document.getElementById('btnSubmit').classList.add('hidden');
-                document.getElementById('checkAgree').disabled = true;
-                document.getElementById('timestamp').innerText = "Signé le " + dateStr;
-                document.getElementById('msgSuccess').classList.remove('hidden');
+        // Mise à jour visuelle de l'interface
+        document.getElementById('btnSubmit').classList.add('hidden');
+        document.getElementById('checkAgree').disabled = true;
+        document.getElementById('timestamp').innerText = "Signé le " + dateStr;
+        document.getElementById('msgSuccess').classList.remove('hidden');
 
-                if (typeof showModal === 'function') {
-                    showModal("Signé !", "Votre émargement a bien été transmis.");
-                } else {
-                    alert("Signature enregistrée et transmise.");
-                }
-            }
-        `;
+        if (typeof showModal === 'function') {
+            showModal("Signé !", "Votre émargement a bien été transmis (Score: 100%).");
+        }
+    }
+`;
 
                 // 6. Insertion du script
                 const scriptElement = document.createElement('script');
