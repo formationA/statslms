@@ -687,7 +687,6 @@
                 // 3. Injection du contenu
                 const targetBox = docClone.querySelector('#rulesBox');
                 if (targetBox) targetBox.innerHTML = contenuFixe;
-
                 targetBox.setAttribute('contenteditable', 'false');
                 targetBox.style.userSelect = 'none';
 
@@ -709,83 +708,70 @@
                     clonedCheck.setAttribute('onchange', "document.getElementById('btnSubmit').disabled = !this.checked");
                 }
 
-                // 5. Création du script de secours (AUTO-INITIALISÉ)
-                // 5. Création du script de secours (AUTO-INITIALISÉ)
+                // 5. Script injecté dans le SCORM
                 const scriptText = `
-    var api = null;
+            var api = null;
+            function findAPI(win) {
+                var findAttempts = 0;
+                while ((win.API == null) && (win.parent != null) && (win.parent != win)) {
+                    findAttempts++;
+                    if (findAttempts > 500) return null;
+                    win = win.parent;
+                }
+                return win.API;
+            }
 
-    function findAPI(win) {
-        var findAttempts = 0;
-        while ((win.API == null) && (win.parent != null) && (win.parent != win)) {
-            findAttempts++;
-            if (findAttempts > 500) return null;
-            win = win.parent;
-        }
-        return win.API;
-    }
-
-    window.onload = function() {
-        api = findAPI(window);
-        if (!api && window.opener) api = findAPI(window.opener);
-
-        if (api) {
-            api.LMSInitialize("");
-            api.LMSSetValue("cmi.core.lesson_status", "incomplete");
-            api.LMSCommit("");
-        }
-
-        const box = document.getElementById('rulesBox');
-        if(box) {
-            box.onscroll = function() {
-                if (box.scrollHeight - box.scrollTop <= box.clientHeight + 40) {
-                    const info = document.getElementById('scrollInfo');
-                    const area = document.getElementById('actionArea');
-                    if(info) info.classList.add('hidden');
-                    if(area) area.classList.remove('hidden');
+            window.onload = function() {
+                api = findAPI(window);
+                if (!api && window.opener) api = findAPI(window.opener);
+                if (api) {
+                    api.LMSInitialize("");
+                    api.LMSSetValue("cmi.core.lesson_status", "incomplete");
+                    api.LMSCommit("");
+                }
+                const box = document.getElementById('rulesBox');
+                if(box) {
+                    box.onscroll = function() {
+                        if (box.scrollHeight - box.scrollTop <= box.clientHeight + 45) {
+                            const info = document.getElementById('scrollInfo');
+                            const area = document.getElementById('actionArea');
+                            if(info) info.classList.add('hidden');
+                            if(area) area.classList.remove('hidden');
+                        }
+                    };
                 }
             };
-        }
-    };
 
-    function validerSignatureSCORM() {
-        const now = new Date();
-        const dateStr = now.toLocaleString('fr-FR');
+            function validerSignatureSCORM() {
+                const now = new Date();
+                const dateStr = now.toLocaleString('fr-FR');
+                if (api) {
+                    api.LMSSetValue("cmi.core.score.min", "0");
+                    api.LMSSetValue("cmi.core.score.max", "100");
+                    api.LMSSetValue("cmi.core.score.raw", "100");
+                    api.LMSSetValue("cmi.core.lesson_status", "passed");
+                    api.LMSSetValue("cmi.comments", "Signé le : " + dateStr);
+                    api.LMSCommit("");
+                    api.LMSFinish("");
+                }
+                document.getElementById('btnSubmit').classList.add('hidden');
+                document.getElementById('checkAgree').disabled = true;
+                document.getElementById('timestamp').innerText = "Signé le " + dateStr;
+                document.getElementById('msgSuccess').classList.remove('hidden');
+                if (typeof showModal === 'function') {
+                    showModal("Signé !", "Votre émargement a été transmis (100%).");
+                } else {
+                    alert("Document signé et validé !");
+                }
+            }
+        `;
 
-        if (api) {
-            // --- LOGIQUE 100% SUCCÈS ---
-            api.LMSSetValue("cmi.core.score.min", "0");
-            api.LMSSetValue("cmi.core.score.max", "100");
-            api.LMSSetValue("cmi.core.score.raw", "100"); // On définit le score à 100
-            
-            // On définit le statut sur 'passed' (réussite) ou 'completed'
-            api.LMSSetValue("cmi.core.lesson_status", "passed"); 
-            
-            api.LMSSetValue("cmi.comments", "Signature règlement intérieur effectuée le : " + dateStr);
-            
-            api.LMSCommit("");
-            api.LMSFinish("");
-        }
-
-        // Mise à jour visuelle de l'interface
-        document.getElementById('btnSubmit').classList.add('hidden');
-        document.getElementById('checkAgree').disabled = true;
-        document.getElementById('timestamp').innerText = "Signé le " + dateStr;
-        document.getElementById('msgSuccess').classList.remove('hidden');
-
-        if (typeof showModal === 'function') {
-            showModal("Signé !", "Votre émargement a bien été transmis (Score: 100%).");
-        }
-    }
-`;
-
-                // 6. Insertion du script
                 const scriptElement = document.createElement('script');
                 scriptElement.textContent = scriptText;
-
                 const bodyClone = docClone.getElementsByTagName('body')[0] || docClone;
                 bodyClone.appendChild(scriptElement);
 
-                // 6bis. STYLE FORCE
+                // Style SCORM
                 const styleSCORM = document.createElement('style');
                 styleSCORM.textContent = `
             html, body { height: 100vh !important; overflow: hidden !important; }
@@ -795,31 +781,53 @@
         `;
                 bodyClone.appendChild(styleSCORM);
 
-                // 7. Nettoyage et Export
+                // Nettoyage HTML
                 const nav = docClone.querySelector('.navbar');
                 if (nav) nav.remove();
-
                 let propreHtml = "<!DOCTYPE html>\n" + docClone.outerHTML;
                 propreHtml = propreHtml.replace(/chargerReglement\s*\(\s*\)\s*;?/g, '// Intégré');
                 propreHtml = propreHtml.replace('<body', '<body class="scorm-mode"');
 
-                
-                // Manifeste SCORM
-                zip.file("imsmanifest.xml", '<?xml version="1.0" encoding="UTF-8"?><manifest identifier="MANIFEST-1" version="1.2" xmlns="http://www.imsproject.org/xsd/imscp_rootv1p1p2"><organizations default="ORG-1"><organization identifier="ORG-1"><title>' + finalName + '</title><item identifierRef="RES-1" identifier="ITEM-1"><title>Quiz</title></item></organization></organizations><resources><resource identifier="RES-1" type="webcontent" href="index.html"><file href="index.html"/><file href="SCORM_API_wrapper.js"/></resource></resources></manifest>');
+                // 7. GÉNÉRATION DU MANIFESTE (CORRIGÉ)
+                const manifest = `<?xml version="1.0" encoding="UTF-8"?>
+<manifest identifier="RI_AFTRAL_SCO" version="1.1" 
+          xmlns="http://www.imsproject.org/xsd/imscp_rootv1p1p2" 
+          xmlns:adlcp="http://www.adlnet.org/xsd/adlcp_rootv1p2" 
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+          xsi:schemaLocation="http://www.imsproject.org/xsd/imscp_rootv1p1p2 imscp_rootv1p1p2.xsd http://www.adlnet.org/xsd/adlcp_rootv1p2 adlcp_rootv1p2.xsd">
+  <metadata>
+    <schema>ADL SCORM</schema>
+    <schemaversion>1.2</schemaversion>
+  </metadata>
+  <organizations default="ORG-1">
+    <organization identifier="ORG-1">
+      <title>Règlement Intérieur AFTRAL</title>
+      <item identifier="ITEM-1" identifierref="RES-1">
+        <title>Signature du Règlement</title>
+      </item>
+    </organization>
+  </organizations>
+  <resources>
+    <resource identifier="RES-1" type="webcontent" adlcp:scormtype="sco" href="index.html">
+      <file href="index.html"/>
+    </resource>
+  </resources>
+</manifest>`;
+
+                zip.file("imsmanifest.xml", manifest);
                 zip.file("index.html", propreHtml);
-              
 
                 zip.generateAsync({ type: "blob" }).then(content => {
                     const a = document.createElement("a");
                     a.href = URL.createObjectURL(content);
-                    a.download = "SCORM_RI_Final.zip";
+                    a.download = "SCORM_Reglement_Signe.zip";
                     a.click();
-                    showModal("Succès", "SCORM généré sans erreur !");
+                    showModal("Succès", "Le pack SCORM est prêt !");
                 });
 
             } catch (error) {
-                console.error("Erreur de génération :", error);
-                showModal("Erreur", "Détail : " + error.message, true);
+                console.error("Erreur :", error);
+                showModal("Erreur", error.message, true);
             }
         }
 
