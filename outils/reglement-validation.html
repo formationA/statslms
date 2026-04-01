@@ -158,7 +158,7 @@
             color: #0055A4;
             font-size: 1.3rem;
             margin-top: 25px;
-            border-bottom: 1px solid #eee;
+            border-bottom: none;
             padding-bottom: 5px;
         }
 
@@ -404,51 +404,51 @@
     <div class="main-container">
         <div class="document-card">
             <header style="position: relative; border-bottom: 2px solid #e2e8f0; padding: 20px; margin-bottom: 20px;">
+               
+                    <!-- LOGO À GAUCHE -->
+                    <img src="logo.png" alt="Logo"
+                         style="position: absolute; left: 20px; top: 50%; transform: translateY(-50%); height: 90px; object-fit: contain;">
 
-                <!-- LOGO À GAUCHE -->
-                <img src="logo.png" alt="Logo"
-                     style="position: absolute; left: 20px; top: 50%; transform: translateY(-50%); height: 90px; object-fit: contain;">
+                    <!-- TEXTE CENTRÉ -->
+                    <div style="text-align: center;">
+                        <div class="logo-text" style="font-size: 1.4rem; font-weight: 800; color: #2d3663; line-height: 1.3; margin-bottom: 10px; text-transform: uppercase;">
+                            RÈGLEMENT INTÉRIEUR GÉNÉRAL DES APPRENANTS
+                        </div>
 
-                <!-- TEXTE CENTRÉ -->
-                <div style="text-align: center;">
-                    <div class="logo-text" style="font-size: 1.4rem; font-weight: 800; color: #2d3663; line-height: 1.3; margin-bottom: 10px; text-transform: uppercase;">
-                        RÈGLEMENT INTÉRIEUR GÉNÉRAL DES APPRENANTS
+                        <h2 style="color: #334155; margin: 5px 0; font-size: 1.1rem; font-weight: 600;">
+                            Organisme de formation et Centre de Formation d'Apprentis (CFA)
+                        </h2>
+
+                        <small style="color: #94a3b8; display: block; margin-top: 10px;">
+                            <!-- texte secondaire -->
+                        </small>
                     </div>
+                </header>
+                <div class="content-scroll" id="rulesBox" contenteditable="true">
+                    <p style="text-align:center; padding:20px; color:#64748b;">
+                        <i class="fas fa-spinner fa-spin"></i> Chargement des articles...
+                    </p>
+                </div>
 
-                    <h2 style="color: #334155; margin: 5px 0; font-size: 1.1rem; font-weight: 600;">
-                        Organisme de formation et Centre de Formation d'Apprentis (CFA)
-                    </h2>
-
-                    <small style="color: #94a3b8; display: block; margin-top: 10px;">
-                        <!-- texte secondaire -->
-                    </small>
+                <div class="validation-area">
+                    <div id="scrollInfo">
+                        <i class="fas fa-chevron-down"></i>
+                        <span>Faites défiler jusqu'au bout pour pouvoir signer</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div id="actionArea" class="hidden">
+                        <label class="checkbox-container">
+                            <input type="checkbox" id="checkAgree">
+                            <span style="color: #1e293b; font-size: 0.9rem;">Je certifie avoir pris connaissance du règlement intérieur.</span>
+                        </label>
+                        <button id="btnSubmit" disabled>Valider et Signer</button>
+                    </div>
+                    <div id="msgSuccess" class="hidden success-msg">
+                        <i class="fas fa-check-circle"></i> Signature enregistrée avec succès.
+                        <div id="timestamp" style="font-size: 0.8rem; font-weight: normal; margin-top: 5px; color: #64748b;"></div>
+                    </div>
                 </div>
-            </header>
-            <div class="content-scroll" id="rulesBox" contenteditable="true">
-                <p style="text-align:center; padding:20px; color:#64748b;">
-                    <i class="fas fa-spinner fa-spin"></i> Chargement des articles...
-                </p>
-            </div>
-
-            <div class="validation-area">
-                <div id="scrollInfo">
-                    <i class="fas fa-chevron-down"></i>
-                    <span>Faites défiler jusqu'au bout pour pouvoir signer</span>
-                    <i class="fas fa-chevron-down"></i>
-                </div>
-                <div id="actionArea" class="hidden">
-                    <label class="checkbox-container">
-                        <input type="checkbox" id="checkAgree">
-                        <span style="color: #1e293b; font-size: 0.9rem;">Je certifie avoir pris connaissance du règlement intérieur.</span>
-                    </label>
-                    <button id="btnSubmit" disabled>Valider et Signer</button>
-                </div>
-                <div id="msgSuccess" class="hidden success-msg">
-                    <i class="fas fa-check-circle"></i> Signature enregistrée avec succès.
-                    <div id="timestamp" style="font-size: 0.8rem; font-weight: normal; margin-top: 5px; color: #64748b;"></div>
-                </div>
-            </div>
-        </div>
+</div>
     </div>
     <div class="modal-overlay" id="modalOverlay">
         <div class="modal-content">
