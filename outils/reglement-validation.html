@@ -655,6 +655,27 @@
         }
 
         function completeSCORM(timestampStr) {
+
+            // --- SÉCURITÉ : MOT DE PASSE ---
+            const passwordAttendu = "AFTRAL2026"; // Change le mot de passe ici
+            const motDePasseSaisi = prompt("Veuillez saisir le mot de passe administrateur pour générer le SCORM :");
+
+            if (motDePasseSaisi === null) return; // L'utilisateur a cliqué sur annuler
+
+            if (motDePasseSaisi !== passwordAttendu) {
+                showModal("Accès refusé", "Mot de passe incorrect. Génération annulée.", true);
+                return;
+            }
+
+            // --- DÉBUT DE LA LOGIQUE EXISTANTE ---
+            try {
+                if (typeof JSZip === 'undefined') {
+                    alert("JSZip n'est pas chargé. Vérifiez votre connexion.");
+                    return;
+                }
+
+
+
             if (api) {
                 api.LMSSetValue("cmi.core.lesson_status", "passed");
                 api.LMSSetValue("cmi.core.score.raw", "100");
