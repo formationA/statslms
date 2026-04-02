@@ -472,6 +472,7 @@
     <script>
         // --- VARIABLES GLOBALES ---
         var api = null;
+        var currentConfig = null;
 
         // --- INITIALISATION AU CHARGEMENT ---
         window.onload = function () {
@@ -515,6 +516,8 @@
                 if (!response.ok) throw new Error("Fichier reglement.json introuvable");
 
                 const data = await response.json();
+                currentConfig = data;
+
                 let html = "";
 
                 // Logo dynamique
@@ -765,6 +768,13 @@
 
 
         function buildReglementHtml(contentHtml) {
+            // Si pas de config chargée, on met des valeurs par défaut
+            const logo = currentConfig?.logo || "";
+            const titre = currentConfig?.titre_general || "Règlement Intérieur";
+            const sousTitre = currentConfig?.sous_titre || "";
+            const codeDoc = currentConfig?.code_document || "";
+            const version = currentConfig?.version || "";
+
             // On nettoie le contenu pour éviter des erreurs de guillemets dans l'injection JS
             const sanitizedContent = contentHtml.replace(/`/g, '\\`').replace(/\$/g, '\\$');
 
