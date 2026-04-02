@@ -943,29 +943,39 @@
 
                     window.onload = function() {
                         api = findAPI(window);
+                        let dejaSigne = false;
+
                         if (api) {
                             api.LMSInitialize("");
-                            // Vérifier si déjà validé précédemment
+                            // On récupère le statut actuel dans le LMS
                             var status = api.LMSGetValue("cmi.core.lesson_status");
+        
+                            // Si le statut est "passed" ou "completed", l'utilisateur a déjà signé
                             if(status === "passed" || status === "completed") {
+                                dejaSigne = true;
                                 afficherSucces();
+                                // Optionnel : On peut ajouter un message spécifique
+                                document.getElementById('msgSuccess').innerHTML = 
+                                    '<i class="fas fa-check-circle"></i> Vous avez déjà signé ce règlement le : ' + 
+                                    (api.LMSGetValue("cmi.comments") || "lors d'une session précédente.");
                             }
                         }
 
-                        // 2. Logique de Scroll
                         const rb = document.getElementById('rulesBox');
-                        rb.onscroll = function() {
-                            // Seuil de tolérance de 40px pour le bas de page
-                            if (this.scrollHeight - this.scrollTop <= this.clientHeight + 40) {
+    
+                        // On n'active la logique de scroll que si l'utilisateur n'a PAS encore signé
+                        if (!dejaSigne) {
+                            rb.onscroll = function() {
+                                if (this.scrollHeight - this.scrollTop <= this.clientHeight + 40) {
+                                    document.getElementById('scrollInfo').classList.add('hidden');
+                                    document.getElementById('actionArea').classList.remove('hidden');
+                                }
+                            };
+
+                            if (rb.scrollHeight <= rb.clientHeight) {
                                 document.getElementById('scrollInfo').classList.add('hidden');
                                 document.getElementById('actionArea').classList.remove('hidden');
                             }
-                        };
-            
-                        // Si le texte est très court (pas de scroll possible)
-                        if (rb.scrollHeight <= rb.clientHeight) {
-                            document.getElementById('scrollInfo').classList.add('hidden');
-                            document.getElementById('actionArea').classList.remove('hidden');
                         }
                     };
 
