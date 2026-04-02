@@ -652,7 +652,7 @@
                     }
                 } catch (e) { console.warn("Logo non exporté (CORS)"); }
 
-                // Nettoyage de l'interface dans le clone
+                // --- Nettoyage et préparation du clone ---
                 const target = docClone.querySelector('#rulesBox');
                 if (target) {
                     target.innerHTML = rulesContent;
@@ -660,6 +660,29 @@
                     target.style.maxHeight = 'none';
                     target.style.overflow = 'visible';
                 }
+
+                  // 1. On affiche la zone d'action (puisque le scroll est considéré fait à l'export)
+                const actionArea = docClone.querySelector('#actionArea');
+                if (actionArea) actionArea.classList.remove('hidden');
+
+                  // 2. On cache les infos de scroll qui ne servent plus
+                const scrollInfo = docClone.querySelector('#scrollInfo');
+                if (scrollInfo) scrollInfo.classList.add('hidden');
+
+                  // 3. On force l'activation du bouton Valider et on lui donne la fonction SCORM
+                const btnSubmit = docClone.querySelector('#btnSubmit');
+                if (btnSubmit) {
+                    btnSubmit.disabled = false; // On le rend cliquable
+                    btnSubmit.classList.remove('hidden'); // On s'assure qu'il est visible
+                    // On utilise setAttribute pour que le code JS soit écrit en dur dans le HTML du ZIP
+                    btnSubmit.setAttribute('onclick', 'validerSignatureSCORM()');
+                }
+
+                  // 4. On cache le bouton de génération SCORM pour que l'utilisateur final ne le voie pas
+                const btnGen = docClone.querySelector('button[onclick="generateSCORM()"]');
+                if (btnGen) btnGen.style.display = 'none';
+
+
 
                 // Injection du script de lecture SCORM pour le ZIP
                 const scormScript = document.createElement('script');
