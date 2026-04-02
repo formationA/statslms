@@ -156,6 +156,9 @@ function buildPlayerHtml(questions, themeChoice, shuffle, bgChoice, showCorr, pa
 
     const safePassScore = (passScore !== undefined && passScore !== "" && !isNaN(passScore)) ? parseInt(passScore) : 0;
 
+    // Sécurisation des questions pour l'injection JS
+    //const jsonData = JSON.stringify(questions).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+
     return '<html><head><meta charset="UTF-8"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">' +
         '<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"><\/script>' +
         '<script src="SCORM_API_wrapper.js"><\/script>' +

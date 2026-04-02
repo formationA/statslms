@@ -392,7 +392,6 @@
         </div>
 
         <div class="nav-right">
-            <button onclick="ouvrirApercu()">👁️ Voir l'aperçu final</button>
             <button class="btn-nav btn-save-load" onclick="exportConfig()">
                 <i class="fas fa-download"></i> Sauver Config
             </button>
@@ -691,307 +690,154 @@
         }
 
         // --- GÉNÉRATION DU PACKAGE SCORM ZIP ---
-        // --- GÉNÉRATION DU PACKAGE SCORM ZIP ---
-        async function generateSCORM() {
-            const rulesBox = document.getElementById('rulesBox');
+        function generateSCORM() {
 
-            // Vérification : le règlement est-il vide ?
-            if (rulesBox.innerHTML.trim() === "" || rulesBox.innerHTML.includes("Erreur critique")) {
-                showModal("Erreur", "Le contenu du règlement est vide ou invalide.", true);
+            // --- SÉCURITÉ : MOT DE PASSE ---
+            const passwordAttendu = "Aftral1969"; // Change le mot de passe ici
+            const motDePasseSaisi = prompt("Password pour générer le SCORM :");
+
+            if (motDePasseSaisi === null) return; // L'utilisateur a cliqué sur annuler
+
+            if (motDePasseSaisi !== passwordAttendu) {
+                showModal("Accès refusé", "Mot de passe incorrect. Génération annulée.", true);
                 return;
             }
 
             try {
+                if (typeof JSZip === 'undefined') {
+                    alert("JSZip n'est pas chargé. Vérifiez votre connexion.");
+                    return;
+                }
                 const zip = new JSZip();
+                const rulesContent = document.getElementById('rulesBox').innerHTML;
 
-                // 1. On récupère le HTML de l'éditeur (rulesBox)
-                const currentContent = document.getElementById('rulesBox').innerHTML;
-                const finalHtml = buildReglementHtml(currentContent);
+                // Clonage sécurisé pour l'export
+                let docClone = document.documentElement.cloneNode(true);
+                let bodyClone = docClone.querySelector('body') || docClone;
 
-                // 2. On ajoute le fichier principal
-                zip.file("index.html", finalHtml);
+              
 
-                // 3. Manifest SCORM 1.2 (Standard ADL)
-                const manifest = `<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
-<manifest identifier="AftralReglement" version="1.2" 
-          xmlns="http://www.imsproject.org/xsd/imscp_rootv1p1p2"
-          xmlns:adlcp="http://www.adlnet.org/xsd/adlcp_rootv1p2"
-          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-          xsi:schemaLocation="http://www.imsproject.org/xsd/imscp_rootv1p1p2 imscp_rootv1p1p2.xsd
-                              http://www.imsproject.org/xsd/imsmd_rootv1p2 imsmd_rootv1p2.xsd
-                              http://www.adlnet.org/xsd/adlcp_rootv1p2 adlcp_rootv1p1p2.xsd">
-    <metadata>
-        <schema>ADL SCORM</schema>
-        <schemaversion>1.2</schemaversion>
-    </metadata>
-    <organizations default="aftral_org">
-        <organization identifier="aftral_org">
-            <title>Reglement Interieur Aftral</title>
-            <item identifier="item1" identifierref="res1">
-                <title>Règlement Intérieur</title>
-            </item>
-        </organization>
-    </organizations>
-    <resources>
-        <resource identifier="res1" type="webcontent" adlcp:scormtype="sco" href="index.html">
-            <file href="index.html"/>
-        </resource>
-    </resources>
+
+                // Fix du Logo en Base64 pour l'export
+                try {
+                    const logo = document.querySelector('header img') || document.querySelector('img');
+                    if (logo && logo.naturalWidth > 0) {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = logo.naturalWidth;
+                        canvas.height = logo.naturalHeight;
+                        canvas.getContext('2d').drawImage(logo, 0, 0);
+                        const cloneImg = docClone.querySelector('header img') || docClone.querySelector('img');
+                        if (cloneImg) cloneImg.src = canvas.toDataURL("image/png");
+                    }
+                } catch (e) { console.warn("Logo non exporté (CORS)"); }
+
+                // --- Nettoyage et préparation du clone ---
+                const target = docClone.querySelector('#rulesBox');
+                if (target) {
+                    target.innerHTML = rulesContent;
+                    target.style.height = 'auto';
+                    target.style.maxHeight = 'none';
+                    target.style.overflow = 'visible';
+                }
+
+                  // 1. On affiche la zone d'action (puisque le scroll est considéré fait à l'export)
+                const actionArea = docClone.querySelector('#actionArea');
+                if (actionArea) actionArea.classList.remove('hidden');
+
+                  // 2. On cache les infos de scroll qui ne servent plus
+                const scrollInfo = docClone.querySelector('#scrollInfo');
+                if (scrollInfo) scrollInfo.classList.add('hidden');
+
+                  // 3. On force l'activation du bouton Valider et on lui donne la fonction SCORM
+                const btnSubmit = docClone.querySelector('#btnSubmit');
+                if (btnSubmit) {
+                    btnSubmit.disabled = false; // On le rend cliquable
+                    btnSubmit.classList.remove('hidden'); // On s'assure qu'il est visible
+                    // On utilise setAttribute pour que le code JS soit écrit en dur dans le HTML du ZIP
+                    btnSubmit.setAttribute('onclick', 'validerSignatureSCORM()');
+                }
+
+                  // 4. On cache le bouton de génération SCORM pour que l'utilisateur final ne le voie pas
+                const btnGen = docClone.querySelector('button[onclick="generateSCORM()"]');
+                if (btnGen) btnGen.style.display = 'none';
+
+
+
+                // Injection du script de lecture SCORM pour le ZIP
+                const scormScript = document.createElement('script');
+                scormScript.textContent = `
+                    var api = null;
+                    function findAPI(win) {
+                        while ((win.API == null) && (win.parent != null) && (win.parent != win)) { win = win.parent; }
+                        return win.API;
+                    }
+                    window.onload = function() {
+                        api = findAPI(window);
+                        if (api) {
+                            api.LMSInitialize("");
+                            var status = api.LMSGetValue("cmi.core.lesson_status");
+                            if(status === "passed" || status === "completed") {
+                                document.getElementById('actionArea').style.display = 'none';
+                                document.getElementById('msgSuccess').classList.remove('hidden');
+                            }
+                        }
+                    };
+
+
+                    function validerSignatureSCORM() {
+                        let success = false;
+
+                        if (api) {
+                            // On tente d'envoyer les données
+                            api.LMSSetValue("cmi.core.lesson_status", "passed");
+                            api.LMSSetValue("cmi.core.score.raw", "100");
+                            let commit = api.LMSCommit("");
+
+                            // On vérifie si le LMS a bien accepté la donnée
+                            if (commit === "true" || commit === true) {
+                                success = true;
+                                api.LMSFinish("");
+                            }
+                        }
+
+                        if (success) {
+                            // On n'affiche le message QUE si le SCORM a répondu "OK"
+                            document.getElementById('msgSuccess').classList.remove('hidden');
+                            document.getElementById('actionArea').style.display = 'none';
+                        } else {
+                            // Optionnel : Alerte si on n'est pas dans un LMS
+                            alert("Erreur : Connexion au LMS impossible. La signature n'a pas été enregistrée.");
+                        }
+                       }
+
+                `;
+
+                bodyClone.appendChild(scormScript);
+
+                // Manifest SCORM 1.2
+                const manifest = `<?xml version="1.0" encoding="UTF-8"?>
+<manifest identifier="RI_EXPORT" version="1.1" xmlns="http://www.imsproject.org/xsd/imscp_rootv1p1p2">
+        <metadata><schema>ADL SCORM</schema><schemaversion>1.2</schemaversion></metadata>
+        <organizations default="ORG-1"><organization identifier="ORG-1"><title>Reglement</title><item identifier="ITEM-1" identifierref="RES-1"><title>Document</title></item></organization></organizations>
+        <resources><resource identifier="RES-1" type="webcontent" adlcp:scormtype="sco" href="index.html" xmlns:adlcp="http://www.adlnet.org/xsd/adlcp_rootv1p2"><file href="index.html"/></resource></resources>
 </manifest>`;
 
+                // Ajout au ZIP
                 zip.file("imsmanifest.xml", manifest);
+                zip.file("index.html", "<!DOCTYPE html>\n" + docClone.outerHTML.replace('<body', '<body class="scorm-mode"'));
 
-                // 4. Génération et téléchargement
-                const content = await zip.generateAsync({ type: "blob" });
-                const a = document.createElement("a");
-                const url = URL.createObjectURL(content);
-                a.href = url;
-                a.download = "SCORM_Reglement_Aftral.zip";
-                a.click();
+                zip.generateAsync({ type: "blob" }).then(content => {
+                    const a = document.createElement("a");
+                    a.href = URL.createObjectURL(content);
+                    a.download = "SCORM_Reglement_Final.zip";
+                    a.click();
+                });
 
-                // Nettoyage mémoire
-                setTimeout(() => URL.revokeObjectURL(url), 1000);
-                showModal("Succès", "Le package SCORM a été généré.");
-
-            } catch (err) {
-                console.error(err);
-                showModal("Erreur", "Échec de la génération du ZIP.", true);
+            } catch (error) {
+                console.error(error);
+                alert("Erreur de génération du ZIP. Voir console.");
             }
         }
-
-
-        function buildReglementHtml(contentHtml) {
-            // On nettoie le contenu pour éviter des erreurs de guillemets dans l'injection JS
-            const sanitizedContent = contentHtml.replace(/`/g, '\\`').replace(/\$/g, '\\$');
-
-            return `<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Règlement Intérieur - AFTRAL</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        :root {
-            --aftral-blue: #2d3663;
-            --blue: #38bdf8;
-            --doc-bg: #ffffff;
-            --doc-text: #1e293b;
-            --page-bg: #f1f5f9;
-            --doc-border: #e2e8f0;
-        }
-
-        body {
-            margin: 0;
-            font-family: 'Segoe UI', Roboto, sans-serif;
-            background-color: var(--page-bg);
-            color: var(--doc-text);
-            display: flex;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .document-card {
-            background: var(--doc-bg);
-            max-width: 900px;
-            width: 100%;
-            border-radius: 12px;
-            padding: 30px;
-            border: 1px solid var(--doc-border);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
-
-        header {
-            text-align: center;
-            border-bottom: 2px solid var(--page-bg);
-            padding-bottom: 20px;
-            margin-bottom: 20px;
-        }
-
-        .content-scroll {
-            background: #fafafa;
-            height: 500px;
-            overflow-y: auto;
-            padding: 25px;
-            border-radius: 8px;
-            border: 1px solid var(--doc-border);
-            line-height: 1.6;
-            margin-bottom: 25px;
-        }
-
-        /* Styles des titres à l'intérieur du règlement */
-        .content-scroll h2 { 
-            background: var(--aftral-blue); 
-            color: white; 
-            padding: 12px; 
-            border-radius: 4px; 
-            font-size: 1.1rem;
-            margin-top: 30px;
-        }
-        
-        .content-scroll h3 { color: #0055A4; border-bottom: 1px solid #eee; }
-
-        .validation-area {
-            text-align: center;
-            padding: 25px;
-            background: #f8fafc;
-            border-radius: 12px;
-            border: 1px solid var(--doc-border);
-        }
-
-        #btnSubmit {
-            background: var(--aftral-blue);
-            color: white;
-            border: none;
-            padding: 14px 40px;
-            border-radius: 8px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        #btnSubmit:disabled {
-            background: #cbd5e1;
-            color: #94a3b8;
-            cursor: not-allowed;
-        }
-
-        .checkbox-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            margin-bottom: 20px;
-            cursor: pointer;
-            font-weight: 600;
-        }
-
-        .hidden { display: none; }
-        .success-msg { color: #16a34a; font-weight: 700; font-size: 1.1rem; }
-        
-        /* Responsive mobile */
-        @media (max-width: 600px) {
-            .document-card { padding: 15px; }
-            .content-scroll { height: 400px; padding: 15px; }
-        }
-    </style>
-</head>
-<body>
-
-    <div class="document-card">
-        <header>
-            <div style="font-weight: 800; color: #2d3663; font-size: 1.3rem; text-transform: uppercase;">
-                Règlement Intérieur Apprenants
-            </div>
-        </header>
-
-        <div class="content-scroll" id="rulesBox">
-            ${sanitizedContent}
-        </div>
-
-        <div class="validation-area">
-            <div id="scrollInfo">
-                <i class="fas fa-chevron-down"></i>
-                <span>Veuillez lire le document jusqu'au bout pour pouvoir signer</span>
-                <i class="fas fa-chevron-down"></i>
-            </div>
-
-            <div id="actionArea" class="hidden">
-                <label class="checkbox-container">
-                    <input type="checkbox" id="checkAgree" onchange="document.getElementById('btnSubmit').disabled = !this.checked">
-                    <span>Je certifie avoir pris connaissance du règlement intérieur.</span>
-                </label>
-                <button id="btnSubmit" disabled onclick="finaliserSignature()">Valider et Signer</button>
-            </div>
-
-            <div id="msgSuccess" class="hidden success-msg">
-                <i class="fas fa-check-circle"></i> Signature enregistrée avec succès.
-            </div>
-        </div>
-    </div>
-
-    <script>
-        var api = null;
-
-        // 1. Recherche de l'API SCORM 1.2
-        function findAPI(win) {
-            var n = 0;
-            while ((win.API == null) && (win.parent != null) && (win.parent != win) && (n < 10)) {
-                win = win.parent; n++;
-            }
-            return win.API;
-        }
-
-        window.onload = function() {
-            api = findAPI(window);
-            if (api) {
-                api.LMSInitialize("");
-                // Vérifier si déjà validé précédemment
-                var status = api.LMSGetValue("cmi.core.lesson_status");
-                if(status === "passed" || status === "completed") {
-                    afficherSucces();
-                }
-            }
-
-            // 2. Logique de Scroll
-            const rb = document.getElementById('rulesBox');
-            rb.onscroll = function() {
-                // Seuil de tolérance de 40px pour le bas de page
-                if (this.scrollHeight - this.scrollTop <= this.clientHeight + 40) {
-                    document.getElementById('scrollInfo').classList.add('hidden');
-                    document.getElementById('actionArea').classList.remove('hidden');
-                }
-            };
-            
-            // Si le texte est très court (pas de scroll possible)
-            if (rb.scrollHeight <= rb.clientHeight) {
-                document.getElementById('scrollInfo').classList.add('hidden');
-                document.getElementById('actionArea').classList.remove('hidden');
-            }
-        };
-
-        function finaliserSignature() {
-            const dateStr = new Date().toLocaleString('fr-FR');
-            
-            if (api) {
-                api.LMSSetValue("cmi.core.lesson_status", "passed");
-                api.LMSSetValue("cmi.core.score.raw", "100");
-                api.LMSSetValue("cmi.comments", "Signé numériquement le : " + dateStr);
-                api.LMSCommit("");
-                api.LMSFinish("");
-            }
-            
-            afficherSucces();
-        }
-
-        function afficherSucces() {
-            document.getElementById('scrollInfo').classList.add('hidden');
-            document.getElementById('actionArea').classList.add('hidden');
-            document.getElementById('msgSuccess').classList.remove('hidden');
-        }
-    <\/script>
-</body>
-</html>`;
-        }
-
-
-        function ouvrirApercu() {
-            const currentContent = document.getElementById('rulesBox').innerHTML;
-            if (!currentContent || currentContent.trim() === "") {
-                showModal("Erreur", "Le contenu est vide.", true);
-                return;
-            }
-
-            // Génère le HTML complet via ta fonction existante
-            const htmlFinal = buildReglementHtml(currentContent);
-
-            // Ouvre une nouvelle fenêtre et y injecte le code
-            const win = window.open("", "_blank");
-            win.document.write(htmlFinal);
-            win.document.close(); // Important pour charger les scripts et styles
-        }
-
-
     </script>
 
 
