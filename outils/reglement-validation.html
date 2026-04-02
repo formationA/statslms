@@ -175,6 +175,11 @@
             font-weight: 600;
         }
 
+        #rulesBox {
+            padding: 10px;
+            word-wrap: break-word; /* Force le texte à revenir à la ligne s'il est trop long */
+        }
+
         .checkbox-container {
             display: flex;
             align-items: center;
@@ -516,9 +521,8 @@
                     <p style="font-weight: bold; margin: 0 0 8px 0; font-size: 1rem;">
                         ${data.sous_titre}
                     </p>
-                    <div style="font-size: 0.75rem; color: #64748b; margin-bottom: 12px; font-family: sans-serif;">
-                        <span>Réf : <strong>${data.code_document}</strong></span> | 
-                        <span>${data.version}</span>
+                   <div style="display: inline-block; background: #f1f5f9; padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; color: #475569; margin-bottom: 15px; border: 1px solid #e2e8f0;">
+                        ${data.code_document} • ${data.version}
                     </div>
                     <p style="font-size: 0.85rem; color: #475569; margin: 0; line-height: 1.4;">
                         ${data.preambule}
