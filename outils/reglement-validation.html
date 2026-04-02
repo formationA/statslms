@@ -483,16 +483,48 @@
                 let html = "";
 
                 // Logo dynamique
-                if (data.logo) {
-                    html += `<div style="text-align:center; margin-bottom:20px;">
-                                <img src="${data.logo}" alt="Logo" style="max-width:200px; height:auto;">
-                             </div>`;
-                }
+                //if (data.logo) {
+                //    html += `<div style="text-align:center; margin-bottom:20px;">
+                //                <img src="${data.logo}" alt="Logo" style="max-width:200px; height:auto;">
+                //             </div>`;
+                //}
 
                 // En-tête
-                html += `<h1 style="text-align:center; color:#0055A4; margin-bottom:5px;">${data.titre_general}</h1>`;
-                html += `<p style="text-align:center; font-weight:bold; margin-top:0; border:none;">${data.sous_titre}</p>`;
-                html += `<p style="text-align:center; font-size:0.9rem; margin-bottom:20px;">${data.preambule}</p>`;
+                //html += `<h1 style="text-align:center; color:#0055A4; margin-bottom:5px;">${data.titre_general}</h1>`;
+                //html += `<p style="text-align:center; font-weight:bold; margin-top:0; border:none;">${data.sous_titre}</p>`;
+                //html += `<p style="text-align:center; font-size:0.9rem; margin-bottom:20px;">${data.preambule}</p>`;
+
+                Script
+                const data = await response.json();
+                let html = "";
+
+                // --- Conteneur d'en-tête Responsive ---
+                html += `<div style="display: flex; flex-direction: column; align-items: center; width: 100%; margin-bottom: 30px; box-sizing: border-box; padding: 10px;">`;
+
+                // Logo dynamique
+                if (data.logo) {
+                    html += `<div style="width: 100%; text-align: center; margin-bottom: 15px;">
+                    <img src="${data.logo}" alt="Logo" style="max-width: 180px; width: 100%; height: auto; object-fit: contain;">
+                 </div>`;
+                }
+
+                // Titres et Préambule
+                html += `
+                <div style="width: 100%; text-align: center;">
+                    <h1 style="color:#0055A4; margin: 0 0 10px 0; font-size: 1.4rem; line-height: 1.2; word-wrap: break-word;">
+                        ${data.titre_general}
+                    </h1>
+                    <p style="font-weight: bold; margin: 0 0 10px 0; font-size: 1.1rem; line-height: 1.3;">
+                        ${data.sous_titre}
+                    </p>
+                    <p style="font-size: 0.9rem; color: #475569; margin: 0; line-height: 1.4;">
+                        ${data.preambule}
+                    </p>
+                </div>`;
+
+                html += `</div>`; // Fin du conteneur d'en-tête
+
+
 
                 // Sections et Articles
                 data.sections.forEach(section => {
