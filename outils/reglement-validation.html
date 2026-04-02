@@ -714,12 +714,29 @@
 
                 // --- GESTION DU LOGO EN BASE64 ---
                 let logoDataUri = "";
-                // On récupère l'URL du logo depuis la config chargée au début
-                const logoUrl = currentConfig?.logo;
-
-                if (logoUrl) {
+                const displayedLogo = rulesBox.querySelector('img');
+               
+                if (displayedLogo && displayedLogo.src.startsWith('data:image')) {
+                    // Cas 1 : L'image est déjà en Base64 dans la page
+                    logoDataUri = displayedLogo.src;
+                } else if (displayedLogo) {
+                    // Cas 2 : L'image est une URL, on la convertit via Canvas pour éviter les soucis de fetch
                     try {
-                        // On récupère l'image et on la convertit en Base64
+                        const canvas = document.createElement('canvas');
+                        canvas.width = displayedLogo.naturalWidth;
+                        canvas.height = displayedLogo.naturalHeight;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(displayedLogo, 0, 0);
+                        logoDataUri = canvas.toDataURL('image/png');
+                    } catch (e) {
+                        console.warn("Échec conversion Canvas, tentative via Fetch...");
+                    }
+                }
+
+                // Si le Canvas a échoué ou n'était pas possible, on garde votre logique Fetch en dernier recours
+                if (!logoDataUri) {
+                    const logoUrl = currentConfig?.logo || "logo.png";
+                    try {
                         const response = await fetch(logoUrl);
                         const blob = await response.blob();
                         logoDataUri = await new Promise((resolve) => {
@@ -728,8 +745,7 @@
                             reader.readAsDataURL(blob);
                         });
                     } catch (e) {
-                        console.warn("Petit souci pour convertir le logo, on garde l'URL simple.", e);
-                        logoDataUri = logoUrl;
+                        console.error("Impossible de récupérer le logo pour le Base64", e);
                     }
                 }
 
@@ -767,6 +783,16 @@
         </resource>
     </resources>
 </manifest>`;
+
+                if (!logoDataUri.startsWith("data:image")) {
+                    try {
+                        const imgResponse = await fetch(logoUrl);
+                        const imgBlob = await imgResponse.blob();
+                        zip.file(logoUrl, imgBlob); // On ajoute le fichier image à la racine du ZIP
+                    } catch (err) {
+                        console.error("Le logo n'a pas pu être ajouté au package.");
+                    }
+                }
 
                 zip.file("imsmanifest.xml", manifest);
 
