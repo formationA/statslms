@@ -1047,6 +1047,25 @@
                 return;
             }
 
+            // --- CONVERSION DU LOGO EN BASE64 POUR L'APERÇU ---
+            let logoDataUri = "";
+            const logoUrl = currentConfig?.logo;
+
+            if (logoUrl) {
+                try {
+                    const response = await fetch(logoUrl);
+                    const blob = await response.blob();
+                    logoDataUri = await new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.onloadend = () => resolve(reader.result);
+                        reader.readAsDataURL(blob);
+                    });
+                } catch (e) {
+                    console.warn("Impossible de charger le logo pour l'aperçu, on tente l'URL directe.", e);
+                    logoDataUri = logoUrl;
+                }
+            }
+
             // Génère le HTML complet via ta fonction existante
             const htmlFinal = buildReglementHtml(currentContent);
 
