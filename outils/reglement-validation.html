@@ -803,7 +803,7 @@
         }
 
 
-        function buildReglementHtml(contentHtml) {
+        function buildReglementHtml(contentHtml, logoForced = null) {
             // Si pas de config chargée, on met des valeurs par défaut
             const logo = currentConfig?.logo || "";
             const titre = currentConfig?.titre_general || "RÈGLEMENT INTÉRIEUR GÉNÉRAL DES APPRENANTS";
