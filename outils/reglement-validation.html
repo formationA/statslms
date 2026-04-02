@@ -392,7 +392,11 @@
         </div>
 
         <div class="nav-right">
-            <button onclick="ouvrirApercu()">👁️ Voir l'aperçu final</button>
+           
+            <button class="btn-nav btn-save-load" onclick="ouvrirApercu()">
+                <i class="fas fa-eye"></i> Aperçu
+            </button>
+
             <button class="btn-nav btn-save-load" onclick="exportConfig()">
                 <i class="fas fa-download"></i> Sauver Config
             </button>
@@ -765,213 +769,220 @@
             const sanitizedContent = contentHtml.replace(/`/g, '\\`').replace(/\$/g, '\\$');
 
             return `<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Règlement Intérieur - AFTRAL</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        :root {
-            --aftral-blue: #2d3663;
-            --blue: #38bdf8;
-            --doc-bg: #ffffff;
-            --doc-text: #1e293b;
-            --page-bg: #f1f5f9;
-            --doc-border: #e2e8f0;
-        }
+            <html lang="fr">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Règlement Intérieur - AFTRAL</title>
+                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+                <style>
+                    :root {
+                        --aftral-blue: #2d3663;
+                        --blue: #38bdf8;
+                        --doc-bg: #ffffff;
+                        --doc-text: #1e293b;
+                        --page-bg: #f1f5f9;
+                        --doc-border: #e2e8f0;
+                    }
 
-        body {
-            margin: 0;
-            font-family: 'Segoe UI', Roboto, sans-serif;
-            background-color: var(--page-bg);
-            color: var(--doc-text);
-            display: flex;
-            justify-content: center;
-            padding: 20px;
-        }
+                    body {
+                        margin: 0;
+                        font-family: 'Segoe UI', Roboto, sans-serif;
+                        background-color: var(--page-bg);
+                        color: var(--doc-text);
+                        display: flex;
+                        justify-content: center;
+                        padding: 20px;
+                    }
 
-        .document-card {
-            background: var(--doc-bg);
-            max-width: 900px;
-            width: 100%;
-            border-radius: 12px;
-            padding: 30px;
-            border: 1px solid var(--doc-border);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
+                    .document-card {
+                        background: var(--doc-bg);
+                        max-width: 900px;
+                        width: 100%;
+                        border-radius: 12px;
+                        padding: 30px;
+                        border: 1px solid var(--doc-border);
+                        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+                    }
 
-        header {
-            text-align: center;
-            border-bottom: 2px solid var(--page-bg);
-            padding-bottom: 20px;
-            margin-bottom: 20px;
-        }
+                    header {
+                        text-align: center;
+                        border-bottom: 2px solid var(--page-bg);
+                        padding-bottom: 20px;
+                        margin-bottom: 20px;
+                    }
 
-        .content-scroll {
-            background: #fafafa;
-            height: 500px;
-            overflow-y: auto;
-            padding: 25px;
-            border-radius: 8px;
-            border: 1px solid var(--doc-border);
-            line-height: 1.6;
-            margin-bottom: 25px;
-        }
+                    .content-scroll {
+                        background: #fafafa;
+                        height: 500px;
+                        overflow-y: auto;
+                        padding: 25px;
+                        border-radius: 8px;
+                        border: 1px solid var(--doc-border);
+                        line-height: 1.6;
+                        margin-bottom: 25px;
+                    }
 
-        /* Styles des titres à l'intérieur du règlement */
-        .content-scroll h2 { 
-            background: var(--aftral-blue); 
-            color: white; 
-            padding: 12px; 
-            border-radius: 4px; 
-            font-size: 1.1rem;
-            margin-top: 30px;
-        }
+                    /* Styles des titres à l'intérieur du règlement */
+                    .content-scroll h2 { 
+                        background: var(--aftral-blue); 
+                        color: white; 
+                        padding: 12px; 
+                        border-radius: 4px; 
+                        font-size: 1.1rem;
+                        margin-top: 30px;
+                    }
         
-        .content-scroll h3 { color: #0055A4; border-bottom: 1px solid #eee; }
+                    .content-scroll h3 { color: #0055A4; border-bottom: 1px solid #eee; }
 
-        .validation-area {
-            text-align: center;
-            padding: 25px;
-            background: #f8fafc;
-            border-radius: 12px;
-            border: 1px solid var(--doc-border);
-        }
+                    .validation-area {
+                        text-align: center;
+                        padding: 25px;
+                        background: #f8fafc;
+                        border-radius: 12px;
+                        border: 1px solid var(--doc-border);
+                    }
 
-        #btnSubmit {
-            background: var(--aftral-blue);
-            color: white;
-            border: none;
-            padding: 14px 40px;
-            border-radius: 8px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
+                    #btnSubmit {
+                        background: var(--aftral-blue);
+                        color: white;
+                        border: none;
+                        padding: 14px 40px;
+                        border-radius: 8px;
+                        font-weight: 700;
+                        cursor: pointer;
+                        transition: all 0.3s ease;
+                    }
 
-        #btnSubmit:disabled {
-            background: #cbd5e1;
-            color: #94a3b8;
-            cursor: not-allowed;
-        }
+                    #btnSubmit:disabled {
+                        background: #cbd5e1;
+                        color: #94a3b8;
+                        cursor: not-allowed;
+                    }
 
-        .checkbox-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            margin-bottom: 20px;
-            cursor: pointer;
-            font-weight: 600;
-        }
+                    .checkbox-container {
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        gap: 12px;
+                        margin-bottom: 20px;
+                        cursor: pointer;
+                        font-weight: 600;
+                    }
 
-        .hidden { display: none; }
-        .success-msg { color: #16a34a; font-weight: 700; font-size: 1.1rem; }
+                    .hidden { display: none; }
+                    .success-msg { color: #16a34a; font-weight: 700; font-size: 1.1rem; }
         
-        /* Responsive mobile */
-        @media (max-width: 600px) {
-            .document-card { padding: 15px; }
-            .content-scroll { height: 400px; padding: 15px; }
-        }
-    </style>
-</head>
-<body>
+                    /* Responsive mobile */
+                    @media (max-width: 600px) {
+                        .document-card { padding: 15px; }
+                        .content-scroll { height: 400px; padding: 15px; }
+                    }
+                </style>
+            </head>
+            <body>
 
-    <div class="document-card">
-        <header>
-            <div style="font-weight: 800; color: #2d3663; font-size: 1.3rem; text-transform: uppercase;">
-                Règlement Intérieur Apprenants
-            </div>
-        </header>
+                <div class="document-card">
+                    <header>
+                        ${logo ? `<img src="${logo}" alt="Logo" style="width: 25%; min-width: 80px; max-width: 150px; height: auto; margin-bottom:15px;">` : ''}
+                        <div style="font-weight: 800; color: #2d3663; font-size: 1.3rem; text-transform: uppercase; margin-bottom:5px;">
+                            ${titre}
+                        </div>
+                        <div style="font-weight: bold; font-size: 1rem; margin-bottom:10px;">
+                            ${sousTitre}
+                        </div>
+                        <div style="display: inline-block; background: #f1f5f9; padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; color: #475569; border: 1px solid #e2e8f0;">
+                            ${codeDoc} • ${version}
+                        </div>
+                    </header>
 
-        <div class="content-scroll" id="rulesBox">
-            ${sanitizedContent}
-        </div>
+                    <div class="content-scroll" id="rulesBox">
+                        ${sanitizedContent}
+                    </div>
 
-        <div class="validation-area">
-            <div id="scrollInfo">
-                <i class="fas fa-chevron-down"></i>
-                <span>Veuillez lire le document jusqu'au bout pour pouvoir signer</span>
-                <i class="fas fa-chevron-down"></i>
-            </div>
+                    <div class="validation-area">
+                        <div id="scrollInfo">
+                            <i class="fas fa-chevron-down"></i>
+                            <span>Veuillez lire le document jusqu'au bout pour pouvoir signer</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
 
-            <div id="actionArea" class="hidden">
-                <label class="checkbox-container">
-                    <input type="checkbox" id="checkAgree" onchange="document.getElementById('btnSubmit').disabled = !this.checked">
-                    <span>Je certifie avoir pris connaissance du règlement intérieur.</span>
-                </label>
-                <button id="btnSubmit" disabled onclick="finaliserSignature()">Valider et Signer</button>
-            </div>
+                        <div id="actionArea" class="hidden">
+                            <label class="checkbox-container">
+                                <input type="checkbox" id="checkAgree" onchange="document.getElementById('btnSubmit').disabled = !this.checked">
+                                <span>Je certifie avoir pris connaissance du règlement intérieur.</span>
+                            </label>
+                            <button id="btnSubmit" disabled onclick="finaliserSignature()">Valider et Signer</button>
+                        </div>
 
-            <div id="msgSuccess" class="hidden success-msg">
-                <i class="fas fa-check-circle"></i> Signature enregistrée avec succès.
-            </div>
-        </div>
-    </div>
+                        <div id="msgSuccess" class="hidden success-msg">
+                            <i class="fas fa-check-circle"></i> Signature enregistrée avec succès.
+                        </div>
+                    </div>
+                </div>
 
-    <script>
-        var api = null;
+                <script>
+                    var api = null;
 
-        // 1. Recherche de l'API SCORM 1.2
-        function findAPI(win) {
-            var n = 0;
-            while ((win.API == null) && (win.parent != null) && (win.parent != win) && (n < 10)) {
-                win = win.parent; n++;
-            }
-            return win.API;
-        }
+                    // 1. Recherche de l'API SCORM 1.2
+                    function findAPI(win) {
+                        var n = 0;
+                        while ((win.API == null) && (win.parent != null) && (win.parent != win) && (n < 10)) {
+                            win = win.parent; n++;
+                        }
+                        return win.API;
+                    }
 
-        window.onload = function() {
-            api = findAPI(window);
-            if (api) {
-                api.LMSInitialize("");
-                // Vérifier si déjà validé précédemment
-                var status = api.LMSGetValue("cmi.core.lesson_status");
-                if(status === "passed" || status === "completed") {
-                    afficherSucces();
-                }
-            }
+                    window.onload = function() {
+                        api = findAPI(window);
+                        if (api) {
+                            api.LMSInitialize("");
+                            // Vérifier si déjà validé précédemment
+                            var status = api.LMSGetValue("cmi.core.lesson_status");
+                            if(status === "passed" || status === "completed") {
+                                afficherSucces();
+                            }
+                        }
 
-            // 2. Logique de Scroll
-            const rb = document.getElementById('rulesBox');
-            rb.onscroll = function() {
-                // Seuil de tolérance de 40px pour le bas de page
-                if (this.scrollHeight - this.scrollTop <= this.clientHeight + 40) {
-                    document.getElementById('scrollInfo').classList.add('hidden');
-                    document.getElementById('actionArea').classList.remove('hidden');
-                }
-            };
+                        // 2. Logique de Scroll
+                        const rb = document.getElementById('rulesBox');
+                        rb.onscroll = function() {
+                            // Seuil de tolérance de 40px pour le bas de page
+                            if (this.scrollHeight - this.scrollTop <= this.clientHeight + 40) {
+                                document.getElementById('scrollInfo').classList.add('hidden');
+                                document.getElementById('actionArea').classList.remove('hidden');
+                            }
+                        };
             
-            // Si le texte est très court (pas de scroll possible)
-            if (rb.scrollHeight <= rb.clientHeight) {
-                document.getElementById('scrollInfo').classList.add('hidden');
-                document.getElementById('actionArea').classList.remove('hidden');
-            }
-        };
+                        // Si le texte est très court (pas de scroll possible)
+                        if (rb.scrollHeight <= rb.clientHeight) {
+                            document.getElementById('scrollInfo').classList.add('hidden');
+                            document.getElementById('actionArea').classList.remove('hidden');
+                        }
+                    };
 
-        function finaliserSignature() {
-            const dateStr = new Date().toLocaleString('fr-FR');
+                    function finaliserSignature() {
+                        const dateStr = new Date().toLocaleString('fr-FR');
             
-            if (api) {
-                api.LMSSetValue("cmi.core.lesson_status", "passed");
-                api.LMSSetValue("cmi.core.score.raw", "100");
-                api.LMSSetValue("cmi.comments", "Signé numériquement le : " + dateStr);
-                api.LMSCommit("");
-                api.LMSFinish("");
-            }
+                        if (api) {
+                            api.LMSSetValue("cmi.core.lesson_status", "passed");
+                            api.LMSSetValue("cmi.core.score.raw", "100");
+                            api.LMSSetValue("cmi.comments", "Signé numériquement le : " + dateStr);
+                            api.LMSCommit("");
+                            api.LMSFinish("");
+                        }
             
-            afficherSucces();
-        }
+                        afficherSucces();
+                    }
 
-        function afficherSucces() {
-            document.getElementById('scrollInfo').classList.add('hidden');
-            document.getElementById('actionArea').classList.add('hidden');
-            document.getElementById('msgSuccess').classList.remove('hidden');
-        }
-    <\/script>
-</body>
-</html>`;
+                    function afficherSucces() {
+                        document.getElementById('scrollInfo').classList.add('hidden');
+                        document.getElementById('actionArea').classList.add('hidden');
+                        document.getElementById('msgSuccess').classList.remove('hidden');
+                    }
+                <\/script>
+            </body>
+            </html>`;
         }
 
 
