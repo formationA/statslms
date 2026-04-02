@@ -698,8 +698,23 @@
         }
 
         // --- GÉNÉRATION DU PACKAGE SCORM ZIP ---
-        // --- GÉNÉRATION DU PACKAGE SCORM ZIP ---
+        
         async function generateSCORM() {
+
+            // --- ZONE DE SÉCURITÉ ---
+            const passwordSecret = "AFTRAL2026"; // Change ce mot de passe ici
+            const saisie = prompt("Veuillez saisir le mot de passe pour générer le package SCORM :");
+
+            // Si l'utilisateur clique sur "Annuler"
+            if (saisie === null) return;
+
+            // Vérification du mot de passe
+            if (saisie !== passwordSecret) {
+                showModal("Accès refusé", "Mot de passe incorrect.", true);
+                return;
+            }
+            // ------------------------
+
             const rulesBox = document.getElementById('rulesBox');
 
             // Vérification : le règlement est-il vide ?
