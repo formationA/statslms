@@ -655,6 +655,17 @@
         }
 
         function completeSCORM(timestampStr) {
+            if (api) {
+                api.LMSSetValue("cmi.core.lesson_status", "passed");
+                api.LMSSetValue("cmi.core.score.raw", "100");
+                api.LMSSetValue("cmi.comments", "Signé numériquement le : " + timestampStr);
+                api.LMSCommit("");
+                api.LMSFinish("");
+            }
+        }
+
+        // --- GÉNÉRATION DU PACKAGE SCORM ZIP ---
+        function generateSCORM() {
 
             // --- SÉCURITÉ : MOT DE PASSE ---
             const passwordAttendu = "AFTRAL2026"; // Change le mot de passe ici
@@ -667,26 +678,6 @@
                 return;
             }
 
-            // --- DÉBUT DE LA LOGIQUE EXISTANTE ---
-            try {
-                if (typeof JSZip === 'undefined') {
-                    alert("JSZip n'est pas chargé. Vérifiez votre connexion.");
-                    return;
-                }
-
-
-
-            if (api) {
-                api.LMSSetValue("cmi.core.lesson_status", "passed");
-                api.LMSSetValue("cmi.core.score.raw", "100");
-                api.LMSSetValue("cmi.comments", "Signé numériquement le : " + timestampStr);
-                api.LMSCommit("");
-                api.LMSFinish("");
-            }
-        }
-
-        // --- GÉNÉRATION DU PACKAGE SCORM ZIP ---
-        function generateSCORM() {
             try {
                 if (typeof JSZip === 'undefined') {
                     alert("JSZip n'est pas chargé. Vérifiez votre connexion.");
