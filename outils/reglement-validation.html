@@ -475,6 +475,32 @@
             chargerReglement();
         };
 
+        function importConfig(input) {
+            const file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                try {
+                    const config = JSON.parse(e.target.result);
+                    rulesBox.innerHTML = config.content;
+                    verifierScrollNecessaire();
+                    showModal("Succès", "Configuration chargée.");
+                } catch (err) { showModal("Erreur", "Fichier invalide.", true); }
+            };
+            reader.readAsText(file);
+            input.value = "";
+        }
+
+        // --- EXPORT / IMPORT CONFIG ---
+        function exportConfig() {
+            const blob = new Blob([JSON.stringify({ content: rulesBox.innerHTML })], { type: 'application/json' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = "CONFIG_Reglement.json";
+            a.click();
+        }
+
+
         // --- CHARGEMENT DU JSON ---
         async function chargerReglement() {
             const rulesBox = document.getElementById('rulesBox');
