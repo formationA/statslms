@@ -726,6 +726,27 @@
             try {
                 const zip = new JSZip();
 
+                // --- GESTION DU LOGO EN BASE64 ---
+                let logoDataUri = "";
+                // On récupère l'URL du logo depuis la config chargée au début
+                const logoUrl = currentConfig?.logo;
+
+                if (logoUrl) {
+                    try {
+                        // On récupère l'image et on la convertit en Base64
+                        const response = await fetch(logoUrl);
+                        const blob = await response.blob();
+                        logoDataUri = await new Promise((resolve) => {
+                            const reader = new FileReader();
+                            reader.onloadend = () => resolve(reader.result);
+                            reader.readAsDataURL(blob);
+                        });
+                    } catch (e) {
+                        console.warn("Petit souci pour convertir le logo, on garde l'URL simple.", e);
+                        logoDataUri = logoUrl;
+                    }
+                }
+
                 // 1. On récupère le HTML de l'éditeur (rulesBox)
                 const currentContent = document.getElementById('rulesBox').innerHTML;
                 const finalHtml = buildReglementHtml(currentContent);
