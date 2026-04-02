@@ -523,14 +523,13 @@
                 // --- Conteneur d'en-tête Responsive ---
                 html += `<div style="display: flex; flex-direction: column; align-items: center; width: 100%; margin-bottom: 30px; box-sizing: border-box; padding: 10px;">`;
 
-                // Logo dynamique 50px au-dessus du titre
-                if (logoBase64) {
-                    html += `
-                <div style="width: 100%; text-align: center; margin-bottom: 15px;">
-                    <img src="${logoBase64}" alt="Logo" 
-                         style="width: 50px; height: auto; object-fit: contain; display: inline-block;">
-                </div>`;
-                    }
+                // Logo dynamique (Adaptatif : Petit sur mobile, Max 150px sur PC)
+                if (data.logo) {
+                    html += `<div style="width: 100%; text-align: center; margin-bottom: 10px;">
+                <img src="${data.logo}" alt="Logo" 
+                     style="width: 50px; height: auto; object-fit: contain;">
+                 </div>`;
+                }
 
                 // Titres et Préambule
                 html += `
