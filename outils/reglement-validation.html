@@ -749,7 +749,7 @@
 
                 // 1. On récupère le HTML de l'éditeur (rulesBox)
                 const currentContent = document.getElementById('rulesBox').innerHTML;
-                const finalHtml = buildReglementHtml(currentContent);
+                const finalHtml = buildReglementHtml(currentContent, logoDataUri);
 
                 // 2. On ajoute le fichier principal
                 zip.file("index.html", finalHtml);
@@ -1040,14 +1040,13 @@
         }
 
 
-        function ouvrirApercu() {
+        async function ouvrirApercu() { // Ajout de async
             const currentContent = document.getElementById('rulesBox').innerHTML;
             if (!currentContent || currentContent.trim() === "") {
                 showModal("Erreur", "Le contenu est vide.", true);
                 return;
             }
 
-            // --- CONVERSION DU LOGO EN BASE64 POUR L'APERÇU ---
             let logoDataUri = "";
             const logoUrl = currentConfig?.logo;
 
@@ -1061,18 +1060,21 @@
                         reader.readAsDataURL(blob);
                     });
                 } catch (e) {
-                    console.warn("Impossible de charger le logo pour l'aperçu, on tente l'URL directe.", e);
+                    console.warn("Impossible de charger le logo pour l'aperçu", e);
                     logoDataUri = logoUrl;
                 }
             }
 
-            // Génère le HTML complet via ta fonction existante
-            const htmlFinal = buildReglementHtml(currentContent);
+            // On passe logoDataUri ici aussi !
+            const htmlFinal = buildReglementHtml(currentContent, logoDataUri);
 
-            // Ouvre une nouvelle fenêtre et y injecte le code
             const win = window.open("", "_blank");
-            win.document.write(htmlFinal);
-            win.document.close(); // Important pour charger les scripts et styles
+            if (win) {
+                win.document.write(htmlFinal);
+                win.document.close();
+            } else {
+                showModal("Erreur", "Le bloqueur de fenêtres empêche l'aperçu.", true);
+            }
         }
 
 
