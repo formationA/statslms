@@ -1040,40 +1040,32 @@
         }
 
 
-        async function ouvrirApercu() { // Ajout de async
+        async function ouvrirApercu() {
             const currentContent = document.getElementById('rulesBox').innerHTML;
-            if (!currentContent || currentContent.trim() === "") {
-                showModal("Erreur", "Le contenu est vide.", true);
-                return;
-            }
+            const logoUrl = currentConfig?.logo || "logo.png"; // On force "logo.png" par défaut si vide
 
-            let logoDataUri = "";
-            const logoUrl = currentConfig?.logo;
+            let logoDataUri = logoUrl; // Par défaut, on garde le chemin relatif
 
-            if (logoUrl) {
-                try {
-                    const response = await fetch(logoUrl);
+            try {
+                const response = await fetch(logoUrl);
+                if (response.ok) {
                     const blob = await response.blob();
                     logoDataUri = await new Promise((resolve) => {
                         const reader = new FileReader();
                         reader.onloadend = () => resolve(reader.result);
                         reader.readAsDataURL(blob);
                     });
-                } catch (e) {
-                    console.warn("Impossible de charger le logo pour l'aperçu", e);
-                    logoDataUri = logoUrl;
                 }
+            } catch (e) {
+                console.warn("Mode local : impossible de convertir en Base64, utilisation du chemin relatif.");
+                // On ne fait rien, logoDataUri reste "logo.png"
             }
 
-            // On passe logoDataUri ici aussi !
             const htmlFinal = buildReglementHtml(currentContent, logoDataUri);
-
             const win = window.open("", "_blank");
             if (win) {
                 win.document.write(htmlFinal);
                 win.document.close();
-            } else {
-                showModal("Erreur", "Le bloqueur de fenêtres empêche l'aperçu.", true);
             }
         }
 
