@@ -523,30 +523,31 @@
                 // --- Conteneur d'en-tête Responsive ---
                 html += `<div style="display: flex; flex-direction: column; align-items: center; width: 100%; margin-bottom: 30px; box-sizing: border-box; padding: 10px;">`;
 
-                // Logo dynamique (Adaptatif : Petit sur mobile, Max 150px sur PC)
-                if (data.logo) {
-                    html += `<div style="width: 100%; text-align: center; margin-bottom: 10px;">
-                <img src="${data.logo}" alt="Logo" 
-                     style="width: 50px; height: auto; object-fit: contain;">
-                 </div>`;
-                }
+                // Logo dynamique 50px au-dessus du titre
+                if (logoBase64) {
+                    html += `
+                <div style="width: 100%; text-align: center; margin-bottom: 15px;">
+                    <img src="${logoBase64}" alt="Logo" 
+                         style="width: 50px; height: auto; object-fit: contain; display: inline-block;">
+                </div>`;
+                    }
 
                 // Titres et Préambule
                 html += `
-                <div style="width: 100%; text-align: center;">
-                    <h1 style="color:#0055A4; margin: 0 0 5px 0; font-size: 1.3rem; line-height: 1.2;">
-                        ${data.titre_general}
-                    </h1>
-                    <p style="font-weight: bold; margin: 0 0 8px 0; font-size: 1rem;">
-                        ${data.sous_titre}
-                    </p>
-                   <div style="display: inline-block; background: #f1f5f9; padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; color: #475569; margin-bottom: 15px; border: 1px solid #e2e8f0;">
-                        ${data.code_document} • ${data.version}
-                    </div>
-                    <p style="font-size: 0.85rem; color: #475569; margin: 0; line-height: 1.4;">
-                        ${data.preambule}
-                    </p>
-                </div>`;
+        <div style="width: 100%; text-align: center;">
+            <h1 style="color:#0055A4; margin: 0 0 5px 0; font-size: 1.3rem; line-height: 1.2;">
+                ${data.titre_general}
+            </h1>
+            <p style="font-weight: bold; margin: 0 0 8px 0; font-size: 1rem;">
+                ${data.sous_titre}
+            </p>
+            <div style="display: inline-block; background: #f1f5f9; padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; color: #475569; margin-bottom: 15px; border: 1px solid #e2e8f0;">
+                ${data.code_document || ''} • ${data.version || ''}
+            </div>
+            <p style="font-size: 0.85rem; color: #475569; margin: 0; line-height: 1.4;">
+                ${data.preambule}
+            </p>
+        </div>`;
 
                 html += `</div>`;
 
