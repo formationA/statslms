@@ -715,39 +715,7 @@
                 let docClone = document.documentElement.cloneNode(true);
                 let bodyClone = docClone.querySelector('body') || docClone;
 
-                // --- FIX : Suppression du cadre fixe et du scroll interne ---
-                const scrollArea = docClone.querySelector('.content-scroll');
-                if (scrollArea) {
-                    scrollArea.style.height = 'auto';
-                    scrollArea.style.minHeight = 'initial';
-                    scrollArea.style.overflow = 'visible';
-                    scrollArea.style.background = 'transparent'; // On enlève le fond gris interne
-                    scrollArea.style.border = 'none';
-                    scrollArea.style.padding = '0';
-                }
-
-                const card = docClone.querySelector('.document-card');
-                if (card) {
-                    card.style.height = 'auto';
-                    card.style.minHeight = 'initial';
-                    card.style.maxHeight = 'none';
-                    card.style.margin = '20px auto';
-                    card.style.width = '90%'; // On lui donne de l'air
-                    card.style.maxWidth = '900px';
-                    card.style.boxShadow = 'none';
-                    card.style.position = 'relative';
-                    card.style.display = 'block';
-                }
-
-                // FORCE LE BODY DU CLONE À ÊTRE FLUIDE
-                const bodyClone = docClone.querySelector('body');
-                if (bodyClone) {
-                    bodyClone.style.height = 'auto';
-                    bodyClone.style.minHeight = '100vh';
-                    bodyClone.style.overflow = 'auto';
-                    bodyClone.style.display = 'block';
-                    bodyClone.style.backgroundColor = '#f1f5f9'; // Le fond gris clair hors de la carte
-                }
+              
 
 
                 // Fix du Logo en Base64 pour l'export
