@@ -703,14 +703,36 @@
                             }
                         }
                     };
+
+
                     function validerSignatureSCORM() {
+                        let success = false;
+
                         if (api) {
+                            // On tente d'envoyer les données
                             api.LMSSetValue("cmi.core.lesson_status", "passed");
-                            api.LMSCommit(""); api.LMSFinish("");
+                            api.LMSSetValue("cmi.core.score.raw", "100");
+                            let commit = api.LMSCommit("");
+
+                            // On vérifie si le LMS a bien accepté la donnée
+                            if (commit === "true" || commit === true) {
+                                success = true;
+                                api.LMSFinish("");
+                            }
                         }
-                        document.getElementById('msgSuccess').classList.remove('hidden');
-                    }
+
+                        if (success) {
+                            // On n'affiche le message QUE si le SCORM a répondu "OK"
+                            document.getElementById('msgSuccess').classList.remove('hidden');
+                            document.getElementById('actionArea').style.display = 'none';
+                        } else {
+                            // Optionnel : Alerte si on n'est pas dans un LMS
+                            alert("Erreur : Connexion au LMS impossible. La signature n'a pas été enregistrée.");
+                        }
+                       }
+
                 `;
+
                 bodyClone.appendChild(scormScript);
 
                 // Manifest SCORM 1.2
