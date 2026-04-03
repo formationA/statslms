@@ -548,13 +548,10 @@
                     </p>
                 </div>`;
 
-                html += `</div>`;
+                // 1. Fonction utilitaire pour générer des listes proprement
+                const renderList = (items) => items ? `<ul>${items.map(i => `<li>${typeof i === 'string' ? i : (i.texte || i.id)}</li>`).join('')}</ul>` : '';
 
-
-                // 1. Petite fonction pour générer des listes proprement
-                const renderList = (items) => items ? `<ul>${items.map(i => `<li>${i}</li>`).join('')}</ul>` : '';
-
-                // 2. Boucle simplifiée
+                // 2. Boucle des Sections
                 data.sections.forEach(section => {
                     html += `<h2 style="background:#2d3663; color:white; padding:12px; border-radius:4px; margin-top:40px;">Section ${section.id} : ${section.titre}</h2>`;
 
@@ -563,45 +560,79 @@
 
                     if (section.champ_application) html += `<p style="background:#f1f5f9; padding:10px; border-left:4px solid #38bdf8;">${section.champ_application}</p>`;
 
+                    // --- AJOUT : Disposition spécifique Apprentis (Niveau SECTION) ---
+                    if (section.disposition_specifique_apprentis) {
+                        html += `<div style="background:#fff7ed; border:1px solid #fdba74; padding:15px; border-radius:6px; margin:20px 0;">
+                            <strong style="color:#9a3412;"><i class="fas fa-user-graduate"></i> Disposition spécifique aux apprentis :</strong>
+                            <p style="margin-top:5px; color:#7c2d12; margin-bottom:0;">${section.disposition_specifique_apprentis}</p>
+                         </div>`;
+                    }
+
                     if (section.articles) {
                         section.articles.forEach(art => {
                             html += `<div style="margin-top:25px; border-bottom:1px solid #eee; padding-bottom:15px;">
-                <h3 style="color:#0055A4;">Article ${art.num} : ${art.titre}</h3>
-                ${art.texte ? `<p>${art.texte}</p>` : ''}`;
+                                <h3 style="color:#0055A4;">Article ${art.num} : ${art.titre}</h3>
+                                ${art.texte ? `<p>${art.texte}</p>` : ''}`;
 
-                            // Bloc Spécificité (Apprentis / Note / Distanciel)
-                            if (art.disposition_specifique_apprentis || art.note || art.formation_distance) {
-                                const info = art.disposition_specifique_apprentis || art.note || (art.formation_distance ? art.formation_distance.regles : null);
-                                const color = art.note ? "#0ea5e9" : "#f97316"; // Bleu pour note, Orange pour apprentis
-                                html += `<div style="background:#f8fafc; border-left:4px solid ${color}; padding:10px; margin:10px 0; font-size:0.9rem;">${info}</div>`;
+                            // --- AJOUT : Disposition spécifique Apprentis (Niveau ARTICLE) ---
+                            if (art.disposition_specifique_apprentis) {
+                                html += `<div style="background:#fff7ed; border-left:3px solid #f97316; padding:8px 12px; margin-top:10px; font-size:0.9rem;">
+                                    <strong style="color:#9a3412;"><i class="fas fa-info-circle"></i> Spécificité Apprentis :</strong> 
+                                    <span style="color:#7c2d12;">${art.disposition_specifique_apprentis}</span>
+                                 </div>`;
                             }
 
-                            // Listes automatiques (Points, Sanctions, Comportements, etc.)
+                            // Notes simples
+                            if (art.note) {
+                                html += `<div style="margin-top:12px; padding:10px; background:#f0f9ff; border-radius:4px; border-left:4px solid #0ea5e9; font-size:0.9rem; color:#0369a1;">
+                                    <i class="fas fa-lightbulb"></i> <strong>Note :</strong> ${art.note}
+                                 </div>`;
+                            }
+
+                            // --- AJOUT : Procédure de contrôle ---
+                            if (art.procedure_controle) {
+                                html += `<div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:15px; margin:15px 0;">
+                                    <strong style="color:#334155;">${art.procedure_controle.description || "Procédure de contrôle :"}</strong>
+                                    ${renderList(art.procedure_controle.points)}
+                                 </div>`;
+                            }
+
+                            // --- AJOUT : Formation à distance (Complet) ---
+                            if (art.formation_distance) {
+                                html += `<div style="background:#f0fdf4; border:1px solid #bbf7d0; padding:15px; border-radius:8px; margin:15px 0; font-size:0.9rem; color:#166534;">
+                                    <strong><i class="fas fa-laptop-house"></i> Modalités Distanciel :</strong>
+                                    ${art.formation_distance.regles ? `<p>${art.formation_distance.regles}</p>` : ''}
+                                    ${renderList(art.formation_distance.points || art.formation_distance.consideres_comme_absences)}
+                                 </div>`;
+                            }
+
+                            // Listes automatiques
                             html += renderList(art.points);
                             html += renderList(art.comportements_interdits);
                             html += renderList(art.actes_frauduleux);
 
-                            // Gestion des Sanctions (Article 24)
-                            if (art.echelle_sanctions) {
+                            // Gestion des Sanctions
+                            if (art.echelle_sanctions || art.sanctions) {
                                 html += `<div style="color:#b91c1c; font-weight:600; margin-top:10px;">🔴 Sanctions :</div>`;
-                                html += renderList(art.echelle_sanctions);
+                                html += renderList(art.echelle_sanctions || art.sanctions);
                             }
 
-                            // Sous-articles (Article 7, 25, etc.)
+                            // Sous-articles
                             if (art.sous_articles) {
                                 art.sous_articles.forEach(sub => {
                                     html += `<div style="margin-left:20px; border-left:2px solid #e2e8f0; padding-left:15px; margin-top:15px;">
-                        <h4 style="color:#1e293b;">${sub.id} ${sub.titre}</h4>
-                        <p>${sub.texte}</p>
-                        ${renderList(sub.points)}
-                    </div>`;
+                                        <h4 style="color:#1e293b;">${sub.id} ${sub.titre}</h4>
+                                        <p>${sub.texte || ""}</p>
+                                        ${sub.disposition_specifique_apprentis ? `<p style="font-size:0.85rem; color:#9a3412;"><em><strong>Note Apprentis :</strong> ${sub.disposition_specifique_apprentis}</em></p>` : ''}
+                                        ${renderList(sub.points)}
+                                     </div>`;
                                 });
                             }
 
                             // Étapes de procédure (Article 25)
                             if (art.etapes) {
                                 art.etapes.forEach(step => {
-                                    html += `<p style="font-size:0.9rem;"><strong>${step.etape} :</strong> ${step.texte}</p>`;
+                                    html += `<p style="font-size:0.9rem; margin-top:8px;"><strong>${step.etape} :</strong> ${step.texte}</p>`;
                                 });
                             }
 
@@ -609,8 +640,10 @@
                         });
                     }
                 });
+               
+                
 
-
+                // ---- FIN BOUCLE section
 
 
 
