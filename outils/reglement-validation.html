@@ -548,13 +548,7 @@
                     </p>
                 </div>`;
 
-                // --- FONCTION UTILITAIRE POUR LES LISTES ---
-                const renderList = (items, label = "") => {
-                    if (!items || items.length === 0) return "";
-                    let res = label ? `<div style="margin-top:10px; font-weight:bold;">${label}</div>` : "";
-                    res += `<ul style="margin-top:5px; padding-left:25px;">${items.map(i => `<li>${typeof i === 'string' ? i : (i.texte || i.id)}</li>`).join('')}</ul>`;
-                    return res;
-                };
+                html += `</div>`;
 
 
                 // 1. Petite fonction pour générer des listes proprement
