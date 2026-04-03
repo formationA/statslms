@@ -593,8 +593,14 @@
                          </div>`;
                             }
 
-
                             if (art.points) html += `<ul>${art.points.map(p => `<li>${p}</li>`).join('')}</ul>`;
+
+                            // --- NOUVEAU : Gestion des Notes (ex: Formation à distance) ---
+                            if (art.note) {
+                                html += `<div style="margin-top:12px; padding:10px; background:#f0f9ff; border-radius:4px; border-left:4px solid #0ea5e9; font-size:0.9rem; color:#0369a1;">
+                                <i class="fas fa-lightbulb"></i> <strong>Note :</strong> ${art.note}
+                                </div>`;
+                            }
 
                             if (art.sanctions) {
                                 html += `<div style="color:#b91c1c; font-weight:600; margin-top:10px;">🔴 Sanctions :</div>`;
