@@ -548,94 +548,120 @@
                     </p>
                 </div>`;
 
-                // --- FONCTION UTILITAIRE POUR LES LISTES ---
+                // --- 2. FONCTION UTILITAIRE LISTE (Gère chaînes ET objets) ---
                 const renderList = (items, label = "") => {
                     if (!items || items.length === 0) return "";
                     let res = label ? `<div style="margin-top:10px; font-weight:bold;">${label}</div>` : "";
-                    res += `<ul style="margin-top:5px; padding-left:25px;">${items.map(i => `<li>${typeof i === 'string' ? i : (i.texte || i.id)}</li>`).join('')}</ul>`;
+                    res += `<ul style="margin-top:5px; padding-left:25px;">${items.map(i => `<li>${typeof i === 'string' ? i : (i.texte || i.id || i)}</li>`).join('')}</ul>`;
                     return res;
                 };
 
-                // --- BOUCLE DES SECTIONS ---
+
+                // --- 3. BOUCLE DES SECTIONS ---
+
+
                 data.sections.forEach(section => {
+                    // Style de Section Original (Bleu Nuit)
                     html += `<h2 style="background:#2d3663; color:white; padding:12px; border-radius:4px; margin-top:40px; border:none;">
                         Section ${section.id} : ${section.titre}
                      </h2>`;
 
                     if (section.contenu_introductif) html += `<p><strong>${section.contenu_introductif}</strong></p>`;
                     html += renderList(section.objectifs);
-                    if (section.champ_application) html += `<p style="background:#f1f5f9; padding:10px; border-left:4px solid #38bdf8; font-size:0.9rem;">${section.champ_application}</p>`;
 
-                    // Spécificité Apprentis au niveau SECTION
+                    // Champ d'application (Style Original)
+                    if (section.champ_application) {
+                        html += `<p style="background:#f1f5f9; padding:10px; border-left:4px solid #38bdf8;">${section.champ_application}</p>`;
+                    }
+
+                    // Disposition spécifique Section (Style Original)
                     if (section.disposition_specifique_apprentis) {
-                        html += `<div style="background:#fff7ed; border:1px solid #fdba74; padding:15px; border-radius:6px; margin:20px 0; color:#9a3412; font-size:0.9rem;">
-                            <strong><i class="fas fa-user-graduate"></i> Spécificité Apprentis :</strong> ${section.disposition_specifique_apprentis}
+                        html += `<div style="background:#fff7ed; border:1px solid #fdba74; padding:15px; border-radius:6px; margin:20px 0;">
+                            <strong style="color:#9a3412;"><i class="fas fa-user-graduate"></i> Disposition spécifique aux apprentis :</strong>
+                            <p style="margin-top:5px; color:#7c2d12; margin-bottom:0;">${section.disposition_specifique_apprentis}</p>
                          </div>`;
                     }
 
-                    // --- BOUCLE DES ARTICLES ---
+                    // --- 4. BOUCLE DES ARTICLES ---
                     if (section.articles) {
                         section.articles.forEach(art => {
                             html += `<div style="margin-top:25px; border-bottom:1px solid #eee; padding-bottom:15px;">
                                 <h3 style="color:#0055A4;">Article ${art.num} : ${art.titre}</h3>
                                 ${art.texte ? `<p>${art.texte}</p>` : ''}`;
 
-                            // Notes et Spécificités Article
+                            // --- Spécificités Article (Apprentis / Note / Contrôle) ---
                             if (art.disposition_specifique_apprentis) {
-                                html += `<div style="background:#fff7ed; border-left:3px solid #f97316; padding:8px 12px; margin:10px 0; font-size:0.85rem; color:#9a3412;"><strong>Note Apprentis :</strong> ${art.disposition_specifique_apprentis}</div>`;
-                            }
-                            if (art.note) {
-                                html += `<div style="background:#f0f9ff; border-left:4px solid #0ea5e9; padding:10px; margin:10px 0; font-size:0.85rem; color:#0369a1;"><strong>Note :</strong> ${art.note}</div>`;
+                                html += `<div style="background:#fff7ed; border-left:3px solid #f97316; padding:8px 12px; margin-top:10px; font-size:0.9rem;">
+                                    <strong style="color:#9a3412;"><i class="fas fa-info-circle"></i> Spécificité Apprentis :</strong> 
+                                    <span style="color:#7c2d12;">${art.disposition_specifique_apprentis}</span>
+                                 </div>`;
                             }
 
-                            // Procédure de contrôle
+                            if (art.note) {
+                                html += `<div style="margin-top:12px; padding:10px; background:#f0f9ff; border-radius:4px; border-left:4px solid #0ea5e9; font-size:0.9rem; color:#0369a1;">
+                                    <i class="fas fa-lightbulb"></i> <strong>Note :</strong> ${art.note}
+                                 </div>`;
+                            }
+
                             if (art.procedure_controle) {
-                                html += `<div style="background:#f8fafc; border:1px solid #cbd5e1; padding:10px; border-radius:8px; margin:10px 0;">
-                                    <strong>${art.procedure_controle.description}</strong>
+                                html += `<div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:15px; margin:15px 0;">
+                                    <strong style="color:#334155;">${art.procedure_controle.description || "Procédure de contrôle :"}</strong>
                                     ${renderList(art.procedure_controle.points)}
                                  </div>`;
                             }
 
-                            // Formation à distance (Art 15 & 16)
+                            // --- Formation à distance (Spécificités) ---
                             if (art.formation_distance) {
-                                html += `<div style="background:#f0fdf4; border:1px solid #bbf7d0; padding:10px; margin:10px 0; border-radius:6px; color:#166534; font-size:0.85rem;">
-                                    <strong>Distanciel :</strong> ${art.formation_distance.regles || ""}
-                                    ${renderList(art.formation_distance.points || art.formation_distance.consideres_comme_absences)}
+                                html += `<div style="background:#f0fdf4; border:1px solid #bbf7d0; padding:15px; border-radius:8px; margin:15px 0; font-size:0.9rem; color:#166534;">
+                                    <strong><i class="fas fa-laptop-house"></i> Modalités Distanciel :</strong>
+                                    ${art.formation_distance.regles ? `<p>${art.formation_distance.regles}</p>` : ''}
+                                    ${renderList(art.formation_distance.points)}
+                                    ${renderList(art.formation_distance.consideres_comme_absences, "Considérés comme absences :")}
                                     ${art.formation_distance.justification ? `<p><strong>Justification :</strong> ${art.formation_distance.justification}</p>` : ''}
                                  </div>`;
                             }
 
-                            // Listes diverses
+                            // --- Listes Automatiques (Points, Sanctions, Fraude, Missions, etc.) ---
                             html += renderList(art.points);
                             html += renderList(art.comportements_interdits, "Comportements interdits :");
                             html += renderList(art.actes_frauduleux, "Actes frauduleux :");
-                            html += renderList(art.echelle_sanctions, "🔴 Échelle des sanctions :");
-                            html += renderList(art.sanctions, "🔴 Sanctions :");
                             html += renderList(art.cas_application, "Cas d'application :");
-                            html += renderList(art.composition, "Composition :");
+                            html += renderList(art.composition, "Composition du conseil :");
                             html += renderList(art.missions, "Missions :");
+                            html += renderList(art.recours_possibles, "Recours possibles :");
+                            html += renderList(art.cas_exclusion, "Cas d'exclusion :");
 
-                            // Sanctions Fraude (Art 20)
+                            // --- Sanctions & Échelles (Rouge) ---
+                            if (art.echelle_sanctions) {
+                                html += `<div style="color:#b91c1c; font-weight:600; margin-top:10px;">🔴 Échelle des sanctions :</div>`;
+                                html += renderList(art.echelle_sanctions);
+                            }
+                            if (art.sanctions) {
+                                html += `<div style="color:#b91c1c; font-weight:600; margin-top:10px;">🔴 Sanctions :</div>`;
+                                html += renderList(art.sanctions);
+                            }
                             if (art.sanctions_fraude) {
-                                html += `<p style="color:#b91c1c; margin-top:10px;"><strong>${art.sanctions_fraude.principe}</strong></p>`;
+                                html += `<div style="color:#b91c1c; margin-top:10px;"><strong>${art.sanctions_fraude.principe}</strong></div>`;
                                 html += renderList(art.sanctions_fraude.defaut_dispositions);
                             }
 
-                            // Étapes de procédure (Art 25)
+                            // --- Étapes de procédure (Art 25) ---
                             if (art.etapes) {
-                                art.etapes.forEach(s => html += `<p style="font-size:0.85rem; margin-top:5px;"><strong>${s.etape} :</strong> ${s.texte}</p>`);
+                                art.etapes.forEach((step, idx) => {
+                                    html += `<p style="font-size:0.9rem; margin-top:10px;"><strong>${idx + 1}. ${step.etape} :</strong> ${step.texte}</p>`;
+                                });
                             }
 
-                            // Sous-articles
+                            // --- Sous-articles (Style Original) ---
                             if (art.sous_articles) {
                                 art.sous_articles.forEach(sub => {
                                     html += `<div style="margin-left:20px; border-left:2px solid #e2e8f0; padding-left:15px; margin-top:15px;">
-                                <h4 style="color:#1e293b;">${sub.id} ${sub.titre}</h4>
-                                <p>${sub.texte}</p>
-                                ${sub.disposition_specifique_apprentis ? `<p style="color:#9a3412; font-size:0.85rem;"><em>Apprentis : ${sub.disposition_specifique_apprentis}</em></p>` : ''}
-                                ${renderList(sub.points)}
-                                ${renderList(sub.extension_direction, "Extensions :")}
-                            </div>`;
+                                        <h4 style="color:#1e293b; margin-bottom:5px;">${sub.id} ${sub.titre}</h4>
+                                        <p>${sub.texte || ""}</p>
+                                        ${sub.disposition_specifique_apprentis ? `<p style="font-size:0.85rem; color:#9a3412;"><em><strong>Note Apprentis :</strong> ${sub.disposition_specifique_apprentis}</em></p>` : ''}
+                                        ${renderList(sub.points)}
+                                        ${renderList(sub.extension_direction, "Extensions de la Direction :")}
+                                     </div>`;
                                 });
                             }
                             html += `</div>`;
@@ -645,8 +671,7 @@
 
 
 
-
-
+                // --- FIN BOUCLE ---
 
 
                 html += `<p style="text-align:center; margin-top:30px; color:#94a3b8;">*** Fin du document ***</p>`;
