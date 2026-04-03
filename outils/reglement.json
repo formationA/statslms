@@ -16,7 +16,7 @@
         "préciser les modalités selon lesquelles est assurée, pour les stages d'une durée supérieure à 500 heures, la représentation des apprenants."
       ],
       "champ_application": "Il s’applique à tous les apprenants, quel que soit leur statut (salarié en formation, demandeur d'emploi, apprenti, etc.) que l'organisme accueille dans ses locaux ou dans des locaux mis à sa disposition. Il s'applique également aux formations dispensées à distance. Ces dispositions visent à garantir le bon déroulement des sessions en ligne et à formaliser les règles applicables à la formation à distance.",
-      "champ_application": "Les apprentis sont tenus de respecter le règlement intérieur de l'organisme de formation ainsi que celui de leur entreprise d'accueil. En cas de manquement, les sanctions applicables sont celles prévues par le règlement intérieur applicable au lieu où le manquement a été constaté.",
+      "disposition_specifique_apprentis": "Les apprentis sont tenus de respecter le règlement intérieur de l'organisme de formation ainsi que celui de leur entreprise d'accueil. En cas de manquement, les sanctions applicables sont celles prévues par le règlement intérieur applicable au lieu où le manquement a été constaté.",
       "articles": [
         {
           "num": 1,
