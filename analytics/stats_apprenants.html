@@ -519,13 +519,27 @@
                 });
 
                 if (lastDataFound) {
-                    document.getElementById('liveBadge').innerText = lastDataFound.apprenants_en_cours || 0;
+                    // 1. Mise à jour du badge "Live" (Apprenants en cours à l'instant T)
+                    document.getElementById('liveBadge').innerText = (lastDataFound.apprenants_en_cours || 0).toLocaleString();
+
+                    // 2. Mise à jour de la date de synchro affichée
                     lastUpdateElem.innerText = heureSynchro
                         ? `Dernière synchronisation : ${heureSynchro}`
-                        : `Dernière synchronisation : ${new Date(lastDataFound.date).toLocaleDateString('fr-FR')}`;
+                        : `Dernière donnée : ${new Date(lastDataFound.date).toLocaleDateString('fr-FR')}`;
 
-                    dataStore.location = Object.entries(lastDataFound.villes || {}).map(([name, count]) => ({
-                        name: name, count: count
+                    // 3. NETTOYAGE ET FUSION DES VILLES (Case Insensitive)
+                    const villesMap = {};
+
+                    Object.entries(lastDataFound.villes || {}).forEach(([name, count]) => {
+                        // On passe tout en MAJUSCULES et on enlève les espaces en trop
+                        const key = name.trim().toUpperCase();
+                        villesMap[key] = (villesMap[key] || 0) + count;
+                    });
+
+                    // On transforme l'objet nettoyé en tableau pour le dataStore
+                    dataStore.location = Object.entries(villesMap).map(([name, count]) => ({
+                        name: name,
+                        count: count
                     }));
                 }
 

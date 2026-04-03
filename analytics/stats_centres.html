@@ -723,7 +723,6 @@
             lastDay.data.forEach(s => {
                 if (center !== "ALL" && s.centre !== center) return;
 
-                // Filtre de période basé sur les dates internes de la session
                 const sessDebut = s.date_debut || "1900-01-01";
                 const sessFin = s.date_fin || "2099-12-31";
                 if (!(sessDebut <= end && sessFin >= start)) return;
@@ -732,17 +731,27 @@
                 const progressInitial = startMap[s.session_id] !== undefined ? startMap[s.session_id] : 0;
                 const gainSurPeriode = progressFinal - progressInitial;
 
-                totalGain += gainSurPeriode;
-                countGain++;
+                // --- NOUVELLE LOGIQUE DE STATUT POUR LA PÉRIODE ---
+
+                // Une session est "Terminée sur la période" si elle n'était pas finie au début mais l'est à la fin
+                const aTermineSurPeriode = (progressInitial < 100 && progressFinal === 100);
+
+                // Une session est "En cours / Active" si elle a progressé pendant la période
+                const aProgresseSurPeriode = (gainSurPeriode > 0);
 
                 const isOverdue = (s.date_fin && s.date_fin < todayStr && progressFinal < 100);
 
                 currentProcessedData.push({
                     ...s,
                     progress: progressFinal,
+                    progressInitial: progressInitial, // Utile pour comparer
                     gain: gainSurPeriode,
-                    isOverdue: isOverdue
+                    isOverdue: isOverdue,
+                    statusPeriode: progressFinal === 100 ? 'DONE' : (progressFinal === 0 ? 'ZERO' : 'PROGRESS')
                 });
+
+                totalGain += gainSurPeriode;
+                countGain++;
             });
 
             const avgGain = countGain > 0 ? (totalGain / countGain).toFixed(1) : 0;

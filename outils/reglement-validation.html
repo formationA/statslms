@@ -561,6 +561,7 @@
                     if (section.contenu_introductif) html += `<p><strong>${section.contenu_introductif}</strong></p>`;
                     if (section.objectifs) html += `<ul>${section.objectifs.map(o => `<li>${o}</li>`).join('')}</ul>`;
                     if (section.champ_application) html += `<p style="background:#f1f5f9; padding:10px; border-left:4px solid #38bdf8;">${section.champ_application}</p>`;
+                    if (section.disposition_specifique_apprentis) html += `<p style="background:#f1f5f9; padding:10px; border-left:4px solid #38bdf8;">${section.disposition_specifique_apprentis}</p>`;
 
                     if (section.articles) {
                         section.articles.forEach(art => {
