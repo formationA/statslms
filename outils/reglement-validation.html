@@ -548,9 +548,11 @@
                     </p>
                 </div>`;
 
+                html += `</div>`;
+
                 // 1. Fonction utilitaire pour générer des listes proprement
                 const renderList = (items) => items ? `<ul>${items.map(i => `<li>${typeof i === 'string' ? i : (i.texte || i.id)}</li>`).join('')}</ul>` : '';
-
+                const renderList = (items) => items ? `<ul>${items.map(i => `<li>${typeof i === 'string' ? i : (i.texte || i.id)}</li>`).join('')}</ul>` : '';
                   
            
 
@@ -558,9 +560,8 @@
                
                 // 2. Boucle des Sections
                 data.sections.forEach(section => {
-                    
-                    html += `<h2 style="background:#2d3663; color:white; padding:12px; border-radius:4px; margin-top:40px; border:none;"> Section ${section.id} : ${section.titre}  </h2>`;
-
+                    html += `<h2 style="background:#2d3663; color:white; padding:12px; border-radius:4px; margin-top:40px; border:none;"> Section ${section.id} : ${section.titre} </h2>`;
+                   
                     if (section.contenu_introductif) html += `<p><strong>${section.contenu_introductif}</strong></p>`;
                     html += renderList(section.objectifs);
 
