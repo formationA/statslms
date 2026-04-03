@@ -645,7 +645,9 @@
                     const dateStartInput = document.getElementById('dateStart');
                     const dateEndInput = document.getElementById('dateEnd');
 
-                    if (!dateStartInput.value) dateStartInput.value = rawData[0].date;
+                    // Remplacez la ligne existante par celle-ci :
+                    if (!dateStartInput.value) dateStartInput.value = "2026-01-01";
+                   // if (!dateStartInput.value) dateStartInput.value = rawData[0].date;
                     if (!dateEndInput.value) dateEndInput.value = rawData[rawData.length - 1].date;
 
                     populateCenters();
