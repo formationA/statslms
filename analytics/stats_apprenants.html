@@ -259,9 +259,67 @@
             height: 500px;
             position: relative;
         }
+
+        #loader-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-color);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000; /* Toujours au-dessus de la navbar */
+            transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(56, 189, 248, 0.1);
+            border-top: 4px solid var(--accent);
+            border-radius: 50%;
+            animation: spin 1s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        #loader-text {
+            color: var(--text-main);
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            font-weight: 600;
+            opacity: 0.8;
+        }
+
+        /* Classe pour cacher le loader en JS */
+        .loader-hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
     </style>
 </head>
 <body>
+    
+    <div id="loader-container">
+        <div class="spinner"></div>
+        <div id="loader-text">Synchronisation en cours...</div>
+    </div>
 
     <nav class="navbar">
         <div class="nav-left">
@@ -401,61 +459,91 @@
         }
 
         async function init() {
+            // 1. Déclarations des éléments pour le loader
+            const loader = document.getElementById('loader-container');
+            const syncStatus = document.getElementById('syncStatus');
+            const lastUpdateElem = document.getElementById('lastUpdate');
+
             const startStr = document.getElementById('startDate').value;
             const endStr = document.getElementById('endDate').value;
-            document.getElementById('lastUpdate').innerText = "Chargement...";
 
-            const index = await fetchData(INDEX_URL);
-            if (!index || !index.kpis) {
-                document.getElementById('lastUpdate').innerText = "Erreur de connexion.";
-                return;
+            // 2. ACTIVATION DU LOADER
+            if (loader) {
+                loader.style.display = 'flex';
+                loader.style.opacity = '1';
             }
+            if (syncStatus) syncStatus.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Sync...';
+            lastUpdateElem.innerText = "Chargement...";
 
-            let heureSynchro = "";
-            if (index.derniere_maj) {
-                const parts = index.derniere_maj.split(' ');
-                if (parts.length === 2) {
-                    const [y, m, d] = parts[0].split('-');
-                    heureSynchro = `${d}/${m}/${y} à ${parts[1]}`;
-                } else { heureSynchro = index.derniere_maj; }
-            }
-
-            dataStore = { sessions: [], actifs: [], ressources: [], location: [], ouvertes: [] };
-
-            const filesToFetch = index.kpis.filter(fileName => {
-                const match = fileName.match(/\d{4}-\d{2}-\d{2}/);
-                if (match) {
-                    const fileDate = match[0];
-                    return fileDate >= startStr && fileDate <= endStr;
+            try {
+                const index = await fetchData(INDEX_URL);
+                if (!index || !index.kpis) {
+                    lastUpdateElem.innerText = "Erreur de connexion.";
+                    if (loader) loader.style.display = 'none'; // On cache si ça échoue direct
+                    return;
                 }
-                return false;
-            }).reverse();
 
-            const promises = filesToFetch.map(fileName => fetchData(`${BASE_URL}${fileName}`));
-            const results = await Promise.all(promises);
-
-            let lastDataFound = null;
-            results.forEach(dayData => {
-                if (dayData && dayData.date) {
-                    const dt = dayData.date;
-                    dataStore.actifs.push({ date: dt, val: dayData.apprenants_actifs || 0 });
-                    dataStore.ressources.push({ date: dt, val: dayData.resource_connections || 0 });
-                    dataStore.ouvertes.push({ date: dt, val: dayData.sessions_ouvertes || 0 });
-                    dataStore.sessions.push({ date: dt, val: dayData.apprenants_dans_sessions || 0 });
-                    if (!lastDataFound || dt > lastDataFound.date) { lastDataFound = dayData; }
+                let heureSynchro = "";
+                if (index.derniere_maj) {
+                    const parts = index.derniere_maj.split(' ');
+                    if (parts.length === 2) {
+                        const [y, m, d] = parts[0].split('-');
+                        heureSynchro = `${d}/${m}/${y} à ${parts[1]}`;
+                    } else { heureSynchro = index.derniere_maj; }
                 }
-            });
 
-            if (lastDataFound) {
-                document.getElementById('liveBadge').innerText = lastDataFound.apprenants_en_cours || 0;
-                document.getElementById('lastUpdate').innerText = heureSynchro
-                    ? `Dernière synchronisation : ${heureSynchro}`
-                    : `Dernière synchronisation : ${new Date(lastDataFound.date).toLocaleDateString('fr-FR')}`;
-                dataStore.location = Object.entries(lastDataFound.villes || {}).map(([name, count]) => ({
-                    name: name, count: count
-                }));
+                dataStore = { sessions: [], actifs: [], ressources: [], location: [], ouvertes: [] };
+
+                const filesToFetch = index.kpis.filter(fileName => {
+                    const match = fileName.match(/\d{4}-\d{2}-\d{2}/);
+                    if (match) {
+                        const fileDate = match[0];
+                        return fileDate >= startStr && fileDate <= endStr;
+                    }
+                    return false;
+                }).reverse();
+
+                const promises = filesToFetch.map(fileName => fetchData(`${BASE_URL}${fileName}`));
+                const results = await Promise.all(promises);
+
+                let lastDataFound = null;
+                results.forEach(dayData => {
+                    if (dayData && dayData.date) {
+                        const dt = dayData.date;
+                        dataStore.actifs.push({ date: dt, val: dayData.apprenants_actifs || 0 });
+                        dataStore.ressources.push({ date: dt, val: dayData.resource_connections || 0 });
+                        dataStore.ouvertes.push({ date: dt, val: dayData.sessions_ouvertes || 0 });
+                        dataStore.sessions.push({ date: dt, val: dayData.apprenants_dans_sessions || 0 });
+                        if (!lastDataFound || dt > lastDataFound.date) { lastDataFound = dayData; }
+                    }
+                });
+
+                if (lastDataFound) {
+                    document.getElementById('liveBadge').innerText = lastDataFound.apprenants_en_cours || 0;
+                    lastUpdateElem.innerText = heureSynchro
+                        ? `Dernière synchronisation : ${heureSynchro}`
+                        : `Dernière synchronisation : ${new Date(lastDataFound.date).toLocaleDateString('fr-FR')}`;
+
+                    dataStore.location = Object.entries(lastDataFound.villes || {}).map(([name, count]) => ({
+                        name: name, count: count
+                    }));
+                }
+
+                // 3. MISE À JOUR DU DASHBOARD
+                updateDashboard();
+
+                // 4. DÉSACTIVATION DU LOADER (Succès)
+                if (syncStatus) syncStatus.innerHTML = '<i class="fas fa-check-circle"></i> Connecté';
+                if (loader) {
+                    loader.style.opacity = '0'; // Effet de fondu
+                    setTimeout(() => { loader.style.display = 'none'; }, 600); // Retrait du DOM après l'animation
+                }
+
+            } catch (e) {
+                console.error("Erreur critique :", e);
+                if (syncStatus) syncStatus.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Erreur';
+                if (loader) loader.style.display = 'none';
             }
-            updateDashboard();
         }
 
         function updateDashboard() {
