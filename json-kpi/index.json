@@ -1,12 +1,16 @@
 {
-  "derniere_maj": "2026-04-03 11:34",
+  "derniere_maj": "2026-04-05 11:18",
   "sessions": [
+    "sessions_programmes_2026-04-04.json",
+    "sessions_programmes_2026-04-03.json",
     "sessions_programmes_2026-04-02.json",
     "sessions_programmes_2026-04-01.json",
     "sessions_programmes_2026-03-31.json",
     "sessions_programmes_2026-03-30.json"
   ],
   "kpis": [
+    "kpi_journaliers_2026-04-04.json",
+    "kpi_journaliers_2026-04-03.json",
     "kpi_journaliers_2026-04-02.json",
     "kpi_journaliers_2026-04-01.json",
     "kpi_journaliers_2026-03-31.json",
